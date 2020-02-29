@@ -17,9 +17,11 @@ This example creates all the logs, plots and saves the training models. It also 
 The generateVideos file can read these datasets and generate rendered videos from the gameplays.
     
 
-**Example**
+**Examples**
 
-[![Watch the video]](https://www.youtube.com/embed/rxp3Xx4De7k)
+The Examples folder contains the datasets and generated videos of two conditions: Running all four agents as random agents, and running all four agents as learning agents.
+
+[![Watch the video](Examples/exampleSimulator.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
 
 
 

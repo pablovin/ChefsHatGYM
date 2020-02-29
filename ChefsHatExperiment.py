@@ -4,8 +4,6 @@ import ChefsHatEnv.ChefsHatEnv
 
 from Agents.AgentDQL import AgentDQL
 from Agents.AgentRandom import AgentRandom
-from Agents.AgentReinforcement import AgentReinforcement
-from Agents.AgentQL import AgentQL
 
 from KEF import ExperimentManager
 
@@ -57,11 +55,6 @@ for i in range(len(playersAgents)):
         players.append(AgentDQL(numMaxCards, env.numberOfCardsPerPlayer, trainingEpoches, loadModel))
     elif playersAgents[i] == AgentRandom.name:
         players.append(AgentRandom(numMaxCards, env.numberOfActions))
-    elif playersAgents[i] == AgentReinforcement.name:
-        players.append(AgentReinforcement(numMaxCards, env.numberOfCardsPerPlayer, trainingEpoches))
-    elif playersAgents[i] == AgentQL.name:
-        players.append(AgentQL(numMaxCards, env.numberOfCardsPerPlayer, trainingEpoches, env.numberOfActions))
-
 
 #start the experiment
 for game in range(numGames):
@@ -142,10 +135,7 @@ for game in range(numGames):
                     # print("action: "+str(numpy.argmax(action)) + " - Valid: " + str(validActionPlayer))
 
                     if not playersAgents[thisPlayer] == AgentRandom.name:
-                        if playersAgents[thisPlayer] == AgentReinforcement.name:
-                            aIndex = players[thisPlayer].getActionIndex(action)
-                            players[thisPlayer].memorize(state, aIndex, action, reward)
-                        elif  playersAgents[thisPlayer] == AgentDQL.name:
+                        if  playersAgents[thisPlayer] == AgentDQL.name:
                             # logger.write("Training the Agent Player " + str(thisPlayer))
                             done = False
                             if env.lastActionPlayers[thisPlayer] == "Finish":
@@ -153,9 +143,7 @@ for game in range(numGames):
                             if wrongActions < 5:
                                players[thisPlayer].memorize(state, action, reward, newState, done, experimentManager.modelDirectory,game)
                         #
-                        elif playersAgents[thisPlayer] == AgentQL.name:
-                            if wrongActions< 10:
-                              players[thisPlayer].trainSimpleModel(action, reward, state, newState, experimentManager.modelDirectory,game)
+
 
                     if not validActionPlayer :
                         wrongActions = wrongActions+1

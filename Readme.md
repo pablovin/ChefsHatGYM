@@ -16,6 +16,12 @@ This example creates all the logs, plots and saves the training models. It also 
 
 The generateVideos file can read these datasets and generate rendered videos from the gameplays.
 
+
+**Example**
+
+[![Watch the video](Examples/Example_Random_Agent.avi)](Examples/Example_Random_Agent.avi)
+
+
 **License**
 
 All the examples in this repository are distributed under a Non-Comercial license. If you use this environment, you have to agree with the following itens:

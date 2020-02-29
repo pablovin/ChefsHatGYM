@@ -519,7 +519,7 @@ class RenderManager():
 
     def createVideo(self):
 
-        command = "ffmpeg -i "+str(self.currentGameDirectory)+"/%d.png -framerate 1 -r "+str(self.fps)+"  "+str(self.saveVideoDirectory)+"video.avi"
+        command = "ffmpeg -i "+str(self.currentGameDirectory)+"/%d.png -framerate 1 -r "+str(self.fps)+" -vcodec libx264 -acodec aac "+str(self.saveVideoDirectory)+"video.mp4"
 
         subprocess.call(command, shell=True)
 

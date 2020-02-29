@@ -19,7 +19,7 @@ The generateVideos file can read these datasets and generate rendered videos fro
 
 **Example**
 
-[![Watch the video](Examples/Example_Random_Agent.avi)](Examples/Example_Random_Agent.avi)
+[![Watch the video](Examples/Example_Random_Agent.mp4)](Examples/Example_Random_Agent.mp4)
 
 
 **License**

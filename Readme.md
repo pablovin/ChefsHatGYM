@@ -19,8 +19,8 @@ The generateVideos file can read these datasets and generate rendered videos fro
 
 **Example**
 
+[![Watch the video](https://www2.informatik.uni-hamburg.de/wtm/OMG-EmotionChallenge/images/challenge_details/video1_cover.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
 
-[![Watch the video](https://www.youtube.com/watch?v=rxp3Xx4De7k)](https://www.youtube.com/watch?v=rxp3Xx4De7k)
 
 
 **License**

@@ -15,7 +15,7 @@ We let available here two files: one with an example on how to run the GYM envir
 This example creates all the logs, plots and saves the training models. It also allow the generation of datasets that hold the game steps.
 
 The generateVideos file can read these datasets and generate rendered videos from the gameplays.
-
+    
 
 **Example**
 

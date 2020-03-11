@@ -3,12 +3,12 @@ import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-# import seaborn as sns
 import numpy
-from keras.utils import plot_model
 
-import pylab as P
 
+from KEF import DataSetManager
+
+from matplotlib.collections import PolyCollection
 
 class PlotManager():
 
@@ -24,6 +24,7 @@ class PlotManager():
     def plotWinners(self, numPLayers, winners, iteraction):
 
         fig, ax = plt.subplots()
+        plt.grid()
         ax.hist(winners, bins=numPLayers)
 
         ax.set_xlabel('Players')
@@ -35,11 +36,42 @@ class PlotManager():
         plt.xlim(0, numPLayers)
         # plt.xlim(0, range(len(dataY)))
 
-        plt.savefig(self._plotsDirectory + "/WinnersHistogram_iteration_"+str(iteraction)+".png")
+        plt.savefig(self._plotsDirectory + "/Game_WinnersHistogram_iteration_"+str(iteraction)+".png")
 
         plt.clf()
 
-    def plotHistoryAllPLayers(self, numPLayers, scoresAll, winners, iteraction):
+
+    def plotRounds(self, allRounds, iteraction):
+
+        dataY = range(len(allRounds))
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        ax.set_xlabel('Games')
+        ax.set_ylabel('Number of Rounds')
+
+        # ax.text(1, 1, "TotalWin:"+str(totalWins), style='italic',
+        #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+
+        plt.yticks(numpy.arange(0, numpy.max(allRounds) +1 , 5))
+        # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
+
+        plt.ylim(0,  numpy.max(allRounds))
+        plt.xlim(0, len(dataY))
+
+        plt.grid()
+        ax.plot(dataY, allRounds)
+
+        roundsNumber = 0
+        if len(allRounds)> 0:
+            roundsNumber = allRounds[-1]
+
+        plt.savefig(self._plotsDirectory + "/Game_Rounds_iteration_"+str(iteraction)+"_Rounds_"+str(roundsNumber)+".png")
+
+        plt.clf()
+
+    def plotFinishPositionAllPlayers(self, numPLayers, scoresAll, winners, iteraction):
 
         # fig = plt.figure()
         # ax = fig.add_subplot(111)
@@ -67,15 +99,15 @@ class PlotManager():
             ax.set_xlabel('Games')
             ax.set_ylabel('Position')
 
-            ax.text(1, 1, "TotalWin:"+str(totalWins), style='italic',
-                     bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+            # ax.text(1, 1, "TotalWin:"+str(totalWins), style='italic',
+            #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
 
             plt.yticks(numpy.arange(0, numPLayers+1, 1.0))
             # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
 
             plt.ylim(0, numPLayers+1)
             plt.xlim(0, len(dataY))
-
+            plt.grid()
             ax.plot(dataY, currentPLayerData)
 
             #ax.bar(dataY, currentPLayerData, align='center')
@@ -88,7 +120,7 @@ class PlotManager():
             #
 
 
-            plt.savefig(self._plotsDirectory  + "/HistoryWinners_player_"+str(i)+"_iteration_"+str(iteraction)+".png")
+            plt.savefig(self._plotsDirectory  + "/Player_HistoryWinners_player_"+str(i)+"_iteration_"+str(iteraction)+"_TotalWin_"+str(totalWins)+".png")
 
             fig.clf()
 
@@ -101,26 +133,27 @@ class PlotManager():
 
         # print ("Rewards: ", numpy.array(rewards).shape)
 
-
         for i in range(numPLayers):
-            reward = rewards[i]
+
+            averageRewards = []
+            for a in range(len(rewards[i])):
+
+                # thisReward = rewards[i]
+                # print ("A:", a)
+                # print("Rewards:" , len(rewards))
+                # print("Rewards[i]:", len(rewards[i]))
+                # print("Rewards[i][0]:", len(rewards[i][0]))
+                # print("Rewards[i]:", len(rewards[i][0]))
+                averageRewards.append(numpy.average(rewards[i][a]))
+
+            reward = averageRewards
 
             dataY = range(len(reward))
-
             # input("here")
             meanReward = numpy.average(numpy.array(reward))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
-
-            #totalWrongActions = numpy.array(wrongActionsPlot).sum()
-            # ax.text(1, 1, "meanReward:"+str(meanReward), style='italic',
-            #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
-
-            # print ("Mean reward:" + str(meanReward))
-
-            # print ("DataY:", dataY)
-            # print ("WrongActionPlots:", wrongActionsPlot)
 
             ax.set_xlabel('Games')
             ax.set_ylabel('Average Reward')
@@ -130,10 +163,50 @@ class PlotManager():
 
             plt.ylim(-1.1, 1.2)
             # plt.xlim(0, range(len(dataY)))
-
+            plt.grid()
             ax.plot(dataY, reward)
 
-            plt.savefig(self._plotsDirectory + "/RewardPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
+            plt.savefig(self._plotsDirectory + "/Player_RewardValidAction_player_" + str(i) +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
+
+            fig.clf()
+
+    def plotTimeLine(self, actions, numPLayers, iteration=0, directory=""):
+
+        for i in range(numPLayers):
+            actionsPlot = actions[i]
+
+            data2 = []
+            for actionIndex in range(len(actionsPlot)):
+                data2.append([0+actionIndex,1+actionIndex, actionsPlot[actionIndex]])
+
+            cats = {DataSetManager.actionPass: 1, DataSetManager.actionDiscard: 2, DataSetManager.actionFinish: 3}
+            colormapping = {DataSetManager.actionDiscard: "C0", DataSetManager.actionPass: "C1", DataSetManager.actionFinish: "C2"}
+
+            verts2 = []
+            colors2 = []
+            for d in data2:
+                v = [(d[0], cats[d[2]] - .4),
+                     (d[0], cats[d[2]] + .4),
+                     (d[1], cats[d[2]] + .4),
+                     (d[1], cats[d[2]] - .4),
+                     (d[0], cats[d[2]] - .4)]
+                verts2.append(v)
+                colors2.append(colormapping[d[2]])
+
+            bars = PolyCollection(verts2, facecolors=colors2)
+
+            fig, ax = plt.subplots()
+            ax.add_collection(bars)
+            ax.autoscale()
+            ax.set_xlabel('Actions')
+            ax.set_yticks([1, 2, 3])
+            ax.set_yticklabels([DataSetManager.actionDiscard, DataSetManager.actionPass,DataSetManager.actionFinish])
+
+            if directory == "":
+                plt.savefig(self._plotsDirectory  + "/Game_TimeLine_iteration_"+str(iteration)+"_Player_"+str(i)+".png")
+            else:
+                plt.savefig(
+                    directory + "/Game_TimeLine_iteration_" + str(iteration) + "_Player_" + str(i) + ".png")
 
             fig.clf()
 
@@ -141,8 +214,6 @@ class PlotManager():
     def plotWrongActions(self, numPLayers, wrongActions, iteraction):
 
         # Plot wrong actions all players
-
-
         for i in range(numPLayers):
             wrongActionsPlot = wrongActions[i]
 
@@ -164,180 +235,14 @@ class PlotManager():
             # plt.yticks(numpy.arange(-1.0, 121, 20))
             # plt.xticks(numpy.arange(0, len(dataY) + 1, 500))
 
-            plt.ylim(-1., 600)
+            # plt.ylim(-1., 600)
             # plt.xlim(0, range(len(dataY)))
 
             plt.plot(dataY, wrongActionsPlot)
+            plt.grid()
 
-            plt.savefig(self._plotsDirectory + "/WrongActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
+            plt.savefig(self._plotsDirectory + "/Player_WrongActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
 
             plt.clf()
 
-    def createListPlot(self, lists, names):
 
-        for l in range(len(lists)):
-            plt.plot(lists[l])
-            plt.title(names[l])
-
-            plt.ylabel(names[l])
-            plt.xlabel('Iteration')
-            plt.savefig(self.plotsDirectory + "/" + names[l] + ".png")
-            plt.clf()
-
-    def createCategoricalHistogram(self, dataPoints, dataName):
-
-        dataClasses = []
-        for y in dataPoints.dataY:
-            dataClasses.append(numpy.argmax(y))
-
-        dataClasses = numpy.array(dataClasses)
-
-        n, bins, patches = plt.hist(dataClasses, len(dataPoints.dataY[0]), facecolor='green', alpha=0.75)
-        P.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "Histogram" + ".png")
-        plt.clf()
-
-    def createDataArousalValenceHistograms(self, arousals, valences, dataName):
-
-        # arousals = []
-        # valences = []
-        # print "Shape:", numpy.shape(dataPoints.dataY)
-        # print dataPoints.dataY[0]
-        # for y in dataPoints.dataY:
-        #
-        #     arousals.append(y[0])
-        #     valences.append(y[1])
-
-        arousals = numpy.array(arousals)
-        arousals = numpy.interp(arousals, (arousals.min(), arousals.max()), (-1, +1))
-        valences = numpy.array(valences)
-
-        n, bins, patches = plt.hist(arousals, 20, facecolor='green', alpha=0.75)
-        P.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "arousal" + ".png")
-        plt.clf()
-
-        n, bins, patches = plt.hist(valences, 20, facecolor='green', alpha=0.75)
-        P.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "valence" + ".png")
-        plt.clf()
-
-        plt.scatter(arousals, valences, 0.3)
-        # draw a default hline at y=1 that spans the xrange
-        l = plt.axhline(y=0)
-        l = plt.axvline(x=0)
-        plt.axis([-1, 1, -1, 1])
-        plt.xlabel("Arousal")
-        plt.ylabel("Valence")
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "Arousal_Valence" + ".png")
-        plt.clf()
-
-    def createDataArousalValenceHistogram(self, dataPoints, dataName):
-
-        arousals = []
-        valences = []
-        # print "Shape:", numpy.shape(dataPoints.dataY)
-        # print dataPoints.dataY[0]
-        for y in dataPoints.dataY:
-            arousals.append(y[0])
-            valences.append(y[1])
-
-        arousals = numpy.array(arousals)
-        arousals = numpy.interp(arousals, (arousals.min(), arousals.max()), (-1, +1))
-        valences = numpy.array(valences)
-
-        n, bins, patches = plt.hist(arousals, 20, facecolor='green', alpha=0.75)
-        P.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "arousal" + ".png")
-        plt.clf()
-
-        n, bins, patches = plt.hist(valences, 20, facecolor='green', alpha=0.75)
-        P.setp(patches, 'facecolor', 'g', 'alpha', 0.75)
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "valence" + ".png")
-        plt.clf()
-
-        plt.scatter(arousals, valences, 0.3)
-        # draw a default hline at y=1 that spans the xrange
-        l = plt.axhline(y=0)
-        l = plt.axvline(x=0)
-        plt.axis([-1, 1, -1, 1])
-        plt.xlabel("Arousal")
-        plt.ylabel("Valence")
-
-        plt.savefig(self.plotsDirectory + "/" + dataName + "Arousal_Valence" + ".png")
-        plt.clf()
-
-    def creatModelPlot(self, model, modelName=""):
-        print
-        "Creating Plot at: " + str(self.plotsDirectory) + "/" + str(modelName) + "_plot.png"
-        plot_model(model, to_file=self.plotsDirectory + "/" + modelName + "_plot.png", show_layer_names=True,
-                   show_shapes=True)
-
-    def createTrainingPlot(self, trainingHistory, modelName=""):
-
-        print
-        "Creating Training Plot"
-
-        metrics = trainingHistory.history.keys()
-
-        for m in metrics:
-            if m.startswith('lr'):
-                metrics.remove(m)
-
-        for i in range(len(metrics)):
-
-            if not "val" in metrics[i]:
-                # print "Models:"+ metrics[i]+" - "+ str(trainingHistory.history[metrics[i]])
-                # print "Models:val_"+ metrics[i]+" - "+ str(trainingHistory.history["val_"+metrics[i]])
-                # print "-"
-
-                plt.plot(trainingHistory.history[metrics[i]])
-                plt.plot(trainingHistory.history["val_" + metrics[i]])
-
-                plt.title("Model's " + metrics[i])
-
-                plt.ylabel(metrics[i])
-                plt.xlabel('epoch')
-                plt.legend(['train', 'validation'], loc='upper left')
-                # print "Saving Plot:", self.plotsDirectory+"/"+modelName+metrics[i]+".png"
-                plt.savefig(self.plotsDirectory + "/" + modelName + metrics[i] + ".png")
-                plt.clf()
-
-    def plotLoss(self, loss_history):
-        plt.gcf().clear()
-        plt.figure(1)
-        plt.ylabel('Loss')
-        plt.xlabel('Epochs')
-        plt.plot(loss_history, c='b')
-        plt.savefig("loss.png")
-
-    def plotAcc(self, acc_history):
-        plt.gcf().clear()
-        plt.figure(1)
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epochs')
-        plt.plot(acc_history, c='b')
-        plt.savefig("acc.png")
-
-    def plotOutput(self, faceX, faceY):
-        plt.gcf().clear()
-        plt.figure(1)
-        plt.ylabel('Y')
-        plt.xlabel('X')
-        plt.plot(faceX, c='b')
-        plt.plot(numpy.tranpose(faceY), c='r')
-        plt.savefig("face_plot.png")
-
-    def plotReward(self, avg_reward):
-        plt.gcf().clear()
-        plt.figure(1)
-        plt.ylabel('Avg. Reward ')
-        plt.xlabel('Episodes x 1000')
-        plt.plot(avg_reward, c='b')
-        plt.savefig(self.plotsDirectory + "/avg_reward.png")

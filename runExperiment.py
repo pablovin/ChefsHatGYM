@@ -1,0 +1,23 @@
+from ExperimentHandler import ChefsHatExperimentHandler
+
+from Agents.AgentType import  DUMMY_RANDOM, DUMMY_DISCARDONECARD, DQL_v1, DQL_v2
+
+#Parameters for the game
+playersAgents = [DUMMY_RANDOM, DUMMY_RANDOM, DUMMY_RANDOM, DUMMY_RANDOM]
+
+numGames = 50# amount of training games
+experimentDescriptor = "DUMMY_RANDOM_all_test"
+
+# loadModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/WINNINGDQL_Player_4_Cards_11_games_100TrainAgents_['DQL', 'RANDOM', 'RANDOM', 'RANDOM']_QLLearningAgent_2020-02-29_21:49:50.134777/Model/actor_iteration_27.hd5"
+
+loadModel = ""
+
+isLogging = False #Logg the experiment
+
+# #Parameters for controling the experiment
+createDataset = False # weather to save the dataset
+saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments" # where the experiment will be saved
+
+metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,experimentDescriptor=experimentDescriptor,isLogging=isLogging,createDataset=createDataset,saveExperimentsIn=saveExperimentsIn)
+
+print ("Metrics:" + str(metrics))

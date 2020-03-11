@@ -9,6 +9,9 @@ import subprocess
 import numpy
 import os
 
+from KEF import PlotManager
+
+
 
 from KEF import DataSetManager
 
@@ -359,7 +362,7 @@ class RenderManager():
 
         playerStatus = playerStatus.split("_")
 
-        if playerStatus[0] == "Finish":
+        if playerStatus[0] == DataSetManager.actionFinish:
             if int(score[0]) == 0:
                 card = self.roleCards[3]
             elif int(score[1]) == 0:
@@ -377,7 +380,7 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-        if playerStatus[1] == "Finish":
+        if playerStatus[1] == DataSetManager.actionFinish:
             if int(score[0]) == 1:
                 card = self.roleCards[3]
             elif int(score[1]) == 1:
@@ -397,7 +400,7 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-        if playerStatus[2] == "Finish":
+        if playerStatus[2] == DataSetManager.actionFinish:
             if int(score[0]) == 2:
                 card = self.roleCards[3]
             elif int(score[1]) == 2:
@@ -417,7 +420,7 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-        if playerStatus[3] == "Finish":
+        if playerStatus[3] == DataSetManager.actionFinish:
             if int(score[0]) == 3:
                 card = self.roleCards[3]
             elif int(score[1]) == 3:
@@ -450,26 +453,26 @@ class RenderManager():
 
         card = self.passCard
 
-        if playerStatus[0] == "Pass" and playerCurrentStatus[0]=="PASS":
+        if playerStatus[0] == DataSetManager.actionPass and playerCurrentStatus[0]==DataSetManager.actionPass:
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 120
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 620
 
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-        if playerStatus[1] == "Pass" and playerCurrentStatus[1]=="PASS":
+        if playerStatus[1] == DataSetManager.actionPass and playerCurrentStatus[1]==DataSetManager.actionPass:
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 120
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1510
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-        if playerStatus[2] == "Pass" and playerCurrentStatus[2]=="PASS":
+        if playerStatus[2] == DataSetManager.actionPass and playerCurrentStatus[2]==DataSetManager.actionPass:
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 720
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 620
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-        if playerStatus[3] == "Pass" and  playerCurrentStatus[3]=="PASS":
+        if playerStatus[3] == DataSetManager.actionPass and  playerCurrentStatus[3]==DataSetManager.actionPass:
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 720
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1510
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
@@ -519,36 +522,41 @@ class RenderManager():
 
     def createVideo(self):
 
-        command = "ffmpeg -i "+str(self.currentGameDirectory)+"/%d.png -framerate 1 -r "+str(self.fps)+" -vcodec libx264 -acodec aac "+str(self.saveVideoDirectory)+"video.mp4"
+        command = "ffmpeg -i "+str(self.currentGameDirectory)+"/%d.png -framerate 1 -pix_fmt yuv420p -r "+str(self.fps)+" -vcodec libx264 -acodec aac "+str(self.saveVideoDirectory)+"video.mp4"
 
         subprocess.call(command, shell=True)
 
         shutil.rmtree(self.currentGameDirectory)
 
-        #
-        # print ("Video here:", saveLocation+"/video.avi")
-        #
-        # # writer = cv2.VideoWriter(saveLocation+"/video.avi", cv2.VideoWriter_fourcc(*"MJPG"), self.fps, (self.imageSize[0], self.imageSize[1]))
-        # # for frame in images:
-        # #     writer.write(frame)
-        # # writer.release()
-        #
-        # w = imageio.get_writer(saveLocation+"/video.avi", fps=self.fps)
-        # for img in images:
-        #     w.append_data(img)
-        # w.close()
-        #
-        #
-        # print("Video here:", saveLocation + "/video.avi")
-        # #
-        # # p = Popen(['ffmpeg', '-y', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-r', '24', '-i', '-', '-vcodec', 'mpeg4',
-        # #            '-qscale', '5', '-r', '24', saveLocation+"/video.avi"], stdin=PIPE)
-        # # for img in images:
-        # #     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # #     im_pil = Image.fromarray(img)
-        # #     im_pil.save(p.stdin, 'JPEG')
-        # # p.stdin.close()
-        # # p.wait()
+
+
+    def createGameTimeLine(self, gameLog):
+
+        playerActions = []
+
+        playerActions.append([]) #player 1 actions
+        playerActions.append([]) #player 2 actions
+        playerActions.append([]) #player 3 actions
+        playerActions.append([]) #player 4 actions
+
+        with open(gameLog, mode='r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            lineCounter = 0
+            for row in csv_reader:
+                actionType = row["Action Type"]
+                player = row["Player"]
+
+                if not player =="":
+                    playerActions[int(player)].append(actionType)
+
+        plotManager = PlotManager.PlotManager(self.saveVideoDirectory)
+        plotManager.plotTimeLine(playerActions, 4)
+        # self.plotTimeLine(playerActions,4)
+
+
+
+
+
 
 
     def renderGameStatus(self, gameLog, createVideo=False):
@@ -694,13 +702,13 @@ class RenderManager():
                 elif actionType == DataSetManager.actionPass:
 
                     if int(player) == 1:
-                        player1LastAction = "PASS"
+                        player1LastAction = DataSetManager.actionPass
                     elif int(player) == 2:
-                        player2LastAction = "PASS"
+                        player2LastAction = DataSetManager.actionPass
                     elif int(player) == 3:
-                        player3LastAction = "PASS"
+                        player3LastAction = DataSetManager.actionPass
                     elif int(player) == 4:
-                        player4LastAction = "PASS"
+                        player4LastAction = DataSetManager.actionPass
 
                     header = "Round: " + str(rounds) + " - Turn: Player " + str(player)
 
@@ -730,9 +738,6 @@ class RenderManager():
                     player2LastAction = ""
                     player3LastAction = ""
                     player4LastAction = ""
-
-
-
 
 
                 self.saveImages(originalImage, 5)

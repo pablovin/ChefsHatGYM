@@ -1,52 +1,50 @@
-import keras
 import numpy
-
-from keras.layers import Input, Dense, Flatten
-from keras.models import Model
-from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint
-
-from keras import backend as K
-
-import tensorflow as tf
-import datetime
-
+from Agents.AgentType  import DUMMY_RANDOM, DUMMY_DISCARDONECARD
+import copy
 
 class AgentRandom:
 
     numMaxCards = 0
     outputSize = 0
     actionsTaken = []
-    name="RANDOM"
+    name="DUMMY"
+    behavior = "RANDOM"
 
-    def __init__(self, numMaxCards = 4, numActions=365):
+    #agentsType
+
+
+    def __init__(self, behavior, numMaxCards = 4, numActions=200):
 
         self.numMaxCards = numMaxCards
         self.outputSize = numActions # all the possible ways to play cards plus the pass action
 
+        self.behavior = behavior
 
-    def getRandomAction(self, action):
-        #
-        # actionIndex = numpy.random.choice(self.outputSize, p=action) #number of cards in the player hand plus pass
-        actionIndex = numpy.argmax(action)  # number of cards in the player hand plus pass
+    def getAction(self, possibleActions):
 
-        while actionIndex in self.actionsTaken:
-            actionIndex = actionIndex + 1
-            if actionIndex >= len(action):
-                actionIndex = 0
+        if self.behavior == DUMMY_RANDOM:
+            possibleActions = possibleActions
 
-        action = numpy.zeros(self.outputSize)
-        action[actionIndex] = 1
-        self.actionsTaken.append(actionIndex)
+        if self.behavior == DUMMY_DISCARDONECARD:
 
-        return action
+            originalPossibleAction = copy.copy(possibleActions)
+            positionsWithOneCard = [0, 3, 9, 18, 30, 45, 63, 84, 108, 135, 165]
+            for i in range(len(possibleActions)):
 
-    def resetActionsTaken(self):
-        self.actionsTaken = []
+                if not i in positionsWithOneCard:
+                    possibleActions[i] = 0
 
-    def getAction(self, state):
+            if originalPossibleAction[198] == 1: #check if joker was an option
+                possibleActions[198] = 1
+            possibleActions[199] = 1 #pass action always available
 
         aIndex = numpy.random.randint(0, self.outputSize)
+        while not possibleActions[aIndex] == 1:
+            aIndex = aIndex + 1
+
+            if aIndex >= len(possibleActions):
+                aIndex = 0
+
         a = numpy.zeros(self.outputSize)
         a[aIndex] = 1
 

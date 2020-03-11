@@ -1,63 +1,14 @@
 import gym
 import random
 import numpy
+from KEF import DataSetManager
 
 class ChefsHatEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
-  # variables for the entire experiment
-  score = []  # the last score
-  board = [] # the current board
-
-  maxCardNumber = 0  # The highest value of a card in the deck
-
-  numberPlayers = 0  # number of players playing the game
-
-  numberOfCardsPerPlayer = 0  # number of cards each player has at hand in the begining of the game
-
-  numberOfActions = 0
-
-  #variables per game played
-  cards = [] # the deck
-
-  playersHand = [] # the current cards each player has at hand
-
-  currentPlayer = 0
-
-  currentGame = []
-
-  gameFinished = False
-
-  exchangedCards = [] # cards exchanged on the role change
-
-  firstActionPlayed = 0
-
-  playerStartedGame = 0 # who started the game
-
-  currentRoles = []
-
-  currentSpecialAction = []
-
-  currentPlayerDeclaredSpecialAction = []
-
-  rounds = 0
-
-  lastToPass = 0
-
-  lastActionPlayers = []
-
-  #Variables to log some statistics per all games
-  allScores = []
-  allRewards = []
-  allWrongActions = []
-  winners = []
-
-  #Auxiliatory variables
-  takenActions = [] # store a set of actions that were taken by a certain agent
-  currentActionRewards = []
-  currentWrongActions = 0
 
   def __init__(self):
+
      print("")
 
   def nextPlayer(self):
@@ -69,13 +20,13 @@ class ChefsHatEnv(gym.Env):
           # move to the next round
           # self.rounds = self.rounds +1
 
-          self.allWrongActions[self.currentPlayer].append(self.currentWrongActions)
-          self.currentWrongActions = 0
+          # self.allWrongActions[self.currentPlayer].append(self.currentWrongActions)
+          # self.currentWrongActions = 0
 
 
-          if len(self.currentActionRewards) > 0:
-              avgActionReward = numpy.average(self.currentActionRewards)
-              self.allRewards[self.currentPlayer].append(avgActionReward)
+          # if len(self.currentActionRewards) > 0:
+          #     avgActionReward = numpy.average(self.currentActionRewards)
+          #     self.allRewards[self.currentPlayer].append(avgActionReward)
 
           self.currentActionRewards = []
 
@@ -92,18 +43,15 @@ class ChefsHatEnv(gym.Env):
     actionTaken = ""
     reward = 0
 
-    if self.playerStartedGame == self.currentPlayer and self.rounds == 0:
-      firstAction = True
-
-    else:
-      firstAction = False
+    actionTag = ""
     #
     # print ("Current player:" + str(self.currentPlayer))
     # print ("Player Finished:"  + str(self.hasPlayerFinished(self.currentPlayer)))
 
     # if not self.hasPlayerFinished(self.currentPlayer):
 
-    possibleActions = self.getPossibleActions(self.currentPlayer, firstAction)
+    possibleActions = self.getPossibleActions(self.currentPlayer)
+    # possibleActions = 167
     # Verify if this is a valid play
 
     # if numpy.sum(action) == 0 or numpy.sum(
@@ -114,7 +62,7 @@ class ChefsHatEnv(gym.Env):
     #   actionTaken = "Pass"
     # else:  # if not a pass action, verify if the player can make the action
 
-    if self.isActionAllowed(self.currentPlayer, action, firstAction):  # if the player can make the action, do it.
+    if self.isActionAllowed(self.currentPlayer, action):  # if the player can make the action, do it.
         # reward = 1.0  # Experiment 1
         validAction = True
 
@@ -124,29 +72,46 @@ class ChefsHatEnv(gym.Env):
             # otherwise positive
             if numpy.argmax(possibleActions) == len(possibleActions) - 1:
                 # reward = 1 #experiment 1
-                reward = 0.1 #experiment 2
+                reward = 0.01 #experiment 2
             else:
-                reward = -1
-                validAction = False
+                reward = 0
+                # validAction = False
 
-            actionTaken = "Pass"
+            actionTaken = DataSetManager.actionPass
+            actionTag = DataSetManager.actionPass
             # reward = -0.1  # Experiment 2
         else:
             # reward = 1  # Experiment 1
-            reward = 0.1 # Experiment 2
+            #reward = 0.1 # Experiment 2
+
             cardsDiscarded = self.discardCards(self.currentPlayer, action)
 
-            actionTaken = "Discard: ", cardsDiscarded
+            unique, counts = numpy.unique(self.playersHand[self.currentPlayer], return_counts=True)
+            currentPlayerHand = dict(zip(unique, counts))
+            if 0 in self.playersHand[self.currentPlayer]:
+                cardsInHand = len(self.playersHand[self.currentPlayer]) - currentPlayerHand[0]
+            else:
+                cardsInHand = len(self.playersHand[self.currentPlayer])
+
+
+            reward = (1 - cardsInHand*100 / len(self.playersHand[self.currentPlayer]) * 0.01) *0.7
+
+
+            actionTaken = DataSetManager.actionDiscard, cardsDiscarded
+            actionTag = DataSetManager.actionDiscard
+
+            if len(cardsDiscarded) == 0:
+                print ("here")
 
             self.lastToPass = self.currentPlayer   # if player did not pass nor finish, he was the last one to play
 
-
         # print("-- Action: Discard - ", cardsDiscarded)
     else:  # if the player cannot make the action, penalize it and repeat it until it can do it
-        reward = -1
+        reward = 0
         validAction = False
         actionTaken = "Invalid"
-        self.currentWrongActions += 1
+        self.currentWrongActions[self.currentPlayer] += 1
+        # self.currentWrongActions += 1
 
     if self.hasPlayerFinished(self.currentPlayer): # If all the cards of the player hands are gone, he wins the round, maximum reward
         # if actionTaken == "Pass" and numpy.array(self.playersHand[
@@ -157,10 +122,15 @@ class ChefsHatEnv(gym.Env):
                 self.score.append(self.currentPlayer)
 
             index = self.score.index(self.currentPlayer)
+            # if index == 0:
+            #     reward+= 0.3
+            # else:
+            #     reward += 0
             # reward += 0  # Experiment 1
-            reward +=  (0.9 - index * 0.3) #Experiment 2
+            reward +=  (0.9 - index * 0.3) * 0.3 #Experiment 2
             # reward = 1
-            actionTaken = "Finish"
+            actionTaken = DataSetManager.actionFinish
+            actionTag = DataSetManager.actionFinish
             # print ("Score", self.score)
             # input("here")
 
@@ -169,6 +139,10 @@ class ChefsHatEnv(gym.Env):
 
     self.currentActionRewards.append(reward)
 
+    if validAction:
+        self.currentGameRewards[self.currentPlayer].append(reward)
+        self.playerActions[self.currentPlayer].append(actionTag)
+
     return self.getCurrentPlayerState(), reward, validAction
 
       # reward, validAction, actionTaken, possibleActions
@@ -176,8 +150,6 @@ class ChefsHatEnv(gym.Env):
 
 
   def reset(self):
-
-
     # Create a deck
     self.cards = []
     for i in range(self.maxCardNumber + 1):
@@ -201,6 +173,32 @@ class ChefsHatEnv(gym.Env):
 
         self.lastActionPlayers = []
 
+        # update the game round and the reward counts and wrong actions count
+        self.allRounds.append(self.rounds)
+
+        for i in range(self.numberPlayers):
+            self.allRewards[i].append(self.currentGameRewards[i])
+            self.allWrongActions[i].append(self.currentWrongActions[i])
+
+        #update the startGame/win game values
+
+        counter = 0
+        for s in self.score:
+            if self.playerStartedGame == s:
+                self.startGameFinishingPosition[counter] +=1
+            counter = counter+1
+
+
+        # if self.playerStartedGame == self.score[0]:
+        #     self.startGameWinGames += 1
+
+
+    #reset current wrong actions and reward
+
+    self.currentGameRewards = []
+    self.currentWrongActions = []
+
+    self.playerActions = []
 
     # set the score
     self.score = []
@@ -213,19 +211,22 @@ class ChefsHatEnv(gym.Env):
     random.shuffle(self.cards)
 
     # create players hand and last actions and rewards
+
     self.playersHand = []
     for i in range(self.numberPlayers):
       self.playersHand.append([])
       self.lastActionPlayers.append("")
-      self.allRewards.append([])
-      self.allWrongActions.append([])
+      self.currentGameRewards.append([])
+      self.currentWrongActions.append(0)
+      self.playerActions.append([])  # players actions
+
 
     self.numberOfCardsPerPlayer = int(len(self.cards) / len(self.playersHand))
 
     #number of actions
 
-    self.numberOfActions = (self.maxCardNumber*self.maxCardNumber*3)+2
-
+    # self.numberOfActions = (self.maxCardNumber*self.maxCardNumber*3)+2
+    self.numberOfActions = 200
     # initialize the board
     self.restartBoard()
 
@@ -276,9 +277,9 @@ class ChefsHatEnv(gym.Env):
     for i in range(self.numberPlayers):
 
       # print ("player "+str(i)+" action:" + str(self.lastActionPlayers[i]))
-      if self.lastActionPlayers[i] == "Pass":
+      if self.lastActionPlayers[i] == DataSetManager.actionPass:
         allPLayerFinished = allPLayerFinished + 0
-      elif self.lastActionPlayers[i] == "Finish":
+      elif self.lastActionPlayers[i] == DataSetManager.actionFinish:
         allPLayerFinished = allPLayerFinished + 0
       else:
         allPLayerFinished = allPLayerFinished + 1
@@ -291,10 +292,8 @@ class ChefsHatEnv(gym.Env):
 
     return pizzaReady
 
-
   def nextRound(self):
       self.rounds = self.rounds+1
-
 
   def hasGameFinished(self):
 
@@ -308,7 +307,14 @@ class ChefsHatEnv(gym.Env):
   #the number of possible actions is: self.maxCardNumber * self.maxCardNumber * 3 + 2
   # where the *3 refers to the options: discard a card, card+1 joker, card + 2 jokers
   # the 2 refers to: discard only one joker, and pass action
-  def getPossibleActions(self, player, firstAction):
+  def getPossibleActions(self, player):
+
+      if self.playerStartedGame == self.currentPlayer and self.rounds == 0:
+          firstAction = True
+
+      else:
+          firstAction = False
+
 
       #print ("Player:", player)
       possibleActions = []
@@ -345,8 +351,11 @@ class ChefsHatEnv(gym.Env):
           # print("-Card present in the player hand:", cardNumber + 1 in self.playersHand[player])
 
           # if this card is present in the hand and it is lower than the cards in the board
-          for cardQuantity in range(self.maxCardNumber):
+          for cardQuantity in range(cardNumber+1):
 
+
+              # if cardQuantity == 0:
+              #       print (len(possibleActions))
               if (cardNumber + 1 < highestCardOnBoard ) and cardNumber + 1 in self.playersHand[player]:
 
               #verify if the quantity of the card in the hand is allowed to be put down
@@ -380,6 +389,8 @@ class ChefsHatEnv(gym.Env):
               else:
                   possibleActions.append(0)
 
+
+              # if cardNumber
 
               # add the joker possibilities
               if self.maxCardNumber + 1 in self.playersHand[player]:  # there is a joker in the hand
@@ -432,19 +443,19 @@ class ChefsHatEnv(gym.Env):
       else:
           possibleActions.append(0) #I can not discard one joker
 
-
-
       possibleActions.append(1) #the pass action, which is always a valid action
 
       return possibleActions
 
-  def isActionAllowed(self, player, action, firstAction):
-      possibleActions =self.getPossibleActions(player, firstAction)# check possible actions
+  def isActionAllowed(self, player, action):
+      possibleActions =self.getPossibleActions(player)# check possible actions
 
       actionToTake = numpy.argmax(action)
-
+      #
       # print ("Action to take:", actionToTake)
-      # print("Possible actions:", possibleActions)
+      # print("Possible actions:", len(possibleActions))
+
+
       if possibleActions[actionToTake] == 1: # if this specific action is part of the game
           return True
       else:
@@ -459,7 +470,7 @@ class ChefsHatEnv(gym.Env):
       #find the cards to discard
       discardIndex = 0
       for cardNumber in range (self.maxCardNumber):
-          for cardQuantity in range (self.maxCardNumber):
+          for cardQuantity in range (cardNumber+1):
 
               if discardIndex == action:
                   for i in range(cardQuantity+1): # the card quantity starts always with 1
@@ -484,7 +495,7 @@ class ChefsHatEnv(gym.Env):
               discardIndex = discardIndex + 1
 
       #discard only the joker
-      if action == self.maxCardNumber*self.maxCardNumber*3 + 1:
+      if action == self.numberOfActions-2:
           cardsToDiscard.append(self.maxCardNumber + 1)
 
 
@@ -516,11 +527,84 @@ class ChefsHatEnv(gym.Env):
 
 
   def startNewGame(self, maxCardNumber=4, numberPlayers=2, numGames=0):
+
+
+    #start all variables
+
+    # variables for the entire experiment
+    self.score = []  # the last score
+    self.board = []  # the current board
+
+    self.maxCardNumber = 0  # The highest value of a card in the deck
+
+    self.numberPlayers = 0  # number of players playing the game
+
+    self.numberOfCardsPerPlayer = 0  # number of cards each player has at hand in the begining of the game
+
+    self.numberOfActions = 0
+
+    # variables per game played
+    self.cards = []  # the deck
+
+    self.playersHand = []  # the current cards each player has at hand
+
+    self.currentPlayer = 0
+
+    self.currentGame = []
+
+    self.gameFinished = False
+
+    self.exchangedCards = []  # cards exchanged on the role change
+
+    self.firstActionPlayed = 0
+
+    self.playerStartedGame = 0  # who started the game
+
+    self.currentRoles = []
+
+    self.currentSpecialAction = []
+
+    self.currentPlayerDeclaredSpecialAction = []
+
+    self.rounds = 0
+
+    self.lastToPass = 0
+
+    self.lastActionPlayers = []
+
+    self.playerActions = []
+
+    # Variables to log some statistics per all games
+    self.allScores = []
+    self.allRewards = []
+    self.allWrongActions = []
+    self.allRounds = []
+    self.winners = []
+
+    self.startGameFinishingPosition = []
+
+    self.currentGameRewards = []
+    self.currentWrongActions = []
+
+    # Auxiliatory variables
+    self.takenActions = []  # store a set of actions that were taken by a certain agent
+    self.currentActionRewards = []
+
+
+
     # update the max number of cards
     self.maxCardNumber = maxCardNumber
 
     # update number of players
     self.numberPlayers = numberPlayers
+
+    self.startGameWinGames = 0
+
+    self.allRewards = []
+    for i in range(self.numberPlayers):
+        self.allRewards.append([])
+        self.allWrongActions.append([])
+        self.startGameFinishingPosition.append(0)
 
   def declareSpecialAction(self):
 

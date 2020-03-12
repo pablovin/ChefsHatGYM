@@ -124,6 +124,89 @@ class PlotManager():
 
             fig.clf()
 
+    def plotNumberOfActions(self, numPLayers, actions, iteraction):
+
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111)
+
+        largest = 0
+        for i in range(numPLayers):
+            if len(actions[i]) > largest:
+                largest = len(actions[i])
+
+        # Plot winning history all players
+        for i in range(numPLayers):
+
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+
+
+            actions = numpy.array(actions)
+            currentPlayerActions = []
+
+            # print("Score:", scoresAll)
+            totalWins = 0
+            for a in range(len(actions[i])):
+
+                if actions[i][a][1][0] == 0:
+                    result = 0
+                else:
+                  result = len(actions[i][a][1])
+                currentPlayerActions.append(result)
+
+
+            quarterInterval = int(len(currentPlayerActions)/4)
+
+            for q in range(4):
+
+                # first quarter
+                quarter = currentPlayerActions[q*quarterInterval:q*quarterInterval+quarterInterval]
+                unique, counts = numpy.unique(quarter, return_counts=True)
+                currentQuarter = dict(zip(unique, counts))
+                passesCount = currentQuarter[0]
+                discardCount = len(quarter) - passesCount
+
+                ax.axvline(q*quarterInterval, ymin=0, ymax=11, color="r", linestyle='--', label="Q "+str(q)+" - Passes:" + str(passesCount) + " - Discards:" + str(discardCount))
+
+
+            ax.legend()
+
+
+            # print("Player: " + str(i) + " - data:" + str(currentPLayerData))
+            dataY = range(len(currentPlayerActions))
+            # print("Player: " + str(i) + " - dataY:" + str(dataY))
+
+
+            ax.set_xlabel('Rounds')
+            ax.set_ylabel('Discards')
+
+
+            # ax.text(1, 1, "TotalWin:"+str(totalWins), style='italic',
+            #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+
+            plt.yticks(numpy.arange(0, 12, 1.0))
+            # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
+
+            plt.ylim(0, 12)
+            plt.xlim(0, largest)
+            plt.grid()
+            ax.plot(dataY, currentPlayerActions)
+
+            # ax.bar(dataY, currentPLayerData, align='center')
+
+            # ax.set_ylim([0, 4])
+            #
+            # my_xticks = [1, 2, 3 , 4]
+            # plt.yticks(dataY, my_xticks)
+            # # plt.yticks(np.arange(y.min(), y.max(), 0.005))
+            #
+
+            plt.savefig(self._plotsDirectory + "/Player_Discards_player_" + str(i) + "_iteration_" + str(
+                iteraction) + ".png")
+
+            fig.clf()
+
 
     def plotRewardsAll(self, numPLayers, rewards, iteraction):
 
@@ -171,6 +254,11 @@ class PlotManager():
             fig.clf()
 
     def plotTimeLine(self, actions, numPLayers, iteration=0, directory=""):
+
+        largest = 0
+        for i in range(numPLayers):
+            if len(actions[i]) > largest:
+                largest = len(actions[i])
 
         for i in range(numPLayers):
             actionsPlot = actions[i]

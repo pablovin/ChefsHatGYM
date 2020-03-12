@@ -13,7 +13,7 @@ from KEF import ExperimentManager
 from KEF import DataSetManager
 
 
-def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM, DUMMY_RANDOM], experimentDescriptor="",isLogging=True,createDataset=True, saveExperimentsIn="", loadModel="", agentParams=[]):
+def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM, DUMMY_RANDOM], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, plotFrequency=1, saveExperimentsIn="", loadModel="", agentParams=[]):
 
     numMaxCards = 11
 
@@ -47,8 +47,6 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
     for i in range(len(playersAgents)):
 
-
-
         if playersAgents[i] == DUMMY_RANDOM:
             players.append(AgentRandom(DUMMY_RANDOM,numMaxCards, env.numberOfActions))
         elif  playersAgents[i] == DUMMY_DISCARDONECARD:
@@ -71,8 +69,13 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
         # elif playersAgents[i] == AgentAlwaysOneCard.name:
         #     players.append(AgentAlwaysOneCard(numMaxCards, numActions = env.numberOfActions))
 
+    metrics = []
     #start the experiment
     for game in range(numGames):
+
+        print ("Starting Game number:" + str(game))
+        metricsPerGame = []
+        metricsPerGame.append(game) # add the game number
 
         #Log the dataset
         if createDataset:
@@ -87,7 +90,6 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
         if createDataset:
             experimentManager.dataSetManager.dealAction(env.playersHand, env.allScores)
-
 
         roles = ""
         if game > 0:
@@ -245,18 +247,60 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
                                                                     env.board, env.playersHand, roles,
                                                                     env.score, playersStatus)
             gameFinished = env.hasGameFinished()
-            if isLogging:
-                logger.write("Game finished:" + str(gameFinished))
+
+        if isLogging:
+            logger.write("Game finished:" + str(gameFinished))
 
         if isLogging:
             logger.newLogSession("Plotting...")
             logger.write("Plots saved in:" + str(experimentManager.plotManager.plotsDirectory))
 
-            experimentManager.plotManager.plotTimeLine(env.playerActions, len(playersAgents), game)
+        if isPlotting and game%plotFrequency==0:
+            experimentManager.plotManager.plotTimeLine(env.playerActionsTimeLine, len(playersAgents), game)
+
+            experimentManager.plotManager.plotNumberOfActions( len(playersAgents), env.playerActionsComplete, game)
+
+        #saving the metrics
+        for p in range(len(playersAgents)):
+            metricsPerGame.append(env.score.index(0)) #p_position
+            metricsPerGame.append(numpy.average(env.currentGameRewards[p]))  # p_averageReward
+
+            currentPlayerActions = []
+            for a in range(len(env.playerActionsComplete[p])):
+
+                if env.playerActionsComplete[p][a][1][0] == 0:
+                    result = 0
+                else:
+                    result = len(env.playerActionsComplete[p][a][1])
+                currentPlayerActions.append(result)
+
+            quarterInterval = int(len(currentPlayerActions) / 4)
+
+            for q in range(4):
+                # first quarter
+                quarter = currentPlayerActions[q * quarterInterval:q * quarterInterval + quarterInterval]
+                unique, counts = numpy.unique(quarter, return_counts=True)
+                currentQuarter = dict(zip(unique, counts))
+                passesCount = currentQuarter[0]
+                discardCount = len(quarter) - passesCount
+                metricsPerGame.append(passesCount) #p__q_passes
+                metricsPerGame.append(discardCount) #p__q_discard
+
+
+
+
+
 
         env.reset()  # start a new game
 
-        if isLogging:
+
+        metrics.append(metricsPerGame)
+
+
+
+
+
+        if isPlotting and game%plotFrequency==0:
             experimentManager.plotManager.plotRounds(env.allRounds, game)
             experimentManager.plotManager.plotRewardsAll(len(playersAgents), env.allRewards, game)
             experimentManager.plotManager.plotWinners(len(playersAgents), env.winners, game)
@@ -268,6 +312,8 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
         #
         #
 
+
+    experimentManager.metricManager.saveMetricPlayer(metrics)
     returns = []
     returns.append(env.allRounds) #total rounds per game
     returns.append(env.startGameFinishingPosition) #starting finishing position

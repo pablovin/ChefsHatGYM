@@ -31,9 +31,6 @@ class DataSetManager:
         * Create functions to log images and graphs as well.
     """
 
-
-
-
     @property
     def actions(self):
         return self._actions
@@ -218,96 +215,3 @@ class DataSetManager:
 
         self.logAction(actionType=actionType, playersHand=playersHandAfter, roles=roles, score=score, cardsAction=cardsActionList)
 
-
-
-
-    def write(self, message):
-        """
-            Function that writes messages in the log.
-
-            Args:
-                message (String): The message which will be written in the log.
-
-            Raises:
-
-                Exception: if the logDirectory is invalid.
-
-        """
-
-        try:
-            logFile = open(self.logDirectory, "a")
-        except:
-            raise Exception("Log file not found!")
-
-        else:
-            logFile.write(str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message) + "\n")
-            logFile.close
-
-            if self._verbose:
-                print(
-                str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message))
-
-    def newLogSession(self, sessionName):
-        """
-            Function that writes a new session in the Log.
-
-            Args:
-                sessionName (String): The name of the new session
-
-            Raises:
-
-                Exception: if the logDirectory is invalid.
-
-        """
-
-        try:
-            logFile = open(self.logDirectory, "a")
-        except:
-            raise Exception("Log file not found! Looked at:", self.logDirectory)
-
-        else:
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.write(str(sessionName + "\n"))
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.close
-
-            if self._verbose:
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                print(
-                str(sessionName))
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
-
-    def endLogSession(self):
-        """
-            Function that writes the end of a session in the Log.
-
-            Args:
-                sessionName (String): The name of the new session
-
-            Raises:
-
-                Exception: if the logDirectory is invalid.
-
-        """
-
-        try:
-            logFile = open(self.logDirectory, "a")
-        except:
-            raise Exception("Log file not found! Looked at:", self.logDirectory)
-
-        else:
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.close
-
-            if self._verbose:
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")

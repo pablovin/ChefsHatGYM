@@ -56,7 +56,12 @@ class AgentDQLV2:
             #     ('batchSize', hp.choice("batchSize", [8, 32, 64, 128, 256, 512, 1024])),
             #     ('targetUpdateFrequency', hp.quniform('targetUpdateFrequency', 5, 25))
             # ])
-        # else:
+        else:
+
+             self.hiddenLayers = 1
+             self.hiddenUnits = 32
+             self.outputActivation = "tanh"
+             self.loss ="mse"
 
         self.gamma = 0.95  # discount rate
 
@@ -117,7 +122,7 @@ class AgentDQLV2:
 
         self.memory.append((state, action, reward, next_state, done, possibleActions))
 
-        if len(self.memory) > self.batchSize:
+        if len(self.memory) > self.batchSize and game % 10==0:
             self.train(self.batchSize, savedNetwork, game)
 
 
@@ -125,9 +130,23 @@ class AgentDQLV2:
     def getAction(self, stateVector, possibleActions):
 
         if numpy.random.rand() <= self.epsilon:
+
+            possibleActions[199] = 0
+            trials = 0
             aIndex = numpy.random.randint(0, self.outputSize)
+            while not possibleActions[aIndex] == 1:
+                aIndex = aIndex + 1
+
+                if aIndex >= len(possibleActions):
+                    aIndex = 0
+
+                trials = trials + 1
+                if trials == len(possibleActions) - 1:
+                    aIndex = 199
+                    break
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
+
         else:
             possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
             stateVector = numpy.expand_dims(numpy.array(stateVector), 0)

@@ -44,6 +44,7 @@ class ChefsHatEnv(gym.Env):
     reward = 0
 
     actionTag = ""
+    actionComplete = ""
     #
     # print ("Current player:" + str(self.currentPlayer))
     # print ("Player Finished:"  + str(self.hasPlayerFinished(self.currentPlayer)))
@@ -79,6 +80,7 @@ class ChefsHatEnv(gym.Env):
 
             actionTaken = DataSetManager.actionPass
             actionTag = DataSetManager.actionPass
+            actionComplete = (DataSetManager.actionPass, [0])
             # reward = -0.1  # Experiment 2
         else:
             # reward = 1  # Experiment 1
@@ -99,6 +101,7 @@ class ChefsHatEnv(gym.Env):
 
             actionTaken = DataSetManager.actionDiscard, cardsDiscarded
             actionTag = DataSetManager.actionDiscard
+            actionComplete = (DataSetManager.actionDiscard, cardsDiscarded)
 
             if len(cardsDiscarded) == 0:
                 print ("here")
@@ -131,6 +134,7 @@ class ChefsHatEnv(gym.Env):
             # reward = 1
             actionTaken = DataSetManager.actionFinish
             actionTag = DataSetManager.actionFinish
+            # actionComplete = (DataSetManager.actionFinish, [0])
             # print ("Score", self.score)
             # input("here")
 
@@ -141,7 +145,8 @@ class ChefsHatEnv(gym.Env):
 
     if validAction:
         self.currentGameRewards[self.currentPlayer].append(reward)
-        self.playerActions[self.currentPlayer].append(actionTag)
+        self.playerActionsTimeLine[self.currentPlayer].append(actionTag)
+        self.playerActionsComplete[self.currentPlayer].append(actionComplete)
 
     return self.getCurrentPlayerState(), reward, validAction
 
@@ -198,7 +203,9 @@ class ChefsHatEnv(gym.Env):
     self.currentGameRewards = []
     self.currentWrongActions = []
 
-    self.playerActions = []
+    self.playerActionsTimeLine = []
+
+    self.playerActionsComplete = []
 
     # set the score
     self.score = []
@@ -218,7 +225,8 @@ class ChefsHatEnv(gym.Env):
       self.lastActionPlayers.append("")
       self.currentGameRewards.append([])
       self.currentWrongActions.append(0)
-      self.playerActions.append([])  # players actions
+      self.playerActionsTimeLine.append([])  # players actions timeline
+      self.playerActionsComplete.append([]) # players actions complete
 
 
     self.numberOfCardsPerPlayer = int(len(self.cards) / len(self.playersHand))
@@ -572,7 +580,9 @@ class ChefsHatEnv(gym.Env):
 
     self.lastActionPlayers = []
 
-    self.playerActions = []
+    self.playerActionsTimeLine = []
+
+    self.playerActionsComplete = []
 
     # Variables to log some statistics per all games
     self.allScores = []

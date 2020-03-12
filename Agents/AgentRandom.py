@@ -36,14 +36,22 @@ class AgentRandom:
 
             if originalPossibleAction[198] == 1: #check if joker was an option
                 possibleActions[198] = 1
-            possibleActions[199] = 1 #pass action always available
 
+
+        possibleActions[199] = 0 #pass action always will be selected if nothing else is possible
+
+        trials = 0
         aIndex = numpy.random.randint(0, self.outputSize)
         while not possibleActions[aIndex] == 1:
             aIndex = aIndex + 1
 
             if aIndex >= len(possibleActions):
                 aIndex = 0
+
+            trials = trials+1
+            if trials == len(possibleActions)-1:
+                aIndex = 199
+                break
 
         a = numpy.zeros(self.outputSize)
         a[aIndex] = 1

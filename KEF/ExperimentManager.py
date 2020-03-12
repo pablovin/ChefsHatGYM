@@ -6,6 +6,7 @@ import datetime
 from KEF import LogManager
 from KEF import PlotManager
 from KEF import DataSetManager
+from KEF import MetricsManager
 
 
 class ExperimentManager:
@@ -46,6 +47,10 @@ class ExperimentManager:
     @property
     def plotManager(self):
         return self._plotManager
+
+    @property
+    def metricManager(self):
+        return self._metricManager
 
     @property
     def plotsDirectory(self):
@@ -121,10 +126,12 @@ class ExperimentManager:
         self._dataSetManager = DataSetManager.DataSetManager(self._dataSetDirectory)
         self._createFolder("Datasets")
 
-
+        """Creating the log folder"""
         self._createFolder("Log")
         self._logManager = LogManager.Logger(self.baseDirectory + "/" + self.experimentName + "/Log/" + "Log.txt",
                                              verbose)
+
+        self._metricManager = MetricsManager.MetricsManager(self.baseDirectory + "/" + self.experimentName + "/Log/")
 
         self.logManager.newLogSession("Experiment: " + self.experimentName)
         self.logManager.write("Base Directory: " + self.baseDirectory + "/" + self.experimentName)

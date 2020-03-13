@@ -67,12 +67,53 @@ Our Examples folder holds specific examples of recorded datasets.
 
 ##### Logs and Metrics
 
+If requested, the environment saves a human-friendly log of all the experiments within the Log folder. This log, saved in simple
+.txt form, can be used to perform human analysis on the game state, but also to identify anomalous behavior in long
+simulations. It saves all the game state, player hand and board, actions taken, reward and number of invalida actions
+per player turn.
 
+Together with the log, the environment saves  the following metrics per player for the entire simulation: 
+- The number of rounds per game.
+- The number of victories. 
+- The total averaged reward per game.
+- The finishing positions.
+- The number of invalid actions.
 
-##### Datasets
+Also in the Log folder, the environment saves a metrics.csv file. This file contains the following metrics per player per game:
+
+- Finishing position
+- Average reward over the entire game
+ - Number of passes for each game quarter
+ - Number of discards for each game quarter
+ 
+ The number of passes and discards are calculated for each game quarter (25% of the game duration), and help us to 
+ understand the agents' strategy while playing the game.
 
 ##### Plots
 
+The environment calculates a series of plots to better understand the simulation. The plots folder holds:
+
+![Plots per game](gitImages/gamesPlot.png)
+- A) Number of rounds per game
+- B) Victories histogram per game
+
+![Plots per player](gitImages/playerPlot.png)
+
+- C) Finishing position per player
+- D) Reward valid actions per player
+- E) Invalid actions per player
+
+![Plots per player](gitImages/playergamePlot.png)
+
+- F) Players timeline per game
+- G) The discard behavior of each player per game
+
+
+
+
+
+
+-
 
 The environment calculates specific metrics for each game, and for the entire simulation.
 

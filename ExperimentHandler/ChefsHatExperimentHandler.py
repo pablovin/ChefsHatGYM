@@ -17,6 +17,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
     numMaxCards = 11
 
+
     experimentName = "Player_" + str(len(playersAgents)) + "_Cards_" + str(numMaxCards) + "_games_" + str(numGames) + "TrainAgents_" + str(playersAgents) + "_" + experimentDescriptor
 
     experimentManager = ExperimentManager.ExperimentManager(saveExperimentsIn,
@@ -73,7 +74,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
     #start the experiment
     for game in range(numGames):
 
-        print ("Starting Game number:" + str(game))
+        # print ("Starting Game number:" + str(game))
         metricsPerGame = []
         metricsPerGame.append(game) # add the game number
 
@@ -262,7 +263,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
         #saving the metrics
         for p in range(len(playersAgents)):
-            metricsPerGame.append(env.score.index(0)) #p_position
+            metricsPerGame.append(env.score.index(p)) #p_position
             metricsPerGame.append(numpy.average(env.currentGameRewards[p]))  # p_averageReward
 
             currentPlayerActions = []
@@ -288,11 +289,10 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
 
 
-
-
-
         env.reset()  # start a new game
-
+        unique, counts = numpy.unique(env.winners, return_counts=True)
+        winners = dict(zip(unique, counts))
+        print( "Game " + str(game) + " - Victories:" +str(winners) )
 
         metrics.append(metricsPerGame)
 

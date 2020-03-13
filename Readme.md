@@ -1,15 +1,90 @@
 This repository holds the OpenGYM environment for the Chef's Hat card game.
-For more information about the card game itself, please read out paper:
 
-" It's Food Fight! Introducing the Chef's Hat Card Game for Affective-Aware HRI " - https://arxiv.org/abs/2002.11458
+##**Chef's Hat Card game**
+
+![Chef's Hat Card Game](gitImages/cardGame.jpg)
+
+Chef's Hat was designed with specific HRI requirements in mind, which allows it to be followed and modeled by artificial agents with ease. Also, the game mechanics were designed to evoke different affective interactions within the game, which can be easily perceived and displayed by a robot. Furthermore, the game elements were design to facilitate the extraction of the game state through the use of QR-codes and specific turn taking actions, which do not break the game flow.
+
+Fora a complete overview on the development of the game, refer to:
+
+- It's Food Fight! Introducing the Chef's Hat Card Game for Affective-Aware HRI (https://arxiv.org/abs/2002.11458)
+
+- To better understand the game, please refer to the game's [Rule book](gitImages/RulebookMenuv08.pdf).
+
+If you want to have access to the game materials (cards and playing field), please contact us using the contact information at the end of the page.
+
+
+##**Chef's Hat OpenAI Gym Simulation Environment**
 
 This environment is freely available for scientific purposes and implements all the rules and mechanics of the Chef's Hat game.
 
-**Pre-requisites**
+for an in-depth look at the functioning of the environment, please refer to:
+ - The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents (https://arxiv.org/abs/2003.05861)
+
+The environment is build based on the OpenAi Gym toolkit, so it implements a portable and reusable environment.
+To complement the environment and help with the experimental simulations, we encapsulate the enviromment using the
+ChefsHatExperimentHandler module.
+
+The experiment handler runs a series of games. Each game is independent, but based on Chef's Hat rules, the finishing position
+of each game affects the roles of the next game.
+
+
+
+###**Pre-requisites**
 
 Install the requirements from the Requirements.txt file.
 
-**Instructions**
+###**Agents**
+
+To run the experiment, you have to provide the experiment handler four agents. We include here the following
+agents implementations:
+ - Dummy agent Random: an agent that does not learn, and select all actions randomly based on the possible actions.
+ - Dummy agent AlwaysOneCard: an agent that does not learn, and only select all actions randomly based on discarding o
+ nly one card at a time.
+ - DeepQL Agent: an agent that learns how to play the game based on deep Q-learning.
+
+###**Data Structure**
+
+The environment creates a set of logs and metrics that can help to understand the game state and the agents'
+behavior during the experiments. For each experiment, one folder is created with the following structure:
+
+- Dataset : Holds the generated dataset with all the actions taken by the agents during the game
+- Log: Holds the log of the game, if enabled, and the metrics .csv file with all the metrics of all players for all games.
+- Model: Holds the learned models, per game, when using learning agents.
+- Plots: Holds all the plots generated during the simulations.
+
+##### Datasets
+
+The environment saves a dataset, in the format of .csv files, that stores the dated game state, the taken actions, and game
+events that happen during one game play. The dataset is used later on to create a game-play video, and to extract specific
+metrics of that gameplay.
+
+![Dataset Example](gitImages/datasetExample.csv.png)
+
+
+Our Examples folder holds specific examples of recorded datasets.
+
+##### Logs and Metrics
+
+
+
+##### Datasets
+
+##### Plots
+
+
+The environment calculates specific metrics for each game, and for the entire simulation.
+
+For each game, the environment calculates:
+- All the rewards for each taken action
+- All the 
+
+
+
+
+ - To control the simulation experiments, refer to the "runExperiment.py" code.
+ - To generate videos from the gameplays, use the "generateVideos.py" code.
 
 We let available here two files: one with an example on how to run the GYM environment using a set of Random Agents or a Deep Q-Learning Agent.
 This example creates all the logs, plots and saves the training models. It also allow the generation of datasets that hold the game steps.

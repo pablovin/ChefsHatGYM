@@ -36,10 +36,10 @@ Install the requirements from the Requirements.txt file.
 
 To run the experiment, you have to provide the experiment handler four agents. We include here the following
 agents implementations:
- - Dummy agent Random: an agent that does not learn, and select all actions randomly based on the possible actions.
+ - Dummy agent Random: an agent that does not learn, and select all actions randomly based on the possible actions. (more info: https://arxiv.org/abs/2003.05861).
  - Dummy agent AlwaysOneCard: an agent that does not learn, and only select all actions randomly based on discarding o
  nly one card at a time.
- - DeepQL Agent: an agent that learns how to play the game based on deep Q-learning.
+ - DeepQL Agent: an agent that learns how to play the game based on deep Q-learning. (more info: https://arxiv.org/abs/2003.05861).
 
 ### Simulation Data Structure
 

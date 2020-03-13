@@ -4,7 +4,7 @@ This repository holds the OpenGYM environment for the Chef's Hat card game.
 
 ![Chef's Hat Card Game](gitImages/cardGame.jpg) 
 
-Chef's Hat was designed with specific HRI requirements in mind, which allows it to be followed and modeled by artificial agents with ease. Also, the game mechanics were designed to evoke different affective interactions within the game, which can be easily perceived and displayed by a robot. Furthermore, the game elements were design to facilitate the extraction of the game state through the use of QR-codes and specific turn taking actions, which do not break the game flow.
+Chef's Hat is a cardgame  designed with specific HRI requirements in mind, which allows it to be followed and modeled by artificial agents with ease. Also, the game mechanics were designed to evoke different affective interactions within the game, which can be easily perceived and displayed by a robot. Furthermore, the game elements were design to facilitate the extraction of the game state through the use of QR-codes and specific turn taking actions, which do not break the game flow.
 
 Fora a complete overview on the development of the game, refer to:
 
@@ -18,7 +18,7 @@ If you want to have access to the game materials (cards and playing field), plea
 
 This environment is freely available for scientific purposes and implements all the rules and mechanics of the Chef's Hat game.
 
-for an in-depth look at the functioning of the environment, please refer to:
+For an in-depth look at the functioning of the environment, please refer to:
  - The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents (https://arxiv.org/abs/2003.05861)
 
 The environment is build based on the OpenAi Gym toolkit, so it implements a portable and reusable environment.
@@ -131,7 +131,8 @@ All the examples in this repository are distributed under a Non-Comercial licens
 
 ## Citations
 
-- Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020). It's Food Fight! Introducing the Chef's Hat Card Game for Affective-Aware HRI. arXiv preprint arXiv:2002.11458.
+- Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020). It's Food Fight! Introducing the Chef's Hat Card Game for Affective-Aware HRI. Accepted at the HRI2020
+  Workshop on Exploring Creative Content in Social Robotics! arXiv preprint arXiv:2002.11458.
 
 - Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020) The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents. arXiv preprint arXiv:2003.05861.
 

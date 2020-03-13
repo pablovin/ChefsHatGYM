@@ -2,7 +2,7 @@ This repository holds the OpenGYM environment for the Chef's Hat card game.
 
 ## Chef's Hat Card game
 
-![Chef's Hat Card Game](gitImages/cardGame.jpg)
+![Chef's Hat Card Game](gitImages/cardGame.jpg) 
 
 Chef's Hat was designed with specific HRI requirements in mind, which allows it to be followed and modeled by artificial agents with ease. Also, the game mechanics were designed to evoke different affective interactions within the game, which can be easily perceived and displayed by a robot. Furthermore, the game elements were design to facilitate the extraction of the game state through the use of QR-codes and specific turn taking actions, which do not break the game flow.
 

@@ -1,6 +1,6 @@
 This repository holds the OpenGYM environment for the Chef's Hat card game.
 
-##**Chef's Hat Card game**
+## Chef's Hat Card game
 
 ![Chef's Hat Card Game](gitImages/cardGame.jpg)
 
@@ -15,7 +15,7 @@ Fora a complete overview on the development of the game, refer to:
 If you want to have access to the game materials (cards and playing field), please contact us using the contact information at the end of the page.
 
 
-##**Chef's Hat OpenAI Gym Simulation Environment**
+## Chef's Hat OpenAI Gym Simulation Environment
 
 This environment is freely available for scientific purposes and implements all the rules and mechanics of the Chef's Hat game.
 
@@ -29,13 +29,11 @@ ChefsHatExperimentHandler module.
 The experiment handler runs a series of games. Each game is independent, but based on Chef's Hat rules, the finishing position
 of each game affects the roles of the next game.
 
-
-
-###**Pre-requisites**
+### Pre-requisites
 
 Install the requirements from the Requirements.txt file.
 
-###**Agents**
+### Agents
 
 To run the experiment, you have to provide the experiment handler four agents. We include here the following
 agents implementations:
@@ -44,7 +42,7 @@ agents implementations:
  nly one card at a time.
  - DeepQL Agent: an agent that learns how to play the game based on deep Q-learning.
 
-###**Data Structure**
+### Simulation Data Structure
 
 The environment creates a set of logs and metrics that can help to understand the game state and the agents'
 behavior during the experiments. For each experiment, one folder is created with the following structure:
@@ -103,40 +101,28 @@ The environment calculates a series of plots to better understand the simulation
 - F) Players timeline per game
 - G) The discard behavior of each player per game
 
+### Funcionalities
 
+Currently, the environment implements the following functionalities:
+ - runExperiment.py illustrates how to run an experiment composed of four agents and a series of games.
+ - generateVideos.py illustrates how to generate videos from collected datasets.
+ - generateTimeLine.py illustrates how to generate timeline plots from collected datasets.
+ - optmizeAgent.py illustrates how to run an agent optmization based on Hyperopt.
+ 
+ ##### Videos
+ 
+ The simulator has a specific funcionality that reads a given dataset and generates an entire video of that gameplay.
+ The video can be used to evaluate a specific behavior, or just to illustrate how the agents play the game.
+ The following link directs to a video example:
+ [![Watch the video](Examples/exampleSimulator.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
+ 
 
-
-
-
--
-
-The environment calculates specific metrics for each game, and for the entire simulation.
-
-For each game, the environment calculates:
-- All the rewards for each taken action
-- All the 
-
-
-
-
- - To control the simulation experiments, refer to the "runExperiment.py" code.
- - To generate videos from the gameplays, use the "generateVideos.py" code.
-
-We let available here two files: one with an example on how to run the GYM environment using a set of Random Agents or a Deep Q-Learning Agent.
-This example creates all the logs, plots and saves the training models. It also allow the generation of datasets that hold the game steps.
-
-The generateVideos file can read these datasets and generate rendered videos from the gameplays.
-     
-
-**Examples**
+## Examples
 
 The Examples folder contains the datasets and generated videos of two conditions: Running all four agents as random agents, and running all four agents as learning agents.
 
-[![Watch the video](Examples/exampleSimulator.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
 
-
-
-**License**
+ ## Use and distribution policy
 
 All the examples in this repository are distributed under a Non-Comercial license. If you use this environment, you have to agree with the following itens:
 
@@ -144,7 +130,13 @@ All the examples in this repository are distributed under a Non-Comercial licens
 - To use the environment for research purpose only.
 - To not provide the environment to any second parties.
 
-**Contact**
+## Citations
+
+- Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020). It's Food Fight! Introducing the Chef's Hat Card Game for Affective-Aware HRI. arXiv preprint arXiv:2002.11458.
+
+- Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020) The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents. arXiv preprint arXiv:2003.05861.
+
+## Contact
 
 Pablo Barros - pablo.alvesdebarros@iit.it
 

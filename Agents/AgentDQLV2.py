@@ -68,7 +68,7 @@ class AgentDQLV2:
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.995
 
-        self.batchSize = 32
+        self.batchSize = 256
         self.targetUpdateFrequency = 50
 
         self.memory = deque(maxlen= 1000)
@@ -100,14 +100,23 @@ class AgentDQLV2:
         for i in range(self.hiddenLayers):
             dense = Dense(self.hiddenUnits*(i+1), activation="relu")(dense)
 
-        possibleActionsLayer = Input(shape=(self.outputSize,), name="PossibleActions")
+        # possibleActionsLayer = Input(shape=(self.outputSize,), name="PossibleActions")
+        #
+        # concatLayer = Concatenate()([dense, possibleActionsLayer])
+        #
+        # outputActor = Dense(self.outputSize, activation=self.outputActivation)(
+        #     concatLayer)  # Cards at the player hand plus the pass action
+        #
+        # return  Model(inputs=[inputLayer, possibleActionsLayer], outputs=[outputActor])
 
-        concatLayer = Concatenate()([dense, possibleActionsLayer])
+
+
 
         outputActor = Dense(self.outputSize, activation=self.outputActivation)(
-            concatLayer)  # Cards at the player hand plus the pass action
+            dense)  # Cards at the player hand plus the pass action
 
-        return  Model(inputs=[inputLayer, possibleActionsLayer], outputs=[outputActor])
+        return  Model(inputs=[inputLayer], outputs=[outputActor])
+
 
         # self.actor .compile(loss='mse', optimizer=Adam(lr=self.learning_rate), metrics=['mse'])
 
@@ -122,7 +131,8 @@ class AgentDQLV2:
 
         self.memory.append((state, action, reward, next_state, done, possibleActions))
 
-        if len(self.memory) > self.batchSize and game % 10==0:
+        # if len(self.memory) > self.batchSize and game % 100==0:
+        if len(self.memory) > self.batchSize:
             self.train(self.batchSize, savedNetwork, game)
 
 
@@ -150,7 +160,8 @@ class AgentDQLV2:
         else:
             possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
             stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
-            a = self.online_network.predict([stateVector, possibleActions])[0]
+            # a = self.online_network.predict([stateVector, possibleActions])[0]
+            a = self.online_network.predict([stateVector])[0]
 
         return a
 
@@ -171,18 +182,22 @@ class AgentDQLV2:
 
     def train(self, batch_size, savedNetwork, game):
 
+        # print ("Training agent...")
+
         minibatch = random.sample(self.memory, batch_size)
         for state, action, reward, next_state, done, possibleActions in minibatch:
             target = reward
             if not done:
-                nextQValue = self.targetNetwork.predict([next_state, possibleActions])[0]
+                # nextQValue = self.targetNetwork.predict([next_state, possibleActions])[0]
+                nextQValue = self.targetNetwork.predict([next_state])[0]
                 target = (reward + self.gamma *numpy.amax(nextQValue))
 
 
-            target_f = self.online_network.predict([state, possibleActions])
+            # target_f = self.online_network.predict([state, possibleActions])
+            target_f = self.online_network.predict([state])
             target_f[0][action] = target
-            # self.online_network.train_on_batch([state,possibleActions], target_f)
-            self.online_network.fit([state,possibleActions], target_f, epochs=1, verbose=False)
+            # self.online_network.fit([state,possibleActions], target_f, epochs=1, verbose=False)
+            self.online_network.fit([state], target_f, epochs=1, verbose=False)
             self.trainingStep += 1
 
 

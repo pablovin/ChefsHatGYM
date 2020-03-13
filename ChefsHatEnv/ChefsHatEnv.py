@@ -73,9 +73,11 @@ class ChefsHatEnv(gym.Env):
             # otherwise positive
             if numpy.argmax(possibleActions) == len(possibleActions) - 1:
                 # reward = 1 #experiment 1
-                reward = 0.01 #experiment 2
+                # reward = 0.01 #experiment 2
+                reward = -0.01  # experiment 3
             else:
-                reward = 0
+                # reward = 0
+                reward = -0.01  # experiment 3
                 # validAction = False
 
             actionTaken = DataSetManager.actionPass
@@ -96,21 +98,23 @@ class ChefsHatEnv(gym.Env):
                 cardsInHand = len(self.playersHand[self.currentPlayer])
 
 
-            reward = (1 - cardsInHand*100 / len(self.playersHand[self.currentPlayer]) * 0.01) *0.7
+            # reward = (1 - cardsInHand*100 / len(self.playersHand[self.currentPlayer]) * 0.01) *0.7 #experiment 2
+            reward = -0.01  # experiment 3
 
 
             actionTaken = DataSetManager.actionDiscard, cardsDiscarded
             actionTag = DataSetManager.actionDiscard
             actionComplete = (DataSetManager.actionDiscard, cardsDiscarded)
 
-            if len(cardsDiscarded) == 0:
-                print ("here")
+            # if len(cardsDiscarded) == 0:
+            #     print ("here")
 
             self.lastToPass = self.currentPlayer   # if player did not pass nor finish, he was the last one to play
 
         # print("-- Action: Discard - ", cardsDiscarded)
     else:  # if the player cannot make the action, penalize it and repeat it until it can do it
-        reward = 0
+        # reward = 0
+        reward = -0.01  # experiment 3
         validAction = False
         actionTaken = "Invalid"
         self.currentWrongActions[self.currentPlayer] += 1
@@ -125,13 +129,15 @@ class ChefsHatEnv(gym.Env):
                 self.score.append(self.currentPlayer)
 
             index = self.score.index(self.currentPlayer)
-            # if index == 0:
-            #     reward+= 0.3
-            # else:
-            #     reward += 0
+            if index == 0:
+                reward = 1 # experiment 3
+            else:
+                # reward += 0
+                reward = -0.01  # experiment 3
             # reward += 0  # Experiment 1
-            reward +=  (0.9 - index * 0.3) * 0.3 #Experiment 2
+            # reward +=  (0.9 - index * 0.3) * 0.3 #Experiment 2
             # reward = 1
+            # reward = -0.01  # experiment 3
             actionTaken = DataSetManager.actionFinish
             actionTag = DataSetManager.actionFinish
             # actionComplete = (DataSetManager.actionFinish, [0])

@@ -93,18 +93,13 @@ Also in the Log folder, the environment saves a metrics.csv file. This file cont
 
 The environment calculates a series of plots to better understand the simulation. The plots folder holds:
 
-![Plots per game](gitImages/gamesPlot.png)
+![Plots per game](gitImages/allPlots.png)
+
 - A) Number of rounds per game
 - B) Victories histogram per game
-
-![Plots per player](gitImages/playerPlot.png)
-
 - C) Finishing position per player
 - D) Reward valid actions per player
 - E) Invalid actions per player
-
-![Plots per player](gitImages/playergamePlot.png)
-
 - F) Players timeline per game
 - G) The discard behavior of each player per game
 

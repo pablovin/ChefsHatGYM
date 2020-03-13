@@ -10,7 +10,6 @@ Fora a complete overview on the development of the game, refer to:
 
 - It's Food Fight! Introducing the Chef's Hat Card Game for Affective-Aware HRI (https://arxiv.org/abs/2002.11458)
 
-- To better understand the game, please refer to the game's [Rule book](gitImages/RulebookMenuv08.pdf).
 
 If you want to have access to the game materials (cards and playing field), please contact us using the contact information at the end of the page.
 

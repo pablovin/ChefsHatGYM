@@ -2,7 +2,7 @@ from ExperimentHandler import ChefsHatExperimentHandler
 import time
 import numpy
 
-from Agents.AgentType import  DUMMY_RANDOM, DUMMY_DISCARDONECARD, DQL_v1, DQL_v2
+from Agents.AgentList import  DUMMY_RANDOM, DUMMY_DISCARDONECARD, DQL_v1, DQL_v2
 
 from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 import hyperopt

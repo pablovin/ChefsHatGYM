@@ -1,31 +1,38 @@
 import numpy
-from Agents.AgentType  import DUMMY_RANDOM, DUMMY_DISCARDONECARD
 import copy
+from Agents import IAgent
 
-class AgentRandom:
+DUMMY_RANDOM = "DUMMY_RANDOM"
+DUMMY_DISCARDONECARD = "DUMMY_DISCARDONECARD"
+
+class AgentRandom(IAgent.IAgent):
 
     numMaxCards = 0
     outputSize = 0
     actionsTaken = []
-    name="DUMMY"
-    behavior = "RANDOM"
+    name = ""
 
-    #agentsType
+    def __init__(self, name):
 
+        self.name = name
 
-    def __init__(self, behavior, numMaxCards = 4, numActions=200):
+    def startAgent(self, params):
+
+        numMaxCards , cardsPlayer, numActions, loadModel, params  = params
 
         self.numMaxCards = numMaxCards
         self.outputSize = numActions # all the possible ways to play cards plus the pass action
 
-        self.behavior = behavior
 
-    def getAction(self, possibleActions):
+    def getAction(self, params):
 
-        if self.behavior == DUMMY_RANDOM:
+        state, possibleActions2 = params
+        possibleActions = copy.copy(possibleActions2)
+
+        if self.name == DUMMY_RANDOM:
             possibleActions = possibleActions
 
-        if self.behavior == DUMMY_DISCARDONECARD:
+        if self.name == DUMMY_DISCARDONECARD:
 
             originalPossibleAction = copy.copy(possibleActions)
             positionsWithOneCard = [0, 3, 9, 18, 30, 45, 63, 84, 108, 135, 165]
@@ -42,19 +49,36 @@ class AgentRandom:
 
         trials = 0
         aIndex = numpy.random.randint(0, self.outputSize)
-        while not possibleActions[aIndex] == 1:
-            aIndex = aIndex + 1
 
-            if aIndex >= len(possibleActions):
-                aIndex = 0
+        if possibleActions[aIndex] == 0:
+            itemindex = numpy.where(numpy.array(possibleActions) == 1)
+            numpy.random.shuffle(itemindex)
 
-            trials = trials+1
-            if trials == len(possibleActions)-1:
-                aIndex = 199
-                break
+            aIndex = itemindex
+
+
+        # while not possibleActions[aIndex] == 1:
+        #     aIndex = aIndex + 1
+        #
+        #     if aIndex >= len(possibleActions):
+        #         aIndex = 0
+        #
+        #     trials = trials+1
+        #     if trials == len(possibleActions)-1:
+        #         aIndex = 199
+        #         break
 
         a = numpy.zeros(self.outputSize)
         a[aIndex] = 1
 
         return a
+
+    def loadModel(self, params):
+        pass
+
+    def buildModel(self):
+        pass
+
+    def train(self, params):
+        pass
 

@@ -7,9 +7,11 @@ class ChefsHatEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
 
-  def __init__(self):
+  rewardFunction = ""
 
-     print("")
+  def __init__(self):
+    pass
+
 
   def nextPlayer(self):
 
@@ -45,23 +47,10 @@ class ChefsHatEnv(gym.Env):
 
     actionTag = ""
     actionComplete = ""
-    #
-    # print ("Current player:" + str(self.currentPlayer))
-    # print ("Player Finished:"  + str(self.hasPlayerFinished(self.currentPlayer)))
 
-    # if not self.hasPlayerFinished(self.currentPlayer):
 
     possibleActions = self.getPossibleActions(self.currentPlayer)
-    # possibleActions = 167
-    # Verify if this is a valid play
 
-    # if numpy.sum(action) == 0 or numpy.sum(
-    #         possibleActions) == 0:  # pass action: if all is 0, or there are no possible action
-    #   # reward = 1.0 #Experiment 1
-    #   reward = 0.1 #Experiment 2
-    #   validAction = True
-    #   actionTaken = "Pass"
-    # else:  # if not a pass action, verify if the player can make the action
 
     if self.isActionAllowed(self.currentPlayer, action):  # if the player can make the action, do it.
         # reward = 1.0  # Experiment 1
@@ -69,15 +58,12 @@ class ChefsHatEnv(gym.Env):
 
         if numpy.argmax(action) == len(possibleActions) - 1:
 
-            #if there is any other action available, and the pass action was chosen, the reward must be negative
-            # otherwise positive
+            #if there is any other action available, and the pass action was chosen
             if numpy.argmax(possibleActions) == len(possibleActions) - 1:
-                # reward = 1 #experiment 1
-                # reward = 0.01 #experiment 2
-                reward = -0.01  # experiment 3
+                reward = self.rewardFunction.getRewardPass()
             else:
                 # reward = 0
-                reward = -0.01  # experiment 3
+                reward = self.rewardFunction.getRewardOnlyPass()
                 # validAction = False
 
             actionTaken = DataSetManager.actionPass
@@ -90,16 +76,17 @@ class ChefsHatEnv(gym.Env):
 
             cardsDiscarded = self.discardCards(self.currentPlayer, action)
 
-            unique, counts = numpy.unique(self.playersHand[self.currentPlayer], return_counts=True)
-            currentPlayerHand = dict(zip(unique, counts))
-            if 0 in self.playersHand[self.currentPlayer]:
-                cardsInHand = len(self.playersHand[self.currentPlayer]) - currentPlayerHand[0]
-            else:
-                cardsInHand = len(self.playersHand[self.currentPlayer])
+            # unique, counts = numpy.unique(self.playersHand[self.currentPlayer], return_counts=True)
+            # currentPlayerHand = dict(zip(unique, counts))
+            # if 0 in self.playersHand[self.currentPlayer]:
+            #     cardsInHand = len(self.playersHand[self.currentPlayer]) - currentPlayerHand[0]
+            # else:
+            #     cardsInHand = len(self.playersHand[self.currentPlayer])
 
 
             # reward = (1 - cardsInHand*100 / len(self.playersHand[self.currentPlayer]) * 0.01) *0.7 #experiment 2
-            reward = -0.01  # experiment 3
+            # reward = -0.01  # experiment 3
+            reward = self.rewardFunction.getRewardDiscard()
 
 
             actionTaken = DataSetManager.actionDiscard, cardsDiscarded
@@ -114,7 +101,7 @@ class ChefsHatEnv(gym.Env):
         # print("-- Action: Discard - ", cardsDiscarded)
     else:  # if the player cannot make the action, penalize it and repeat it until it can do it
         # reward = 0
-        reward = -0.01  # experiment 3
+        reward = self.rewardFunction.getRewardInvalidAction()  # experiment 3
         validAction = False
         actionTaken = "Invalid"
         self.currentWrongActions[self.currentPlayer] += 1
@@ -129,11 +116,12 @@ class ChefsHatEnv(gym.Env):
                 self.score.append(self.currentPlayer)
 
             index = self.score.index(self.currentPlayer)
-            if index == 0:
-                reward = 1 # experiment 3
-            else:
-                # reward += 0
-                reward = -0.01  # experiment 3
+            reward = self.rewardFunction.getRewardFinish(index)
+            # if index == 0:
+            #     reward = 1 # experiment 3
+            # else:
+            #     # reward += 0
+            #     reward = -0.01  # experiment 3
             # reward += 0  # Experiment 1
             # reward +=  (0.9 - index * 0.3) * 0.3 #Experiment 2
             # reward = 1
@@ -540,10 +528,12 @@ class ChefsHatEnv(gym.Env):
       return originalCardDiscarded
 
 
-  def startNewGame(self, maxCardNumber=4, numberPlayers=2, numGames=0):
+  def startNewGame(self, maxCardNumber=4, numberPlayers=2, numGames=0, rewardFunction=""):
 
 
     #start all variables
+
+    self.rewardFunction = rewardFunction
 
     # variables for the entire experiment
     self.score = []  # the last score

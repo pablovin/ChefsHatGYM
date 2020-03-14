@@ -1,24 +1,22 @@
 import gym
 import numpy
 
-import ChefsHatEnv.ChefsHatEnv
-from Agents.AgentType import  DUMMY_RANDOM, DUMMY_DISCARDONECARD, DQL_v1, DQL_v2
-from Agents.AgentDQL import AgentDQL
-from Agents.AgentDQLV2 import AgentDQLV2
-from Agents.AgentRandom import AgentRandom
-from Agents.AgentAlwaysOneCard import AgentAlwaysOneCard
+from ChefsHatEnv.ChefsHatEnv import ChefsHatEnv
 
 from KEF import ExperimentManager
 
 from KEF import DataSetManager
 
 
-def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM, DUMMY_RANDOM], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, plotFrequency=1, saveExperimentsIn="", loadModel="", agentParams=[]):
+def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, plotFrequency=1, saveExperimentsIn="", loadModel="", agentParams=[], rewardFunction =""):
 
     numMaxCards = 11
 
+    playersNames = []
+    for i in range(len(playersAgents)):
+     playersNames.append(playersAgents[i].name)
 
-    experimentName = "Player_" + str(len(playersAgents)) + "_Cards_" + str(numMaxCards) + "_games_" + str(numGames) + "TrainAgents_" + str(playersAgents) + "_" + experimentDescriptor
+    experimentName = "Player_" + str(len(playersAgents)) + "_Cards_" + str(numMaxCards) + "_games_" + str(numGames) + "TrainAgents_" + str(playersNames) + "_Reward_" + str(rewardFunction.rewardName)+"_"+experimentDescriptor
 
     experimentManager = ExperimentManager.ExperimentManager(saveExperimentsIn,
                                                             experimentName,
@@ -36,7 +34,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
     players = [] # hold the players of the game
 
     env = gym.make('chefshat-v0') #starting the game Environment
-    env.startNewGame(maxCardNumber=numMaxCards, numberPlayers=len(playersAgents)) # initialize the environment
+    env.startNewGame(maxCardNumber=numMaxCards, numberPlayers=len(playersAgents), rewardFunction=rewardFunction) # initialize the environment
     env.reset() # to calculate the initial variables
 
     if isLogging:
@@ -47,28 +45,8 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
         params = agentParams[0]
 
     for i in range(len(playersAgents)):
-
-        if playersAgents[i] == DUMMY_RANDOM:
-            players.append(AgentRandom(DUMMY_RANDOM,numMaxCards, env.numberOfActions))
-        elif  playersAgents[i] == DUMMY_DISCARDONECARD:
-            players.append(AgentRandom(DUMMY_DISCARDONECARD,numMaxCards, env.numberOfActions))
-        elif playersAgents[i] == DQL_v1:
-            players.append(
-                AgentDQL(numMaxCards, env.numberOfCardsPerPlayer, env.numberOfActions, loadModel))
-        elif playersAgents[i] == DQL_v2:
-            players.append(
-                AgentDQLV2(numMaxCards, env.numberOfCardsPerPlayer,  env.numberOfActions, loadModel, params))
-
-        # if playersAgents[i] == AgentDQL.name:
-        #     players.append(AgentDQL(numMaxCards, env.numberOfCardsPerPlayer, trainingEpoches, env.numberOfActions, loadModel))
-        # elif playersAgents[i] == AgentRandom.name:
-        #     players.append(AgentRandom("RANDOM",numMaxCards, env.numberOfActions))
-        # elif playersAgents[i] == AgentReinforcement.name:
-        #     players.append(AgentReinforcement(numMaxCards, env.numberOfCardsPerPlayer, trainingEpoches))
-        # elif playersAgents[i] == AgentQL.name:
-        #     players.append(AgentQL(numMaxCards, env.numberOfCardsPerPlayer, trainingEpoches, env.numberOfActions))
-        # elif playersAgents[i] == AgentAlwaysOneCard.name:
-        #     players.append(AgentAlwaysOneCard(numMaxCards, numActions = env.numberOfActions))
+         playersAgents[i].startAgent((numMaxCards, env.numberOfCardsPerPlayer,  env.numberOfActions, loadModel, params))
+         players.append(playersAgents[i])
 
     metrics = []
     #start the experiment
@@ -147,72 +125,21 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
                     while not validActionPlayer:
                         state = env.getCurrentPlayerState()
 
+                        #get an action
+                        validAction = env.getPossibleActions(thisPlayer)
+                        action = players[thisPlayer].getAction((state, validAction))
 
-                      #  print ("Action:" + str(action))
-                      #   if not thisPlayer in trainingAgents:
-
-
-                        #do an action
-                        if "DUMMY" in playersAgents[thisPlayer]:
-                            validAction = env.getPossibleActions(thisPlayer)
-                            action = players[thisPlayer].getAction(validAction)
-                        elif playersAgents[thisPlayer] == DQL_v1:
-                            action = players[thisPlayer].getAction(state)
-                        elif playersAgents[thisPlayer] == DQL_v2:
-                            validAction = env.getPossibleActions(thisPlayer)
-                            action = players[thisPlayer].getAction(state, validAction)
-                        #
                         newState, reward, validActionPlayer = env.step(action)
 
-                        #learn something
-                        if playersAgents[thisPlayer] == DQL_v1:
+
+                        if validActionPlayer:
                             done = False
                             if env.lastActionPlayers[thisPlayer] == DataSetManager.actionFinish:
                                 done = True
-                            if validActionPlayer:
-                               players[thisPlayer].memorize(state, action, reward, newState, done, experimentManager.modelDirectory,game)
-                        elif playersAgents[thisPlayer] == DQL_v2:
-                            done = False
-                            if env.lastActionPlayers[thisPlayer] == DataSetManager.actionFinish:
-                                done = True
-                            if validActionPlayer:
-                               players[thisPlayer].memorize(state, action, reward, newState, done, experimentManager.modelDirectory,game, validAction)
 
+                            players[thisPlayer].train((state, action, reward, newState, done,
+                                                       experimentManager.modelDirectory, game, validAction))
 
-                        # if playersAgents[thisPlayer] == AgentAlwaysOneCard.name:
-                        #     if env.playerStartedGame == thisPlayer and env.rounds == 0:
-                        #         firstAction = True
-                        #     else:
-                        #         firstAction = False
-                        #
-                        #     # action = players[thisPlayer].getAction(state)
-                        #     action = players[thisPlayer].getAction(env.playersHand[thisPlayer], firstAction, env.board)
-                        # else:
-                        #
-                        #     action = players[thisPlayer].getAction(state)
-                        #     action = players[thisPlayer].getRandomAction(action)
-
-
-                        # action = players[thisPlayer].getRandomAction(action)
-
-
-                        # print("action: "+str(numpy.argmax(action)) + " - Valid: " + str(validActionPlayer))
-
-                        # if not playersAgents[thisPlayer] == AgentRandom.name:
-                        #     if playersAgents[thisPlayer] == AgentReinforcement.name:
-                        #         aIndex = players[thisPlayer].getActionIndex(action)
-                        #         players[thisPlayer].memorize(state, aIndex, action, reward)
-                        #     elif  playersAgents[thisPlayer] == AgentDQL.name:
-                        #         # logger.write("Training the Agent Player " + str(thisPlayer))
-                        #         done = False
-                        #         if env.lastActionPlayers[thisPlayer] == "Finish":
-                        #             done = True
-                        #         if validActionPlayer:
-                        #            players[thisPlayer].memorize(state, action, reward, newState, done, experimentManager.modelDirectory,game)
-                        #     #
-                        #     elif playersAgents[thisPlayer] == AgentQL.name:
-                        #         if validActionPlayer:
-                        #           players[thisPlayer].trainSimpleModel(action, reward, state, newState, experimentManager.modelDirectory,game)
 
                         if not validActionPlayer :
                             wrongActions = wrongActions+1
@@ -238,6 +165,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
             #input("here")
             env.nextRound() # All players played, now one more round
+            # print ("Next round")
             pizzaReady = env.isEndRound() # check if the pizza is ready
             if pizzaReady:
                 if isLogging:
@@ -256,7 +184,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
             logger.newLogSession("Plotting...")
             logger.write("Plots saved in:" + str(experimentManager.plotManager.plotsDirectory))
 
-        if isPlotting and game%plotFrequency==0:
+        if isPlotting and (game+1)%plotFrequency==0:
             experimentManager.plotManager.plotTimeLine(env.playerActionsTimeLine, len(playersAgents), game)
 
             experimentManager.plotManager.plotNumberOfActions( len(playersAgents), env.playerActionsComplete, game)
@@ -296,11 +224,7 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
 
         metrics.append(metricsPerGame)
 
-
-
-
-
-        if isPlotting and game%plotFrequency==0:
+        if isPlotting and (game+1)%plotFrequency==0:
             experimentManager.plotManager.plotRounds(env.allRounds, game)
             experimentManager.plotManager.plotRewardsAll(len(playersAgents), env.allRewards, game)
             experimentManager.plotManager.plotWinners(len(playersAgents), env.winners, game)
@@ -311,7 +235,6 @@ def runExperiment(numGames=10, playersAgents=[DQL_v2, DUMMY_RANDOM, DUMMY_RANDOM
         # experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
         #
         #
-
 
     experimentManager.metricManager.saveMetricPlayer(metrics)
     returns = []

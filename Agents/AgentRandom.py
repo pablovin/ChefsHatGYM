@@ -44,19 +44,24 @@ class AgentRandom(IAgent.IAgent):
             if originalPossibleAction[198] == 1: #check if joker was an option
                 possibleActions[198] = 1
 
+        itemindex = numpy.where(numpy.array(possibleActions) == 1)
+        numpy.random.shuffle(itemindex)
+        aIndex = itemindex[0]
+        a = numpy.zeros(self.outputSize)
+        a[aIndex] = 1
 
-        possibleActions[199] = 0 #pass action always will be selected if nothing else is possible
-
-        trials = 0
-        aIndex = numpy.random.randint(0, self.outputSize)
-
-        if possibleActions[aIndex] == 0:
-            itemindex = numpy.where(numpy.array(possibleActions) == 1)
-            numpy.random.shuffle(itemindex)
-
-            aIndex = itemindex
+        return a
 
 
+
+        # aIndex = numpy.random.randint(0, self.outputSize)
+        # if possibleActions[aIndex] == 0:
+        # possibleActions[199] = 0 #pass action always will be selected if nothing else is possible
+        #
+        # trials = 0
+        # aIndex = numpy.random.randint(0, self.outputSize)
+        #
+        #
         # while not possibleActions[aIndex] == 1:
         #     aIndex = aIndex + 1
         #
@@ -68,10 +73,6 @@ class AgentRandom(IAgent.IAgent):
         #         aIndex = 199
         #         break
 
-        a = numpy.zeros(self.outputSize)
-        a[aIndex] = 1
-
-        return a
 
     def loadModel(self, params):
         pass

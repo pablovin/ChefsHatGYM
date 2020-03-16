@@ -8,7 +8,7 @@ from KEF import ExperimentManager
 from KEF import DataSetManager
 
 
-def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, plotFrequency=1, saveExperimentsIn="", loadModel="", agentParams=[], rewardFunction =""):
+def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, plotFrequency=1, saveExperimentsIn="", loadModel=[], agentParams=[], rewardFunction =""):
 
     numMaxCards = 11
 
@@ -45,7 +45,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         params = agentParams[0]
 
     for i in range(len(playersAgents)):
-         playersAgents[i].startAgent((numMaxCards, env.numberOfCardsPerPlayer,  env.numberOfActions, loadModel, params))
+         playersAgents[i].startAgent((numMaxCards, env.numberOfCardsPerPlayer,  env.numberOfActions, loadModel[i], params))
          players.append(playersAgents[i])
 
     metrics = []
@@ -139,6 +139,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
                             players[thisPlayer].train((state, action, reward, newState, done,
                                                        experimentManager.modelDirectory, game, validAction))
+                            # print ("")
 
 
                         if not validActionPlayer :
@@ -287,7 +288,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
         playerReturn.append(env.allRewards[i][a]) #rewards
         playerReturn.append(env.allWrongActions[i])  # wrong actions
-
+        playerReturn.append(players[i].lastModel)
         returns.append(playerReturn)
 
 

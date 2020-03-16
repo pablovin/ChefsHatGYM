@@ -11,6 +11,7 @@ class AgentRandom(IAgent.IAgent):
     outputSize = 0
     actionsTaken = []
     name = ""
+    lastModel = ""
 
     def __init__(self, name):
 

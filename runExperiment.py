@@ -1,32 +1,69 @@
 from ExperimentHandler import ChefsHatExperimentHandler
 
-from Agents import  AgentRandom, AgentDQL
+from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
 
 from Rewards import RewardOnlyWinning
+import tensorflow as tf
+from keras import backend as K
 
-#Parameters for the game
-playersAgents = [AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM), AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM), AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM), AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)]
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-reward = RewardOnlyWinning.RewardOnlyWinning()
 
-numGames = 1000# amount of training games
-experimentDescriptor = "TrainingAgent_1000x_LinearOutput"
+def runModel():
+    #Parameters for the game
+    agent1 = AgentDDPG.AgentDDPG([True]) #training agent
+    agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
+    agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
+    agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
 
-#loadModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/DQL_V2/Player_4_Cards_11_games_1000TrainAgents_['DQL_v2', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Training_1000x_NoPossibleActions_OnlyWinningReward_2020-03-13_12:50:08.475705/Model/actor_iteration_977.hd5" #indicate where the saved model is
+     # if training specific agents
+    playersAgents = [agent1, agent2, agent3, agent4]
 
-loadModel = "" #indicate where the saved model is
+    reward = RewardOnlyWinning.RewardOnlyWinning()
 
-# #Parameters for controling the experiment
-isLogging = False #Logg the experiment
+    numGames = 500# amount of training games
+    experimentDescriptor = "testDDPG"
 
-isPlotting = True #plot the experiment
+    actorModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_A2C_2020-03-16_15:54:06.142278/Model/actor_iteration_499.hd5"
+    criticModel ="/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_A2C_2020-03-16_15:54:06.142278/Model/critic_iteration_499.hd5"
+    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['DQL', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_DQL_2020-03-16_15:56:43.621816/Model/actor_iteration_499.hd5"
 
-plotFrequency = 100 #plot the plots every X games
+    loadModelAgent1 = ""
 
-createDataset = False # weather to save the dataset
+    loadModelAgent2 = "" #[actorModel,criticModel]
 
-saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments" # Directory where the experiment will be saved
+    loadModelAgent3 = ""
+    loadModelAgent4 = ""
 
-metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,experimentDescriptor=experimentDescriptor,isLogging=isLogging,isPlotting=isPlotting,plotFrequency = plotFrequency, createDataset=createDataset,saveExperimentsIn=saveExperimentsIn, loadModel=loadModel, rewardFunction=reward)
+    #
+    # loadModel = [loadModelAgent1,loadModelAgent2, loadModelAgent3, loadModelAgent4] #indicate where the saved model is
+    loadModel = [loadModelAgent1,loadModelAgent2, loadModelAgent3, loadModelAgent4] #indicate where the saved model is
+    #
+    # loadModel = "" #indicate where the saved model is
 
-print ("Metrics:" + str(metrics))
+    # #Parameters for controling the experiment
+    isLogging = False #Logg the experiment
+
+    isPlotting = True #plot the experiment
+
+    plotFrequency = 100 #plot the plots every X games
+
+    createDataset = False # weather to save the dataset
+
+    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments" # Directory where the experiment will be saved
+
+    metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,experimentDescriptor=experimentDescriptor,isLogging=isLogging,isPlotting=isPlotting,plotFrequency = plotFrequency, createDataset=createDataset,saveExperimentsIn=saveExperimentsIn, loadModel=loadModel, rewardFunction=reward)
+
+    print ("Metrics:" + str(metrics))
+
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+
+sess = tf.Session(config=config)
+# from keras import backend as K
+K.set_session(sess)
+
+with tf.device('/gpu:0'):
+    runModel()

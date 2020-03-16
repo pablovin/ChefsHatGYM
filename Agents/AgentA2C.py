@@ -50,16 +50,18 @@ class AgentA2C(IAgent.IAgent):
 
         if len(agentParams) > 1:
 
-            self.hiddenLayers, self.hiddenUnits, self.outputActivation, self.loss = agentParams
+             self.hiddenLayers, self.hiddenUnits, self.gamma = agentParams
 
         else:
 
             self.hiddenLayers = 1
             self.hiddenUnits = 32
-            self.outputActivation = "linear"
-            self.loss = "mse"
+            self.gamma = 0.99  # discount rate
 
-        self.gamma = 0.99  # discount rate
+        self.outputActivation = "linear"
+        self.loss = "mse"
+
+
         self.memory = []
         self.learning_rate = 0.0001
 
@@ -81,15 +83,24 @@ class AgentA2C(IAgent.IAgent):
         inputSize = self.numCardsPerPlayer + self.numMaxCards
         #shared part of the model
         inp = Input((inputSize, ), name="State")
-        dense1= Dense(64, activation='relu', name="dense_1")(inp)
-        dense2 = Dense(128, activation='relu', name="dense_2")(dense1)
+        # dense1= Dense(64, activation='relu', name="dense_1")(inp)
+        # dense2 = Dense(128, activation='relu', name="dense_2")(dense1)
+
+        for i in range(self.hiddenLayers + 1):
+            if i == 0:
+                previous = inp
+            else:
+                previous = dense
+
+            dense = Dense(self.hiddenUnits * (i + 1), name="Dense" + str(i), activation="relu")(previous)
+
 
         #Actor network
-        densea1 = Dense(128, activation='relu', name="actor_dense_3")(dense2)
+        densea1 = Dense(128, activation='relu', name="actor_dense_3")(dense)
         outActor = Dense(self.outputSize, activation='softmax', name="Actor_output")(densea1)
 
         #Critic network
-        densec1 = Dense(128, activation='relu', name="critic_dense_3")(dense2)
+        densec1 = Dense(128, activation='relu', name="critic_dense_3")(dense)
         outCritic = Dense(1, activation='linear', name="critic_Output")(densec1)
 
 

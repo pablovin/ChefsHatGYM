@@ -51,22 +51,18 @@ class AgentDDPG(IAgent.IAgent):
 
         if len(agentParams) > 1:
 
-            self.hiddenLayers, self.hiddenUnits, self.outputActivation, self.loss = agentParams
+            self.hiddenLayers, self.hiddenUnits, self.gamma, self.tau, self.batchSize  = agentParams
 
         else:
 
             self.hiddenLayers = 1
             self.hiddenUnits = 32
-            self.outputActivation = "linear"
-            self.loss = "mse"
+            self.batchSize = 256
+            self.gamma = 0.99  # discount rate
+            self.tau = 0.01 # Weight transfer rate
 
-        self.tau = 0.01 # Weight transfer rate
 
-        self.gamma = 0.99  # discount rate
-        self.memory = []
         self.learning_rate = 0.0001
-        self.batchSize = 256
-
         #Game memory
         self.memory = deque(maxlen=5000)
 
@@ -79,17 +75,33 @@ class AgentDDPG(IAgent.IAgent):
 
         inputSize = self.numCardsPerPlayer + self.numMaxCards
         inp = Input((inputSize,), name="Actor_State")
-        dense1 = Dense(256, activation='relu', name="actor_dense_1")(inp)
-        dense2 = Dense(128, activation='relu', name="actor_dense_2")(dense1)
-        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense2)
+
+        for i in range(self.hiddenLayers + 1):
+            if i == 0:
+                previous = inp
+            else:
+                previous = dense
+
+            dense = Dense(self.hiddenUnits * (i + 1), name="Actor_Dense" + str(i), activation="relu")(previous)
+
+
+        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
 
         self.actor = Model(inp,outputActor)
 
         inputSize = self.numCardsPerPlayer + self.numMaxCards
         inp = Input((inputSize,), name="Actor_State")
-        dense1 = Dense(256, activation='relu', name="actor_dense_1")(inp)
-        dense2 = Dense(128, activation='relu', name="actor_dense_2")(dense1)
-        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense2)
+
+        for i in range(self.hiddenLayers + 1):
+            if i == 0:
+                previous = inp
+            else:
+                previous = dense
+
+            dense = Dense(self.hiddenUnits * (i + 1), name="Actor_Dense" + str(i), activation="relu")(previous)
+
+
+        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
 
         self.actorTarget = Model(inp,outputActor)
 
@@ -124,9 +136,21 @@ class AgentDDPG(IAgent.IAgent):
         inp = Input((inputSize,), name="Critic_State")
         actionInput = Input((self.outputSize,), name="Critic_Action")
 
-        dense1 = Dense(256, activation='relu', name="critic_dense_1")(inp)
+        # dense1 = Dense(256, activation='relu', name="critic_dense_1")(inp)
 
-        concatenated = Concatenate()([dense1, actionInput])
+        for i in range(self.hiddenLayers + 1):
+            if i == 0:
+                previous = inp
+            else:
+                previous = dense
+
+            dense = Dense(self.hiddenUnits * (i + 1), name="Critic_Dense" + str(i), activation="relu")(previous)
+
+
+        # outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
+
+
+        concatenated = Concatenate()([dense, actionInput])
 
         dense2 = Dense(128, activation='relu', name="critic__dense_2")(concatenated)
         outputCritic = Dense(1, activation='linear', name="critic_output")(dense2)
@@ -138,9 +162,15 @@ class AgentDDPG(IAgent.IAgent):
         inp = Input((inputSize,), name="Critic_State")
         actionInput = Input((self.outputSize,), name="Critic_Action")
 
-        dense1 = Dense(256, activation='relu', name="critic_dense_1")(inp)
+        for i in range(self.hiddenLayers + 1):
+            if i == 0:
+                previous = inp
+            else:
+                previous = dense
 
-        concatenated = Concatenate()([dense1, actionInput])
+            dense = Dense(self.hiddenUnits * (i + 1), name="Critic_Dense" + str(i), activation="relu")(previous)
+
+        concatenated = Concatenate()([dense, actionInput])
 
         dense2 = Dense(128, activation='relu', name="critic__dense_2")(concatenated)
         outputCritic = Dense(1, activation='linear', name="critic_output")(dense2)
@@ -234,7 +264,9 @@ class AgentDDPG(IAgent.IAgent):
     def updateModel(self, savedNetwork, game):
 
         # Sample experience from buffer
-        minibatch = numpy.swapaxes(numpy.array(copy.copy(self.memory)),0,1)
+        minibatch = random.sample(self.memory, self.batchSize)
+
+        minibatch = numpy.swapaxes(numpy.array(copy.copy(minibatch)),0,1)
         states,actions,rewards,nextStates, done = minibatch
 
         states = states.tolist()

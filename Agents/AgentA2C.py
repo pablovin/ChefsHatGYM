@@ -35,6 +35,13 @@ class AgentA2C(IAgent.IAgent):
 
     lastModel = ""
 
+    currentCorrectAction = 0
+
+    totalCorrectAction = []
+
+    totalAction = []
+    totalActionPerGame = 0
+
     def __init__(self, params=[]):
         self.training = params[0]
         self.name = "A2C"
@@ -54,9 +61,22 @@ class AgentA2C(IAgent.IAgent):
 
         else:
 
+            # space = hp.choice('a',
+            #                   [
+            #                       (hp.choice("layers", [1, 2, 3, 4]), hp.choice("hiddenUnits", [8, 32, 64, 128, 256]),
+            #                        hp.uniform("gamma", 0.01, 0.99),
+            #                        )
+            #                   ])
+            #Hyperopt Best: Best:{'a': 0, 'gamma': 0.9450742180420258, 'hiddenUnits': 4, 'layers': 0}
             self.hiddenLayers = 1
-            self.hiddenUnits = 32
-            self.gamma = 0.99  # discount rate
+            self.hiddenUnits = 256
+            self.gamma = 0.945  # discount rate
+
+            #My Estimation
+            # self.hiddenLayers = 2
+            # self.hiddenUnits = 64
+            # self.gamma = 0.99  # discount rate
+
 
         self.outputActivation = "linear"
         self.loss = "mse"
@@ -75,6 +95,7 @@ class AgentA2C(IAgent.IAgent):
         if loadModel == "":
             self.buildModel()
         else:
+            # print ("loading from:" + str(loadModel))
             self.loadModel(loadModel)
 
 
@@ -108,6 +129,10 @@ class AgentA2C(IAgent.IAgent):
         self.critic = Model(inp, outCritic)
         self.actor = Model(inp, outActor)
 
+        #get optmizers
+        self.getOptmizers()
+
+    def getOptmizers(self):
         rmsOptmizer = RMSprop(lr=self.learning_rate, epsilon=0.1, rho=0.99)
 
         #optmizers
@@ -152,18 +177,27 @@ class AgentA2C(IAgent.IAgent):
         possibleActions = copy.copy(possibleActionsOriginal)
 
         prediction = self.actor.predict([stateVector])[0]
-
-        a = numpy.zeros(self.outputSize)
-        aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
-        a[aIndex] = 1
+        aIndex = numpy.argmax(prediction)
+        a = prediction
 
         if possibleActions[aIndex] == 0:
-            itemindex = numpy.where(numpy.array(possibleActions) == 1)
-            numpy.random.shuffle(itemindex)
-            aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
+            aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
             a[aIndex] = 1
 
+            if possibleActions[aIndex] == 0:
+                itemindex = numpy.where(numpy.array(possibleActions) == 1)
+                numpy.random.shuffle(itemindex)
+                aIndex = itemindex[0]
+                a = numpy.zeros(self.outputSize)
+                a[aIndex] = 1
+            else:
+                # print ("Correct action!")
+                self.currentCorrectAction = self.currentCorrectAction + 1
+        else:
+            self.currentCorrectAction = self.currentCorrectAction + 1
+
+        self.totalActionPerGame = self.totalActionPerGame+1
         return a
 
 
@@ -178,13 +212,17 @@ class AgentA2C(IAgent.IAgent):
 
 
     def loadModel(self, model):
+        # print ("loading:" + str(model))
+        # input("here")
         actorModel, criticModel = model
         self.actor  = load_model(actorModel)
         self.critic = load_model(criticModel)
+        self.getOptmizers()
 
 
     def updateModel(self, savedNetwork, game):
 
+        # print ("Updating the model!")
         self.memory = numpy.array(self.memory)
         # print ("self.memory: " + str(self.memory.shape))
 
@@ -205,10 +243,11 @@ class AgentA2C(IAgent.IAgent):
         self.actorOptmizer([state, action, advantages])
         self.criticOptmizer([state, discounted_rewards])
 
+        # print ("train")
+
         if (game + 1) % 100 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + ".hd5")
             self.critic.save(savedNetwork + "/critic_iteration_" + str(game) + ".hd5")
-
             self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + ".hd5", savedNetwork + "/critic_iteration_" + str(game) + ".hd5")
 
 
@@ -220,9 +259,18 @@ class AgentA2C(IAgent.IAgent):
 
     def train(self, params=[]):
 
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions = params
+
+        if done:
+            self.totalCorrectAction.append(self.currentCorrectAction)
+            self.totalAction.append(self.totalActionPerGame)
+
+            self.currentCorrectAction = 0
+            self.totalActionPerGame = 0
+
         if self.training:
+            # print ("train")
             #memorize
-            state, action, reward, next_state, done, savedNetwork, game, possibleActions = params
 
             action = numpy.argmax(action)
 
@@ -230,9 +278,9 @@ class AgentA2C(IAgent.IAgent):
             self.actions.append(action)
             self.rewards.append(reward)
 
-        # if done: # if a game is over for this player, train it.
-        #     self.updateModel(savedNetwork, game)
-        #     self.resetMemory()
+            if done: # if a game is over for this player, train it.
+                self.updateModel(savedNetwork, game)
+                self.resetMemory()
 
 
 

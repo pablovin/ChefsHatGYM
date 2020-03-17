@@ -37,7 +37,7 @@ def runModel():
     numGames = 500# amount of training games
     experimentDescriptor = "Optmizing_A2C_Agent"
 
-    saveTrialsDataset = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/" +  experimentDescriptor
+    saveTrialsDataset = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/" +  experimentDescriptor + ".p"
 
     actorModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_A2C_2020-03-16_15:54:06.142278/Model/actor_iteration_499.hd5"
     criticModel ="/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_A2C_2020-03-16_15:54:06.142278/Model/critic_iteration_499.hd5"

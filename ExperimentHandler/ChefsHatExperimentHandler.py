@@ -131,25 +131,28 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
                         newState, reward, validActionPlayer = env.step(action)
 
-
+                        done = False
                         if validActionPlayer:
-                            done = False
                             if env.lastActionPlayers[thisPlayer] == DataSetManager.actionFinish:
                                 done = True
 
-                            players[thisPlayer].train((state, action, reward, newState, done,
-                                                       experimentManager.modelDirectory, game, validAction))
                             # print ("")
-
-
-                        if not validActionPlayer :
+                        else:
                             wrongActions = wrongActions+1
 
+                        players[thisPlayer].train((state, action, reward, newState, done,
+                                                   experimentManager.modelDirectory, game, validAction))
+
+
+                    correctActions = players[thisPlayer].currentCorrectAction
+                    totalActions = players[thisPlayer].totalActionPerGame
                     # players[thisPlayer].resetActionsTaken() #resets the list of actions taken
                     if isLogging:
                         logger.write(" ---  Reward: " + str(reward))
+                        logger.write(" ---  Correct actions: " + str(correctActions) + "/" + str(totalActions))
                         logger.write(" ---  Wrong actions: " + str(wrongActions))
 
+                correctActions = players[thisPlayer].currentCorrectAction
                 env.nextPlayer()
                 if isLogging:
                     logger.write(" ---  Action: " + str(env.lastActionPlayers[thisPlayer]))
@@ -161,7 +164,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                     for i in range(len(playersAgents)):
                         playersStatus.append(env.lastActionPlayers[i])
 
-                    experimentManager.dataSetManager.doActionAction(thisPlayer, env.rounds, env.lastActionPlayers[thisPlayer], env.board, wrongActions, reward , env.playersHand, roles,
+                    experimentManager.dataSetManager.doActionAction(thisPlayer, env.rounds, env.lastActionPlayers[thisPlayer], env.board, wrongActions, correctActions, reward , env.playersHand, roles,
                                                                          env.score, playersStatus)
 
             #input("here")
@@ -216,8 +219,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 metricsPerGame.append(passesCount) #p__q_passes
                 metricsPerGame.append(discardCount) #p__q_discard
 
-
-
         env.reset()  # start a new game
         unique, counts = numpy.unique(env.winners, return_counts=True)
         winners = dict(zip(unique, counts))
@@ -226,9 +227,16 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         metrics.append(metricsPerGame)
 
         if isPlotting and (game+1)%plotFrequency==0:
+            correctActions = []
+            totalActions = []
+            for p in players:
+                correctActions.append(p.totalCorrectAction)
+                totalActions.append(p.totalAction)
+
             experimentManager.plotManager.plotRounds(env.allRounds, game)
             experimentManager.plotManager.plotRewardsAll(len(playersAgents), env.allRewards, game)
             experimentManager.plotManager.plotWinners(len(playersAgents), env.winners, game)
+            experimentManager.plotManager.plotCorrectActions(len(playersAgents), correctActions,totalActions,  game)
             experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
             experimentManager.plotManager.plotFinishPositionAllPlayers(len(playersAgents), env.allScores, env.winners, game)
 
@@ -285,6 +293,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         if isLogging:
             logger.write(" -- Average Reward Valid Actions: " + str(averageRewards))
             logger.write(" -- Wrong Actions: " + str(env.allWrongActions[i]))
+            logger.write(" -- Correct Actions: " + str(players[i].totalCorrectAction))
 
         playerReturn.append(env.allRewards[i][a]) #rewards
         playerReturn.append(env.allWrongActions[i])  # wrong actions

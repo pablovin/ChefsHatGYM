@@ -12,7 +12,7 @@ class IReward():
         pass
 
     @abstractmethod
-    def getRewardPass(self, params): #the pass action was chosen even if it was not allowed
+    def getRewardPass(self, params): #the pass action was chosen even if it was not the only one allowed
         pass
 
     @abstractmethod

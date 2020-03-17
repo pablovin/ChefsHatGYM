@@ -78,10 +78,10 @@ class DataSetManager:
 
             employee_writer.writerow(
                 ["Time", "Action Type", "Player Hand",  "Board", "Cards Action",
-                 "Wrong Actions", "Reward", "Score", "Roles", "Round Number", "Player", "Players Status"])
+                 "Wrong Actions", "Correct Actions", "Reward", "Score", "Roles", "Round Number", "Player", "Players Status"])
 
 
-    def logAction(self, actionType,  playersHand="",  board="", cardsAction="", wrongActions="", reward="", score="", roles="", roundNumber ="", player="", playersStatus =""):
+    def logAction(self, actionType,  playersHand="",  board="", cardsAction="", wrongActions="", reward="", score="", roles="", roundNumber ="", player="", playersStatus ="", correctActions=""):
 
         time = str(datetime.datetime.now()).replace(" ", "_")
         # message = time + ";" + actionType + ";" + playersHandBefore + ";" + playersHandAfter + ";" + boardBefore + ";" + boardAfter + ";" + cardsAction + ";" + wrongActions + ";" + reward + ";" + score
@@ -89,7 +89,7 @@ class DataSetManager:
         with open(self._currentDataSetFile, mode='a') as employee_file:
             employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-            employee_writer.writerow([time, actionType , playersHand , board ,cardsAction , wrongActions , reward , score, roles, roundNumber, player, playersStatus])
+            employee_writer.writerow([time, actionType , playersHand , board ,cardsAction , wrongActions , correctActions, reward , score, roles, roundNumber, player, playersStatus])
 
         #
         # try:
@@ -153,7 +153,7 @@ class DataSetManager:
 
 
 
-    def doActionAction(self, player, roundNumber, action, board, wrongActions, reward, playersHand, roles, score, playersStatus):
+    def doActionAction(self, player, roundNumber, action, board, wrongActions, correctActions, reward, playersHand, roles, score, playersStatus):
 
         actionCards = ""
 
@@ -189,7 +189,7 @@ class DataSetManager:
         playersStatus = str(playStatusList)
 
 
-        self.logAction(actionType=actionType, cardsAction =actionCards, playersHand=playersHandAfter, score=score, roundNumber=roundNumber, board=board, player=player, wrongActions=wrongActions, reward=reward, roles=roles, playersStatus=playersStatus)
+        self.logAction(actionType=actionType, cardsAction =actionCards, playersHand=playersHandAfter, score=score, roundNumber=roundNumber, board=board, player=player, wrongActions=wrongActions, correctActions=correctActions, reward=reward, roles=roles, playersStatus=playersStatus)
 
 
 

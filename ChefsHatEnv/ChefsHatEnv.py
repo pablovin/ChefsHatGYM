@@ -137,11 +137,17 @@ class ChefsHatEnv(gym.Env):
 
     self.currentActionRewards.append(reward)
 
+
+    self.currentGameRewards[self.currentPlayer].append(reward)
+
+
     if validAction:
         self.currentGameRewards[self.currentPlayer].append(reward)
         self.playerActionsTimeLine[self.currentPlayer].append(actionTag)
         self.playerActionsComplete[self.currentPlayer].append(actionComplete)
 
+
+    # print ("Given reward:" + str(reward))
     return self.getCurrentPlayerState(), reward, validAction
 
       # reward, validAction, actionTaken, possibleActions

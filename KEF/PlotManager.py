@@ -299,6 +299,48 @@ class PlotManager():
             fig.clf()
 
 
+    def plotCorrectActions(self, numPLayers, wrongActions, totalActions, iteraction):
+
+        # print("wrong actions plot:" + str(wrongActions[0]))
+        # print("wrong actions plot:" + str(wrongActions[0][0]))
+        # input("here")
+        # Plot wrong actions all players
+        for i in range(numPLayers):
+            wrongActionsPlot = wrongActions[i]
+
+            #
+            # print ("Wrong action plot shape:" + wrongActionsPlot.shape)
+            # input("here")
+
+            dataY = range(len(wrongActionsPlot))
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+
+            totalWrongActions = numpy.array(wrongActionsPlot).sum()
+            totalActionsGame = numpy.array(totalActions[i]).sum()
+            # ax.text(0,0, "Wrong actions:"+str(totalWrongActions), style='italic',
+            #         bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+
+            # print ("DataY:", dataY)
+            # print ("WrongActionPlots:", wrongActionsPlot)
+
+            ax.set_xlabel('Games')
+            ax.set_ylabel('Average Correct Actions')
+
+            # plt.yticks(numpy.arange(-1.0, 121, 20))
+            # plt.xticks(numpy.arange(0, len(dataY) + 1, 500))
+
+            # plt.ylim(-1., 600)
+            # plt.xlim(0, range(len(dataY)))
+
+            plt.plot(dataY, wrongActionsPlot)
+            plt.grid()
+
+            plt.savefig(self._plotsDirectory + "/Player_CorrectActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalWrongActions)+"("+str(totalActionsGame)+").png")
+
+            plt.clf()
+
     def plotWrongActions(self, numPLayers, wrongActions, iteraction):
 
         # Plot wrong actions all players
@@ -332,5 +374,3 @@ class PlotManager():
             plt.savefig(self._plotsDirectory + "/Player_WrongActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
 
             plt.clf()
-
-

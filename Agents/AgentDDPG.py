@@ -36,6 +36,13 @@ class AgentDDPG(IAgent.IAgent):
 
     lastModel = ""
 
+    currentCorrectAction = 0
+
+    totalCorrectAction = []
+
+    totalAction = []
+    totalActionPerGame = 0
+
     def __init__(self, params=[]):
         self.training = params[0]
         self.name = "DDPG"
@@ -112,6 +119,7 @@ class AgentDDPG(IAgent.IAgent):
         # self.actorOptmizer = K.function([self.actor.input, action_gdts], [tf.train.AdamOptimizer(self.learning_rate).apply_gradients(grads)])
         #
 
+    def getOptmizers(self):
         k_constants = K.variable(0)
         action_gdts = K.placeholder(shape=(None, self.outputSize))
         params_grad = tf.gradients(self.actor.output, self.actor.trainable_weights, -action_gdts)
@@ -120,6 +128,11 @@ class AgentDDPG(IAgent.IAgent):
 
         self.actorOptmizer = K.function(inputs=[self.actor.input, action_gdts], outputs=k_constants,
                    updates=[tf.train.AdamOptimizer(self.learning_rate).apply_gradients(grads)][1:])
+
+
+        # Function to compute Q-value gradients (Actor Optimization)
+        self.criticGrandients = K.function([self.critic.input[0], self.critic.input[1]],outputs=
+                                       K.gradients(self.critic.output, [self.critic.input[1]]))
         #
         #
         # self.actor.compile(Adam(self.learning_rate), 'mse')
@@ -180,15 +193,12 @@ class AgentDDPG(IAgent.IAgent):
         self.critic.compile(Adam(self.learning_rate), 'mse')
         self.criticTarget.compile(Adam(self.learning_rate), 'mse')
 
-        # Function to compute Q-value gradients (Actor Optimization)
-        self.criticGrandients = K.function([self.critic.input[0], self.critic.input[1]],outputs=
-                                       K.gradients(self.critic.output, [self.critic.input[1]]))
-
 
     def buildModel(self):
 
        self.buildActorNetwork()
        self.buildCriticNetwork()
+       self.getOptmizers()
 
 
     def transferWeights(self):
@@ -218,19 +228,67 @@ class AgentDDPG(IAgent.IAgent):
 
         prediction = self.actor.predict([stateVector])[0]
 
-        # print ("Predictions:", prediction)
-        # input("here")
-        a = numpy.zeros(self.outputSize)
-        aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
-        a[aIndex] = 1
+        aIndex = numpy.argmax(prediction)
+        a = prediction
+
 
         if possibleActions[aIndex] == 0:
-            itemindex = numpy.where(numpy.array(possibleActions) == 1)
-            numpy.random.shuffle(itemindex)
-            aIndex = itemindex[0]
+
             a = numpy.zeros(self.outputSize)
+            aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
             a[aIndex] = 1
 
+            if possibleActions[aIndex] == 0:
+                    itemindex = numpy.where(numpy.array(possibleActions) == 1)
+                    numpy.random.shuffle(itemindex)
+                    aIndex = itemindex[0]
+                    a = numpy.zeros(self.outputSize)
+                    a[aIndex] = 1
+            else:
+                # print ("Correct action!")
+                self.currentCorrectAction = self.currentCorrectAction + 1
+
+        else:
+            # print ("Correct action!")
+            self.currentCorrectAction = self.currentCorrectAction+1
+
+        self.totalActionPerGame = self.totalActionPerGame+1
+
+
+
+        # testIndex = numpy.where(numpy.array(possibleActions) == 1)
+        #
+        # print ("testIndex:" + str(testIndex))
+        #
+        # print ("AIndex:" + str(aIndex))
+
+
+        # if possibleActions[aIndex] == 0:
+        #     # print("Incorrect action!")
+        #     # print ("Predictions:", prediction)
+        #     # input("here")
+        #
+        #     number = random.random()
+        #     if number < 0.5:
+        #         a = numpy.zeros(self.outputSize)
+        #         aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
+        #         a[aIndex] = 1
+        #
+        #         number = random.random()
+        #
+        #         if possibleActions[aIndex] == 0:
+        #              if number < 0.5:
+        #                 itemindex = numpy.where(numpy.array(possibleActions) == 1)
+        #                 numpy.random.shuffle(itemindex)
+        #                 aIndex = itemindex[0]
+        #                 a = numpy.zeros(self.outputSize)
+        #                 a[aIndex] = 1
+        #
+        # else:
+        #     # print ("Correct action!")
+        #     self.currentCorrectAction = self.currentCorrectAction+1
+        #
+        # self.totalActionPerGame = self.totalActionPerGame+1
         return a
 
 
@@ -247,7 +305,14 @@ class AgentDDPG(IAgent.IAgent):
     def loadModel(self, model):
         actorModel, criticModel = model
         self.actor  = load_model(actorModel)
+        self.actorTarget = load_model(actorModel)
+
         self.critic = load_model(criticModel)
+        self.criticTarget = load_model(criticModel)
+
+        self.getOptmizers()
+
+
 
     def bellman(self, rewards, q_values, dones):
         """ Use the Bellman Equation to compute the critic target
@@ -313,9 +378,17 @@ class AgentDDPG(IAgent.IAgent):
 
     def train(self, params=[]):
 
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions = params
+        if done:
+            self.totalCorrectAction.append(self.currentCorrectAction)
+            self.totalAction.append(self.totalActionPerGame)
+
+            self.currentCorrectAction = 0
+            self.totalActionPerGame = 0
+
         if self.training:
             #memorize
-            state, action, reward, next_state, done, savedNetwork, game, possibleActions = params
+
             # action = numpy.argmax(action)
 
             # state = [numpy.expand_dims(numpy.array(state), 0)]

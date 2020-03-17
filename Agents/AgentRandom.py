@@ -13,9 +13,18 @@ class AgentRandom(IAgent.IAgent):
     name = ""
     lastModel = ""
 
+    currentCorrectAction = 0
+
+    totalCorrectAction = []
+
+    totalAction = []
+    totalActionPerGame = 0
+
     def __init__(self, name):
 
         self.name = name
+
+        self.totalCorrectAction.append(0)
 
     def startAgent(self, params):
 

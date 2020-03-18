@@ -34,10 +34,10 @@ def runModel():
 
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
-    numGames = 500# amount of training games
+    numGames = 100# amount of training games
     experimentDescriptor = "Optmizing_A2C_Agent"
 
-    saveTrialsDataset = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/" +  experimentDescriptor + ".p"
+    saveTrialsDataset = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/Hyperopt/AC2/" +  experimentDescriptor + ".p"
 
     actorModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_A2C_2020-03-16_15:54:06.142278/Model/actor_iteration_499.hd5"
     criticModel ="/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingAgent_A2C_2020-03-16_15:54:06.142278/Model/critic_iteration_499.hd5"
@@ -57,7 +57,7 @@ def runModel():
     # loadModel = "" #indicate where the saved model is
 
     # #Parameters for controling the experiment
-    numMaxEvals = 100 # number of evaluations for the optmization
+    numMaxEvals = 50 # number of evaluations for the optmization
 
     isLogging = False #Logg the experiment
 
@@ -67,7 +67,7 @@ def runModel():
 
     createDataset = False # weather to save the dataset
 
-    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments" # Directory where the experiment will be saved
+    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/Hyperopt/AC2/" # Directory where the experiment will be saved
 
     # self.hiddenLayers, self.hiddenUnits, QSize, self.batchSize, self.targetUpdateFrequency
 
@@ -94,7 +94,7 @@ def runModel():
         loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3,
                      loadModelAgent4]
 
-        numGames = 100
+        numGames = 300
 
         #training trial
         metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,
@@ -114,11 +114,13 @@ def runModel():
         playersAgents = [agent1, agent2, agent3, agent4]
 
 
+
         loadModelAgent1 = p1_model
         loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3,
                      loadModelAgent4]
         numGames = 100  # amount of training games
 
+        print ("Testing:" + str(loadModel))
         metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,
                                                           experimentDescriptor=experimentDescriptor,
                                                           isLogging=isLogging, isPlotting=isPlotting,
@@ -135,7 +137,6 @@ def runModel():
         p1_positions = p1[1]
         p1_rewards = p1[2]
         p1_wrongActions = p1[3]
-        p1_model = p1[4]
 
         p2 = metrics[3]
         p3 = metrics[4]
@@ -152,7 +153,7 @@ def runModel():
             'status': STATUS_OK,
             # -- store other results like this
             'eval_time': time.time(),
-            'other_stuff': {'reward': averageReward, "rounds": averageRounds, 'wrongMoves': p1_wrongActions},
+            'other_stuff': {'reward': averageReward, "rounds": averageRounds, 'wrongMoves': p1_wrongActions, "BestModel":loadModelAgent1},
         }
 
     trials = Trials()

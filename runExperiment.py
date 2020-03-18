@@ -2,7 +2,7 @@ from ExperimentHandler import ChefsHatExperimentHandler
 
 from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
 
-from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid
+from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid, RewardOnlyWinning_ShortRounds, RewardIROSPaper,RewardValidAction
 import tensorflow as tf
 from keras import backend as K
 
@@ -12,7 +12,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDDPG.AgentDDPG([True]) #training agent
+    agent1 = AgentDQL.AgentDQL([True]) #training agent
+    # agent1 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -20,24 +21,24 @@ def runModel():
      # if training specific agents
     playersAgents = [agent1, agent2, agent3, agent4]
 
-    reward = RewardOnlyWinning.RewardOnlyWinning()
+    reward = RewardValidAction.RewardValidAction()
 
-    numGames = 100# amount of training games
-    experimentDescriptor = "Training_Penalty_Agent"
+    numGames = 1000# amount of training games
+    experimentDescriptor = "DQLTraining_DoAction"
 
-    actorModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingHyperoptAgent_2020-03-17_09:43:50.235338/Model/actor_iteration_499.hd5"
-    criticModelA2c ="/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C/Player_4_Cards_11_games_500TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingHyperoptAgent_2020-03-17_09:43:50.235338/Model/critic_iteration_499.hd5"
+    actorModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_A2CTraining_2020-03-17_20:01:40.860961/Model/actor_iteration_999_Player_0.hd5"
+    criticModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_A2CTraining_2020-03-17_20:01:40.860961/Model/critic_iteration_999_Player_0.hd5"
 
-    actorModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingMyAgent_2020-03-17_10:48:23.512129/Model/actor_iteration_499.hd5"
-    criticModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingMyAgent_2020-03-17_10:48:23.512129/Model/critic_iteration_499.hd5"
+    actorModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_DDPGTraining_2020-03-18_11:58:30.344906/Model/actor_iteration_999_Player_0.hd5"
+    criticModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_DDPGTraining_2020-03-18_11:58:30.344906/Model/critic_iteration_999_Player_0.hd5"
 
-    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DQL', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingHyperoptAgent_2020-03-17_10:07:02.985994/Model/actor_iteration_499.hd5"
+    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_100TrainAgents_['DQL', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_ValidAction_DDPGTraining_2020-03-18_12:54:12.424980/Model/actor_iteration_99_Player_0.hd5"
 
-    loadModelAgent1 = "" #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
+    loadModelAgent1 = ""#[actorModelDDPG,criticModelDDPG] ##""#[actorModelA2C,criticModelA2C] #[actorModelA2C,criticModelA2C] #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
 
-    loadModelAgent2 = "" #[actorModel,criticModel]
+    loadModelAgent2 = ""#DQLModel #"" #DQLModel
 
-    loadModelAgent3 = ""
+    loadModelAgent3 = "" #[actorModelDDPG,criticModelDDPG]
     loadModelAgent4 = ""
 
     #
@@ -51,11 +52,11 @@ def runModel():
 
     isPlotting = True #plot the experiment
 
-    plotFrequency = 10 #plot the plots every X games
+    plotFrequency = 100 #plot the plots every X games
 
     createDataset = False # weather to save the dataset
 
-    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments" # Directory where the experiment will be saved
+    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/" # Directory where the experiment will be saved
 
     metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,experimentDescriptor=experimentDescriptor,isLogging=isLogging,isPlotting=isPlotting,plotFrequency = plotFrequency, createDataset=createDataset,saveExperimentsIn=saveExperimentsIn, loadModel=loadModel, rewardFunction=reward)
 

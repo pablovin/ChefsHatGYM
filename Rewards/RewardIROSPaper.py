@@ -1,25 +1,32 @@
 from Rewards import iReward
 
-class RewardOnlyWinning_PunishmentInvalid(iReward.IReward):
+class RewardIROSPaper(iReward.IReward):
 
 
-    rewardName = "OnlyWinning_PunishmentInvalid"
+    rewardName = "RewardIROSPaper"
 
     def getRewardOnlyPass(self, params=[]):
-        return -0.01
+        return 0.01
 
     def getRewardPass(self, params=[]):
-        return -0.01
+        return -0.5
 
     def getRewardInvalidAction(self, params=[]):
         return -0.5
 
     def getRewardDiscard(self, params=[]):
-        return -0.01
+        cardsInHand, playerHand = params
+        return(1 - cardsInHand*100 / playerHand * 0.01) *0.7
 
     def getRewardFinish(self, params=[]):
         position, rounds = params
+
+        if rounds > 50:
+            rewardRounds = 0
+        else:
+            rewardRounds = 0.3
+
         if position == 0:
-            return 1  # experiment 3
+            return rewardRounds + 0.7  # experiment 3
         else:
            return -0.01

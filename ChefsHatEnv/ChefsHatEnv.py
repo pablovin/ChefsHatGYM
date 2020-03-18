@@ -76,17 +76,17 @@ class ChefsHatEnv(gym.Env):
 
             cardsDiscarded = self.discardCards(self.currentPlayer, action)
 
-            # unique, counts = numpy.unique(self.playersHand[self.currentPlayer], return_counts=True)
-            # currentPlayerHand = dict(zip(unique, counts))
-            # if 0 in self.playersHand[self.currentPlayer]:
-            #     cardsInHand = len(self.playersHand[self.currentPlayer]) - currentPlayerHand[0]
-            # else:
-            #     cardsInHand = len(self.playersHand[self.currentPlayer])
+            unique, counts = numpy.unique(self.playersHand[self.currentPlayer], return_counts=True)
+            currentPlayerHand = dict(zip(unique, counts))
+            if 0 in self.playersHand[self.currentPlayer]:
+                cardsInHand = len(self.playersHand[self.currentPlayer]) - currentPlayerHand[0]
+            else:
+                cardsInHand = len(self.playersHand[self.currentPlayer])
 
 
             # reward = (1 - cardsInHand*100 / len(self.playersHand[self.currentPlayer]) * 0.01) *0.7 #experiment 2
             # reward = -0.01  # experiment 3
-            reward = self.rewardFunction.getRewardDiscard()
+            reward = self.rewardFunction.getRewardDiscard((cardsInHand, len(self.playersHand[self.currentPlayer])))
 
 
             actionTaken = DataSetManager.actionDiscard, cardsDiscarded
@@ -116,7 +116,7 @@ class ChefsHatEnv(gym.Env):
                 self.score.append(self.currentPlayer)
 
             index = self.score.index(self.currentPlayer)
-            reward = self.rewardFunction.getRewardFinish(index)
+            reward = self.rewardFunction.getRewardFinish((index,self.rounds))
             # if index == 0:
             #     reward = 1 # experiment 3
             # else:
@@ -409,14 +409,29 @@ class ChefsHatEnv(gym.Env):
                      # for one joker
                      if currentPlayerHand[cardNumber + 1] >= cardQuantity and (currentBoard[
                       highestCardOnBoard] + jokerQuantityBoard) <= cardQuantity + 1: # verify if the amount of cards in the hand + a joker is more than the card quantity and if the cards in the board + possible jokers is more than the card quantity
-                         possibleActions.append(1) # I can discard one joker
+                         if firstAction:  # if this is the first move
+                             if cardNumber + 1 == self.maxCardNumber:  # if this is the highest card
+                                 possibleActions.append(1) # I can discard one joker
+                             else:
+                                 possibleActions.append(0)  # I cannot discard one joker
+
+                         else:
+                             possibleActions.append(1) # I can discard one joker
                      else:
                          possibleActions.append(0) # I cannot discard one joker
+
 
                      if jokerQuantity == 2:
                         #for two joker
                         if currentPlayerHand[cardNumber + 1] >= cardQuantity -1 and (currentBoard[
                       highestCardOnBoard] + jokerQuantityBoard) <= cardQuantity + 1: # if the amount of cards in board and in the hand are the same or more than cardNumber quantity
+
+                            if firstAction:  # if this is the first move
+                                if cardNumber + 1 == self.maxCardNumber:  # if this is the highest card
+                                    possibleActions.append(1)  # I can discard two jokers
+                                else:
+                                    possibleActions.append(0)  # I can discard two jokers
+                            else:
                               possibleActions.append(1) # I can discard two jokers
                         else:
                             possibleActions.append(0) # I cannot discard two jokers
@@ -444,10 +459,13 @@ class ChefsHatEnv(gym.Env):
       #Joker actions
       # verify how many jokers the player has at hand
       if self.maxCardNumber+1 in self.playersHand[player]: # there is a joker in the hand
-          if highestCardOnBoard == self.maxCardNumber+2:
-              possibleActions.append(1) # I can discard the joker
+          if firstAction:
+              possibleActions.append(0)
           else:
-              possibleActions.append(0)  # I cannot discard the joker
+              if highestCardOnBoard == self.maxCardNumber+2:
+                  possibleActions.append(1) # I can discard the joker
+              else:
+                  possibleActions.append(0)  # I cannot discard the joker
       else:
           possibleActions.append(0) #I can not discard one joker
 

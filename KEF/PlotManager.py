@@ -306,18 +306,24 @@ class PlotManager():
         # input("here")
         # Plot wrong actions all players
         for i in range(numPLayers):
-            wrongActionsPlot = wrongActions[i]
+
+
+            correctActionsPlot = wrongActions[i]
+            totalCorrectActionsPlot = totalActions[i]
+
+            # correlation = numpy.corrcoef(correctActionsPlot, totalCorrectActionsPlot)[0, 1]
 
             #
             # print ("Wrong action plot shape:" + wrongActionsPlot.shape)
             # input("here")
 
-            dataY = range(len(wrongActionsPlot))
+            dataY = range(len(correctActionsPlot))
+            dataY2 = range(len(totalCorrectActionsPlot))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
 
-            totalWrongActions = numpy.array(wrongActionsPlot).sum()
+            totalCorrectActions = numpy.array(correctActionsPlot).sum()
             totalActionsGame = numpy.array(totalActions[i]).sum()
             # ax.text(0,0, "Wrong actions:"+str(totalWrongActions), style='italic',
             #         bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
@@ -328,16 +334,19 @@ class PlotManager():
             ax.set_xlabel('Games')
             ax.set_ylabel('Average Correct Actions')
 
+
             # plt.yticks(numpy.arange(-1.0, 121, 20))
             # plt.xticks(numpy.arange(0, len(dataY) + 1, 500))
 
             # plt.ylim(-1., 600)
             # plt.xlim(0, range(len(dataY)))
 
-            plt.plot(dataY, wrongActionsPlot)
+            ax.plot(dataY, correctActionsPlot, label="Correct Actions ")
+            ax.plot(dataY2, totalCorrectActionsPlot, label="Total Actions ")
+            ax.legend()
             plt.grid()
 
-            plt.savefig(self._plotsDirectory + "/Player_CorrectActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalWrongActions)+"("+str(totalActionsGame)+").png")
+            plt.savefig(self._plotsDirectory + "/Player_CorrectActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalCorrectActions)+"("+str(totalActionsGame)+").png")
 
             plt.clf()
 

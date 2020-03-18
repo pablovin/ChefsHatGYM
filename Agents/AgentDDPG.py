@@ -46,6 +46,14 @@ class AgentDDPG(IAgent.IAgent):
     def __init__(self, params=[]):
         self.training = params[0]
         self.name = "DDPG"
+
+        self.totalAction = []
+        self.totalActionPerGame = 0
+
+        self.currentCorrectAction = 0
+
+        self.totalCorrectAction = []
+
         pass
 
 
@@ -62,6 +70,15 @@ class AgentDDPG(IAgent.IAgent):
 
         else:
 
+            #(4, 32, 0.9771889086404025, 0.021720838134133988, 512)
+            # Hyperopt
+            # self.hiddenLayers = 4
+            # self.hiddenUnits = 32
+            # self.batchSize = 512
+            # self.gamma = 0.977  # discount rate
+            # self.tau = 0.021 # Weight transfer rate
+
+            #My estimations
             self.hiddenLayers = 1
             self.hiddenUnits = 32
             self.batchSize = 256
@@ -69,9 +86,19 @@ class AgentDDPG(IAgent.IAgent):
             self.tau = 0.01 # Weight transfer rate
 
 
+
         self.learning_rate = 0.0001
         #Game memory
         self.memory = deque(maxlen=5000)
+
+        self.epsilon_min = 0.1
+        self.epsilon_decay = 0.995
+
+        if self.training:
+            self.epsilon = 1.0  # exploration rate while training
+        else:
+            self.epsilon = 0.1 #no exploration while testing
+
 
         if loadModel == "":
             self.buildModel()
@@ -92,7 +119,7 @@ class AgentDDPG(IAgent.IAgent):
             dense = Dense(self.hiddenUnits * (i + 1), name="Actor_Dense" + str(i), activation="relu")(previous)
 
 
-        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
+        outputActor = Dense(self.outputSize, activation='linear', name="actor_output")(dense)
 
         self.actor = Model(inp,outputActor)
 
@@ -108,7 +135,7 @@ class AgentDDPG(IAgent.IAgent):
             dense = Dense(self.hiddenUnits * (i + 1), name="Actor_Dense" + str(i), activation="relu")(previous)
 
 
-        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
+        outputActor = Dense(self.outputSize, activation='linear', name="actor_output")(dense)
 
         self.actorTarget = Model(inp,outputActor)
 
@@ -222,37 +249,65 @@ class AgentDDPG(IAgent.IAgent):
         stateVector, possibleActionsOriginal = params
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
-        # print ("Shape vector: " + str(stateVector.shape))
-
-        possibleActions = copy.copy(possibleActionsOriginal)
-
-        prediction = self.actor.predict([stateVector])[0]
-
-        aIndex = numpy.argmax(prediction)
-        a = prediction
-
-
-        if possibleActions[aIndex] == 0:
-
+        if numpy.random.rand() <= self.epsilon:
+            itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
+            aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
-            aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
             a[aIndex] = 1
-
-            if possibleActions[aIndex] == 0:
-                    itemindex = numpy.where(numpy.array(possibleActions) == 1)
-                    numpy.random.shuffle(itemindex)
-                    aIndex = itemindex[0]
-                    a = numpy.zeros(self.outputSize)
-                    a[aIndex] = 1
-            else:
-                # print ("Correct action!")
-                self.currentCorrectAction = self.currentCorrectAction + 1
-
+            #
+            #
+            # aIndex = numpy.random.randint(0, self.outputSize)
+            # a = numpy.zeros(self.outputSize)
+            # a[aIndex] = 1
         else:
-            # print ("Correct action!")
-            self.currentCorrectAction = self.currentCorrectAction+1
+            a = self.actor.predict([stateVector])[0]
+            aIndex = numpy.argmax(a)
 
-        self.totalActionPerGame = self.totalActionPerGame+1
+            if possibleActionsOriginal[aIndex] == 1:
+              self.currentCorrectAction = self.currentCorrectAction + 1
+
+        self.totalActionPerGame = self.totalActionPerGame + 1
+        return a
+
+        # # print ("Shape vector: " + str(stateVector.shape))
+        #
+        # possibleActions = copy.copy(possibleActionsOriginal)
+        #
+        # # if numpy.sum(possibleActions) >1:
+        # #     possibleActions[199] = 0
+        #     # input("Other actions are allowed!")
+        #
+        # prediction = self.actor.predict([stateVector])[0]
+        #
+        # aIndex = numpy.argmax(prediction)
+        # a = prediction
+        #
+        #
+        #
+        #
+        # if possibleActions[aIndex] == 0:
+        #
+        #     a = numpy.zeros(self.outputSize)
+        #     aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
+        #     a[aIndex] = 1
+        #
+        #     if possibleActions[aIndex] == 0:
+        #
+        #             itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
+        #             random.shuffle(itemindex)
+        #
+        #             aIndex = itemindex[0]
+        #             a = numpy.zeros(self.outputSize)
+        #             a[aIndex] = 1
+        #     else:
+        #         # print ("Correct action!")
+        #         self.currentCorrectAction = self.currentCorrectAction + 1
+        #
+        # else:
+        #     # print ("Correct action!")
+        #     self.currentCorrectAction = self.currentCorrectAction+1
+        #
+        # self.totalActionPerGame = self.totalActionPerGame+1
 
 
 
@@ -289,7 +344,7 @@ class AgentDDPG(IAgent.IAgent):
         #     self.currentCorrectAction = self.currentCorrectAction+1
         #
         # self.totalActionPerGame = self.totalActionPerGame+1
-        return a
+        # return a
 
 
     def discount(self, r):
@@ -326,7 +381,7 @@ class AgentDDPG(IAgent.IAgent):
         return critic_target
 
 
-    def updateModel(self, savedNetwork, game):
+    def updateModel(self, savedNetwork, game, thisPlayer):
 
         # Sample experience from buffer
         minibatch = random.sample(self.memory, self.batchSize)
@@ -369,16 +424,23 @@ class AgentDDPG(IAgent.IAgent):
         self.transferWeights()
 
         if (game + 1) % 100 == 0:
-            self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + ".hd5")
-            self.critic.save(savedNetwork + "/critic_iteration_" + str(game) + ".hd5")
+            if (game + 1) % 100 == 0:
+                self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_" + str(thisPlayer) + ".hd5")
+                self.critic.save(savedNetwork + "/critic_iteration_" + str(game) + "_Player_" + str(thisPlayer) + ".hd5")
+                self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + "_Player_" + str(thisPlayer) + ".hd5",
+                                  savedNetwork + "/critic_iteration_" + str(game) + "_Player_" + str(
+                                      thisPlayer) + ".hd5")
 
-            self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + ".hd5",
-                              savedNetwork + "/critic_iteration_" + str(game) + ".hd5")
+        #Update the decay
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
+        print (" -- Epsilon:" + str(self.epsilon))
 
 
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, thisPlayer = params
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
             self.totalAction.append(self.totalActionPerGame)
@@ -388,18 +450,10 @@ class AgentDDPG(IAgent.IAgent):
 
         if self.training:
             #memorize
-
-            # action = numpy.argmax(action)
-
-            # state = [numpy.expand_dims(numpy.array(state), 0)]
-            # # #
-            # next_state = numpy.expand_dims(numpy.array(next_state), 0)
-            #
-            # action = numpy.expand_dims(numpy.array(action), 0)
-
             self.memory.append((state,action,reward,next_state, done))
-            if len(self.memory) > self.batchSize and done:# if a game is over for this player, train it.
-             self.updateModel(savedNetwork, game)
+
+            if len(self.memory) > self.batchSize and done: # if a game is over for this player, train it.
+                self.updateModel(savedNetwork, game, thisPlayer)
 
 
 

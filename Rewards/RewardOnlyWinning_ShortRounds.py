@@ -1,9 +1,9 @@
 from Rewards import iReward
 
-class RewardOnlyWinning(iReward.IReward):
+class RewardOnlyWinning_ShortRounds(iReward.IReward):
 
 
-    rewardName = "OnlyWinning"
+    rewardName = "RewardOnlyWinning_ShortRounds"
 
     def getRewardOnlyPass(self, params=[]):
         return -0.01
@@ -11,10 +11,8 @@ class RewardOnlyWinning(iReward.IReward):
     def getRewardPass(self, params=[]):
         return -0.01
 
-
     def getRewardInvalidAction(self, params=[]):
-        return -1.0
-
+        return -0.5
 
     def getRewardDiscard(self, params=[]):
         return -0.01
@@ -22,7 +20,12 @@ class RewardOnlyWinning(iReward.IReward):
     def getRewardFinish(self, params=[]):
         position, rounds = params
 
+        if rounds > 50:
+            rewardRounds = 0
+        else:
+            rewardRounds = 0.3
+
         if position == 0:
-            return 1  # experiment 3
+            return rewardRounds + 0.7  # experiment 3
         else:
            return -0.01

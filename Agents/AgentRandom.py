@@ -1,6 +1,7 @@
 import numpy
 import copy
 from Agents import IAgent
+import random
 
 DUMMY_RANDOM = "DUMMY_RANDOM"
 DUMMY_DISCARDONECARD = "DUMMY_DISCARDONECARD"
@@ -43,8 +44,8 @@ class AgentRandom(IAgent.IAgent):
             possibleActions = possibleActions
 
         if self.name == DUMMY_DISCARDONECARD:
-
-            originalPossibleAction = copy.copy(possibleActions)
+            # print ("here")
+            originalPossibleAction = copy.copy(possibleActions2)
             positionsWithOneCard = [0, 3, 9, 18, 30, 45, 63, 84, 108, 135, 165]
             for i in range(len(possibleActions)):
 
@@ -54,8 +55,12 @@ class AgentRandom(IAgent.IAgent):
             if originalPossibleAction[198] == 1: #check if joker was an option
                 possibleActions[198] = 1
 
-        itemindex = numpy.where(numpy.array(possibleActions) == 1)
-        numpy.random.shuffle(itemindex)
+            if originalPossibleAction[199] == 1:
+                possibleActions[199] = 1
+
+
+        itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
+        random.shuffle(itemindex)
         aIndex = itemindex[0]
         a = numpy.zeros(self.outputSize)
         a[aIndex] = 1

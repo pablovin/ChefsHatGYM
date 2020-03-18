@@ -140,8 +140,10 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                         else:
                             wrongActions = wrongActions+1
 
+                        # if done or wrongActions < 10:
+                        # # if validActionPlayer:
                         players[thisPlayer].train((state, action, reward, newState, done,
-                                                   experimentManager.modelDirectory, game, validAction))
+                                                     experimentManager.modelDirectory, game, validAction, thisPlayer))
 
 
                     correctActions = players[thisPlayer].currentCorrectAction
@@ -156,6 +158,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 env.nextPlayer()
                 if isLogging:
                     logger.write(" ---  Action: " + str(env.lastActionPlayers[thisPlayer]))
+                    logger.write(" ---  Valid Actions: " + str(validAction))
                     logger.write(" ---  Hand: " + str(env.playersHand[thisPlayer]))
                     logger.write(" --- Board After: " + str(env.board))
 
@@ -214,7 +217,11 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 quarter = currentPlayerActions[q * quarterInterval:q * quarterInterval + quarterInterval]
                 unique, counts = numpy.unique(quarter, return_counts=True)
                 currentQuarter = dict(zip(unique, counts))
-                passesCount = currentQuarter[0]
+                if 0 in currentQuarter:
+                 passesCount = currentQuarter[0]
+                else:
+                    passesCount = 0
+
                 discardCount = len(quarter) - passesCount
                 metricsPerGame.append(passesCount) #p__q_passes
                 metricsPerGame.append(discardCount) #p__q_discard

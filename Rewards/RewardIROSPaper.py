@@ -12,7 +12,7 @@ class RewardIROSPaper(iReward.IReward):
         return -0.5
 
     def getRewardInvalidAction(self, params=[]):
-        return -0.5
+        return -1.0
 
     def getRewardDiscard(self, params=[]):
         cardsInHand, playerHand = params
@@ -21,12 +21,12 @@ class RewardIROSPaper(iReward.IReward):
     def getRewardFinish(self, params=[]):
         position, rounds = params
 
-        if rounds > 50:
-            rewardRounds = 0
-        else:
-            rewardRounds = 0.3
+        # if rounds > 50:
+        #     rewardRounds = 0
+        # else:
+        #     rewardRounds = 0.3
 
         if position == 0:
-            return rewardRounds + 0.7  # experiment 3
+            return 1.0  # experiment 3
         else:
            return -0.01

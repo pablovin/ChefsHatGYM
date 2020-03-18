@@ -187,31 +187,56 @@ class AgentA2C(IAgent.IAgent):
         stateVector, possibleActionsOriginal = params
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
-        possibleActions = copy.copy(possibleActionsOriginal)
-
-        prediction = self.actor.predict([stateVector])[0]
-        aIndex = numpy.argmax(prediction)
-        a = prediction
-
-        if possibleActions[aIndex] == 0:
+        if numpy.random.rand() <= self.epsilon:
+            itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
+            random.shuffle(itemindex)
+            aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
-            aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
             a[aIndex] = 1
-
-            if possibleActions[aIndex] == 0:
-                itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
-                random.shuffle(itemindex)
-                aIndex = itemindex[0]
-                a = numpy.zeros(self.outputSize)
-                a[aIndex] = 1
-            else:
-                # print ("Correct action!")
-                self.currentCorrectAction = self.currentCorrectAction + 1
+            #
+            #
+            # aIndex = numpy.random.randint(0, self.outputSize)
+            # a = numpy.zeros(self.outputSize)
+            # a[aIndex] = 1
         else:
-            self.currentCorrectAction = self.currentCorrectAction + 1
+            a = self.actor.predict([stateVector])[0]
+            aIndex = numpy.argmax(a)
 
-        self.totalActionPerGame = self.totalActionPerGame+1
+            if possibleActionsOriginal[aIndex] == 1:
+                self.currentCorrectAction = self.currentCorrectAction + 1
+
+        self.totalActionPerGame = self.totalActionPerGame + 1
         return a
+
+
+        # stateVector, possibleActionsOriginal = params
+        # stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
+        #
+        # possibleActions = copy.copy(possibleActionsOriginal)
+        #
+        # prediction = self.actor.predict([stateVector])[0]
+        # aIndex = numpy.argmax(prediction)
+        # a = prediction
+        #
+        # if possibleActions[aIndex] == 0:
+        #     a = numpy.zeros(self.outputSize)
+        #     aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
+        #     a[aIndex] = 1
+        #
+        #     if possibleActions[aIndex] == 0:
+        #         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
+        #         random.shuffle(itemindex)
+        #         aIndex = itemindex[0]
+        #         a = numpy.zeros(self.outputSize)
+        #         a[aIndex] = 1
+        #     else:
+        #         # print ("Correct action!")
+        #         self.currentCorrectAction = self.currentCorrectAction + 1
+        # else:
+        #     self.currentCorrectAction = self.currentCorrectAction + 1
+        #
+        # self.totalActionPerGame = self.totalActionPerGame+1
+        # return a
 
 
     def discount(self, r):

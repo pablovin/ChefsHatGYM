@@ -149,6 +149,7 @@ class AgentDQL(IAgent.IAgent):
 
         if numpy.random.rand() <= self.epsilon:
             itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
+            random.shuffle(itemindex)
             aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
@@ -242,6 +243,8 @@ class AgentDQL(IAgent.IAgent):
         minibatch = random.sample(self.memory, self.batchSize)
         ts = 0
 
+        trainingStates = []
+        trainingTargets = []
         for state, action, reward, next_state, done, possibleActions in minibatch:
             ts = ts + 1
             # print ("--Training " + str(ts))

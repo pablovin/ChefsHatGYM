@@ -140,9 +140,9 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                         else:
                             wrongActions = wrongActions+1
 
-                        # if done or wrongActions < 10:
-                        # # if validActionPlayer:
-                        players[thisPlayer].train((state, action, reward, newState, done,
+                        if done or wrongActions < 10:
+                        # if validActionPlayer:
+                          players[thisPlayer].train((state, action, reward, newState, done,
                                                      experimentManager.modelDirectory, game, validAction, thisPlayer))
 
 

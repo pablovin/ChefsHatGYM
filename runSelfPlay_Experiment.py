@@ -5,6 +5,7 @@ from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
 from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid
 import tensorflow as tf
 from keras import backend as K
+import numpy
 
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -12,18 +13,18 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDDPG.AgentDDPG([True]) #training agent
-    agent2 = AgentDDPG.AgentDDPG([True])
-    agent3 = AgentDDPG.AgentDDPG([True])
-    agent4 = AgentDDPG.AgentDDPG([True])
+    agent1 = AgentDQL.AgentDQL([True]) #training agent
+    agent2 = AgentDQL.AgentDQL([True])
+    agent3 = AgentDQL.AgentDQL([True])
+    agent4 = AgentDQL.AgentDQL([True])
 
      # if training specific agents
     playersAgents = [agent1, agent2, agent3, agent4]
 
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
-    numExperiments = 100 # number of experiments. At the end of each experiment, we copy the best player and make them play against each other.
-    numGames = 600# amount of training games
+    numExperiments = 10 # number of experiments. At the end of each experiment, we copy the best player and make them play against each other.
+    numGames = 200# amount of training games
 
     experimentDescriptor = "Training_SelfPlay_"
 
@@ -33,15 +34,15 @@ def runModel():
     actorModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingMyAgent_2020-03-17_10:48:23.512129/Model/actor_iteration_499.hd5"
     criticModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingMyAgent_2020-03-17_10:48:23.512129/Model/critic_iteration_499.hd5"
 
-    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DQL', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingHyperoptAgent_2020-03-17_10:07:02.985994/Model/actor_iteration_499.hd5"
+    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DQL_100x10/MostlyChoosingRandomAgents/Player_4_Cards_11_games_100TrainAgents_['DQL', 'DQL', 'DQL', 'DQL']_Reward_OnlyWinning_Training_SelfPlay__GameExperimentNumber_3_Best_Agent_1_2020-03-18_15:41:31.786142/Model/actor_iteration_99_Player_3.hd5"
 
 
-    loadModelAgent1 =""  #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
+    loadModelAgent1 =""#""  #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
 
-    loadModelAgent2 = ""#[actorModel,criticModel]
+    loadModelAgent2 =""# ""#[actorModel,criticModel]
 
-    loadModelAgent3 = ""
-    loadModelAgent4 = ""
+    loadModelAgent3 =""# ""
+    loadModelAgent4 =""# ""
 
     #
     # loadModel = [loadModelAgent1,loadModelAgent2, loadModelAgent3, loadModelAgent4] #indicate where the saved model is
@@ -54,11 +55,11 @@ def runModel():
 
     isPlotting = True #plot the experiment
 
-    plotFrequency = 300 #plot the plots every X games
+    plotFrequency = 50 #plot the plots every X games
 
     createDataset = False # weather to save the dataset
 
-    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DDPG_600x100/" # Directory where the experiment will be saved
+    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DQL_100x10/" # Directory where the experiment will be saved
 
     # #Initial Run
     # metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,
@@ -72,10 +73,10 @@ def runModel():
     for i in range(numExperiments):
 
         # Train the best scored one
-        agent1 = AgentDDPG.AgentDDPG([True])  # training agent
-        agent2 = AgentDDPG.AgentDDPG([True])
-        agent3 = AgentDDPG.AgentDDPG([True])
-        agent4 = AgentDDPG.AgentDDPG([True])
+        agent1 = AgentDQL.AgentDQL([True])  # training agent
+        agent2 = AgentDQL.AgentDQL([True])
+        agent3 = AgentDQL.AgentDQL([True])
+        agent4 = AgentDQL.AgentDQL([True])
 
         # if training specific agents
         playersAgents = [agent1, agent2, agent3, agent4]
@@ -89,7 +90,7 @@ def runModel():
         #
         # loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3, loadModelAgent4]
 
-        numGames = 600
+        numGames = 200
         print("Best agent: " + str(bestAgent) + " - Loading:" + str(loadModel))
         # input("here")
         experimentDescriptor = description + "_GameExperimentNumber_" + str(i) + "_Best_Agent_" + str(bestAgent)
@@ -119,10 +120,10 @@ def runModel():
         loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3, loadModelAgent4]
 
         #Initialize evaluation agents
-        agent1 = AgentDDPG.AgentDDPG([False])
-        agent2 = AgentDDPG.AgentDDPG([False])
-        agent3 = AgentDDPG.AgentDDPG([False])
-        agent4 = AgentDDPG.AgentDDPG([False])
+        agent1 = AgentDQL.AgentDQL([False])
+        agent2 = AgentDQL.AgentDQL([False])
+        agent3 = AgentDQL.AgentDQL([False])
+        agent4 = AgentDQL.AgentDQL([False])
         playersAgents = [agent1, agent2, agent3, agent4]
 
         print ("Testing - loading: " + str(loadModel))
@@ -145,10 +146,11 @@ def runModel():
         p3 = metrics[4]
         p4 = metrics[5]
 
-        wins = (p1[0], p2[0], p3[0], p4[0])
+        wins = (numpy.average(p1[2]), numpy.average(p2[2]), numpy.average(p3[2]), numpy.average(p4[2])) #Reward
+        # wins = (numpy.array(p1[0].sum(), p2[0], p3[0], p4[0]) # Wins
 
         bestAgent = 0
-        bestWin = 0
+        bestWin = -5000
         for a in range(4):
             if wins[a] > bestWin:
                 bestWin = wins[a]
@@ -156,6 +158,10 @@ def runModel():
 
         loadModel = [loadModel[bestAgent], loadModel[bestAgent], loadModel[bestAgent], loadModel[bestAgent]]
 
+
+        print ("Best Agent: " + str(bestAgent))
+        print("Rewards: " + str(wins))
+        # input("Here")
 
     print ("Metrics:" + str(metrics))
 

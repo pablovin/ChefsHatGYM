@@ -85,8 +85,6 @@ class AgentDDPG(IAgent.IAgent):
             self.gamma = 0.99  # discount rate
             self.tau = 0.01 # Weight transfer rate
 
-
-
         self.learning_rate = 0.0001
         #Game memory
         self.memory = deque(maxlen=5000)
@@ -251,6 +249,7 @@ class AgentDDPG(IAgent.IAgent):
 
         if numpy.random.rand() <= self.epsilon:
             itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
+            random.shuffle(itemindex)
             aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1

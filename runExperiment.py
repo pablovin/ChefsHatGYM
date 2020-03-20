@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDQL.AgentDQLV3([False]) #training agent
+    agent1 = AgentDQL.AgentDQLV3([False, 1.0]) #training agent
     # agent1 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)

@@ -1,6 +1,6 @@
 from ExperimentHandler import ChefsHatExperimentHandler
 
-from Agents import  AgentRandom, AgentDQL_old, AgentA2C, AgentDDPG, AgentDQL_Trfl
+from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG, AgentDQL_Trfl
 
 from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid
 import tensorflow as tf
@@ -13,18 +13,18 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDQL_Trfl.AgentDQL_Trfl([True]) #training agent
-    agent2 = AgentDQL_Trfl.AgentDQL_Trfl([True])
-    agent3 = AgentDQL_Trfl.AgentDQL_Trfl([True])
-    agent4 = AgentDQL_Trfl.AgentDQL_Trfl([True])
+    agent1 = AgentDQL.AgentDQL([True, 1.0]) #training agent
+    agent2 = AgentDQL.AgentDQL([True, 1.0])
+    agent3 = AgentDQL.AgentDQL([True, 1.0])
+    agent4 = AgentDQL.AgentDQL([True, 1.0])
 
      # if training specific agents
     playersAgents = [agent1, agent2, agent3, agent4]
 
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
-    numExperiments = 10 # number of experiments. At the end of each experiment, we copy the best player and make them play against each other.
-    numGames = 200# amount of training games
+    numExperiments = 20 # number of experiments. At the end of each experiment, we copy the best player and make them play against each other.
+    numGames = 2000# amount of training games
 
     experimentDescriptor = "Training_SelfPlay_"
 
@@ -55,11 +55,11 @@ def runModel():
 
     isPlotting = True #plot the experiment
 
-    plotFrequency = 100 #plot the plots every X games
+    plotFrequency = 1000 #plot the plots every X games
 
     createDataset = False # weather to save the dataset
 
-    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DQL_100x10/" # Directory where the experiment will be saved
+    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DQL_2000x20/" # Directory where the experiment will be saved
 
     # #Initial Run
     # metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,
@@ -70,14 +70,19 @@ def runModel():
 
     bestAgent = 0
     description = experimentDescriptor
+    epsilon = 1.0
     for i in range(numExperiments):
 
-        # Train the best scored one
-        agent1 = AgentDQL_Trfl.AgentDQL_Trfl([True])  # training agent
-        agent2 = AgentDQL_Trfl.AgentDQL_Trfl([True])
-        agent3 = AgentDQL_Trfl.AgentDQL_Trfl([True])
-        agent4 = AgentDQL_Trfl.AgentDQL_Trfl([True])
 
+
+        # Train the best scored one
+        agent1 = AgentDQL.AgentDQL([True, epsilon])  # training agent
+        agent2 = AgentDQL.AgentDQL([True, epsilon])
+        agent3 = AgentDQL.AgentDQL([True, epsilon])
+        agent4 = AgentDQL.AgentDQL([True, epsilon])
+        epsilon = epsilon * 0.7
+        if epsilon < 0.1:
+            epsilon = 0.1
         # if training specific agents
         playersAgents = [agent1, agent2, agent3, agent4]
 
@@ -90,7 +95,7 @@ def runModel():
         #
         # loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3, loadModelAgent4]
 
-        numGames = 200
+        numGames = 2000
         print("Best agent: " + str(bestAgent) + " - Loading:" + str(loadModel))
         # input("here")
         experimentDescriptor = description + "_GameExperimentNumber_" + str(i) + "_Best_Agent_" + str(bestAgent)
@@ -120,10 +125,10 @@ def runModel():
         loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3, loadModelAgent4]
 
         #Initialize evaluation agents
-        agent1 = AgentDQL_old.AgentDQL([False])
-        agent2 = AgentDQL_old.AgentDQL([False])
-        agent3 = AgentDQL_old.AgentDQL([False])
-        agent4 = AgentDQL_old.AgentDQL([False])
+        agent1 = AgentDQL.AgentDQL([False, 0.1])
+        agent2 = AgentDQL.AgentDQL([False, 0.1])
+        agent3 = AgentDQL.AgentDQL([False, 0.1])
+        agent4 = AgentDQL.AgentDQL([False, 0,1])
         playersAgents = [agent1, agent2, agent3, agent4]
 
         print ("Testing - loading: " + str(loadModel))

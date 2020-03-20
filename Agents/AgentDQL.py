@@ -15,7 +15,7 @@ from Agents import MemoryBuffer
 
 import random
 
-class AgentDQLV3(IAgent.IAgent):
+class AgentDQL(IAgent.IAgent):
 
     name=""
     actor = None
@@ -46,6 +46,7 @@ class AgentDQLV3(IAgent.IAgent):
 
     def __init__(self, params=[]):
         self.training = params[0]
+        self.initialEpsilon = params[1]
         self.name = "DQL"
 
         self.totalAction = []
@@ -104,7 +105,7 @@ class AgentDQLV3(IAgent.IAgent):
         self.tau = 0.1 #target network update rate
 
         if self.training:
-            self.epsilon = 1.0  # exploration rate while training
+            self.epsilon = self.initialEpsilon  # exploration rate while training
         else:
             self.epsilon = 0.1 #no exploration while testing
 

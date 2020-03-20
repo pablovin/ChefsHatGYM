@@ -3,15 +3,19 @@ import numpy
 import copy
 
 from collections import deque
-from keras.layers import Input, Dense, Flatten, Concatenate
+from keras.layers import Input, Dense, Flatten, Concatenate, Lambda, Multiply
+import keras.backend as K
+
 from keras.models import Model
 from keras.optimizers import Adam
 
 from keras.models import load_model
 
+from Agents import MemoryBuffer
+
 import random
 
-class AgentDQL(IAgent.IAgent):
+class AgentDQLV3(IAgent.IAgent):
 
     name=""
     actor = None
@@ -38,6 +42,8 @@ class AgentDQL(IAgent.IAgent):
     totalAction = []
     totalActionPerGame = 0
 
+    losses = []
+
     def __init__(self, params=[]):
         self.training = params[0]
         self.name = "DQL"
@@ -48,7 +54,6 @@ class AgentDQL(IAgent.IAgent):
         self.currentCorrectAction = 0
 
         self.totalCorrectAction = []
-
 
 
     def startAgent(self, params=[]):
@@ -76,9 +81,9 @@ class AgentDQL(IAgent.IAgent):
             #Best Hyperopt:{'Qsize': 1000, 'TargetUpdateFunction': 256, 'a': 0, 'batchSize': 256, 'hiddenUnits': 256, 'layers': 3}
             #(3, 256, 1000, 256, 256)
             self.hiddenLayers = 3
-            self.hiddenUnits = 256
+            self.hiddenUnits = 32
             self.batchSize = 256
-            QSize = 1000
+            QSize = 20000
             self.targetUpdateFrequency = 256
 
             #My initial estimation
@@ -95,14 +100,21 @@ class AgentDQL(IAgent.IAgent):
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.990
 
+
+        self.tau = 0.1 #target network update rate
+
         if self.training:
             self.epsilon = 1.0  # exploration rate while training
         else:
             self.epsilon = 0.1 #no exploration while testing
 
 
+        # behavior parameters
+        self.prioritized_experience_replay = False
+        self.dueling = False
 
-        self.memory = deque(maxlen=QSize)
+        self.memory = MemoryBuffer.MemoryBuffer(QSize, self.prioritized_experience_replay)
+
         self.learning_rate = 0.001
 
         if loadModel == "":
@@ -122,24 +134,67 @@ class AgentDQL(IAgent.IAgent):
 
     def buildSimpleModel(self):
 
+        """ Build Deep Q-Network
+               """
         inputSize = self.numCardsPerPlayer + self.numMaxCards
-
-        inputLayer = Input(shape=(inputSize,),
+        inputLayer = Input(shape=(28,),
                            name="State")  # 5 cards in the player's hand + maximum 4 cards in current board
 
         # dense = Dense(self.hiddenLayers, activation="relu", name="dense_0")(inputLayer)
-        for i in range(self.hiddenLayers+1):
+        for i in range(self.hiddenLayers + 1):
+
             if i == 0:
                 previous = inputLayer
             else:
-                previous = dense
+              previous = dense
 
-            dense = Dense(self.hiddenUnits*(i+1), name="Dense"+str(i), activation="relu")(previous)
+            dense = Dense(self.hiddenUnits * (i + 1), name="Dense" + str(i), activation="relu")(previous)
 
-        outputActor = Dense(self.outputSize, activation=self.outputActivation)(
-            dense)  # Cards at the player hand plus the pass action
+        if (self.dueling):
+            # Have the network estimate the Advantage function as an intermediate layer
+            dense = Dense(self.outputSize + 1, activation='linear', name="duelingNetwork")(dense)
+            dense = Lambda(lambda i: K.expand_dims(i[:, 0], -1) + i[:, 1:] - K.mean(i[:, 1:], keepdims=True),
+                       output_shape=(self.outputSize,))(dense)
+        else:
 
-        return  Model(inputs=[inputLayer], outputs=[outputActor])
+            possibleActions = Input(shape=(self.outputSize,),
+                           name="PossivleActions")
+
+
+            dense = Dense(self.outputSize, activation='softmax')(dense)
+            output = Multiply()([possibleActions, dense])
+
+
+        return Model([inputLayer, possibleActions], output)
+
+    # def buildSimpleModel(self):
+    #
+    #     inputSize = self.numCardsPerPlayer + self.numMaxCards
+    #
+    #     inputLayer = Input(shape=(inputSize,),
+    #                        name="State")  # 5 cards in the player's hand + maximum 4 cards in current board
+    #
+    #     # dense = Dense(self.hiddenLayers, activation="relu", name="dense_0")(inputLayer)
+    #     for i in range(self.hiddenLayers+1):
+    #         if i == 0:
+    #             previous = inputLayer
+    #         else:
+    #             previous = dense
+    #
+    #         dense = Dense(self.hiddenUnits*(i+1), name="Dense"+str(i), activation="relu")(previous)
+    #
+    #     possibleActions = Input((self.outputSize), name="possibleActions")
+    #
+    #     multiply = Multiply()([possibleActions,dense])
+    #     dense = Dense(self.outputSize, activation='linear')(multiply)
+    #
+    #
+    #     outputActor = Dense(self.outputSize, activation=self.outputActivation)(
+    #         dense)  # Cards at the player hand plus the pass action
+    #
+    #
+    #     return  Model(inputs=[inputLayer], outputs=[outputActor])
+
 
 
     def getAction(self, params):
@@ -147,19 +202,21 @@ class AgentDQL(IAgent.IAgent):
         stateVector, possibleActionsOriginal = params
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
+        possibleActions2 = copy.copy(possibleActionsOriginal)
+        possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
+
         if numpy.random.rand() <= self.epsilon:
-            itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
+            if numpy.sum(possibleActions2) > 1:
+                possibleActions2[199] = 0
+
+            itemindex = numpy.array(numpy.where(numpy.array(possibleActions2) == 1))[0].tolist()
             random.shuffle(itemindex)
             aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
-            #
-            #
-            # aIndex = numpy.random.randint(0, self.outputSize)
-            # a = numpy.zeros(self.outputSize)
-            # a[aIndex] = 1
+
         else:
-            a = self.online_network.predict([stateVector])[0]
+            a = self.online_network.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
 
             if possibleActionsOriginal[aIndex] == 1:
@@ -168,63 +225,6 @@ class AgentDQL(IAgent.IAgent):
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
 
-
-        # stateVector, possibleActionsOriginal = params
-        # possibleActions = copy.copy(possibleActionsOriginal)
-        #
-        # # possibleActions[199] = 0
-        # # trials = 0
-        #
-        # if numpy.random.rand() <= self.epsilon:
-        #
-        #     aIndex = numpy.random.randint(0, self.outputSize)
-        #
-        #     a = numpy.zeros(self.outputSize)
-        #
-        # else:
-        #     # possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
-        #     stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
-        #     # a = self.online_network.predict([stateVector, possibleActions])[0]
-        #     a = self.online_network.predict([stateVector])[0]
-        #     aIndex = numpy.argmax(a)
-        #
-        # if possibleActions[aIndex] == 0:
-        #     itemindex = numpy.where(numpy.array(possibleActions) == 1)
-        #     numpy.random.shuffle(itemindex)
-        #
-        #     aIndex = itemindex[0]
-        #     a[aIndex] = 1
-
-        # stateVector, possibleActionsOriginal = params
-        # stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
-        #
-        # possibleActions = copy.copy(possibleActionsOriginal)
-        #
-        # prediction = self.online_network.predict([stateVector])[0]
-        # aIndex = numpy.argmax(prediction)
-        # a = prediction
-        #
-        # if possibleActions[aIndex] == 0:
-        #     a = numpy.zeros(self.outputSize)
-        #     aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
-        #     a[aIndex] = 1
-        #
-        #     if possibleActions[aIndex] == 0:
-        #
-        #         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
-        #         random.shuffle(itemindex)
-        #
-        #         aIndex = itemindex[0]
-        #         a = numpy.zeros(self.outputSize)
-        #         a[aIndex] = 1
-        #     else:
-        #         # print ("Correct action!")
-        #         self.currentCorrectAction = self.currentCorrectAction + 1
-        # else:
-        #     self.currentCorrectAction = self.currentCorrectAction+1
-        #
-        # self.totalActionPerGame = self.totalActionPerGame+1
-        # return a
 
 
 
@@ -235,56 +235,76 @@ class AgentDQL(IAgent.IAgent):
 
     def updateTargetNetwork(self):
 
-        self.online_network.set_weights(self.online_network.get_weights())
+        W = self.online_network.get_weights()
+        tgt_W = self.targetNetwork.get_weights()
+        for i in range(len(W)):
+            tgt_W[i] = self.tau * W[i] + (1 - self.tau) * tgt_W[i]
+        self.targetNetwork.set_weights(tgt_W)
+
+        #
+        # self.online_network.set_weights(self.online_network.get_weights())
 
 
     def updateModel(self, savedNetwork, game, thisPlayer):
 
-        minibatch = random.sample(self.memory, self.batchSize)
-        ts = 0
+        """ Train Q-network on batch sampled from the buffer
+                """
+        # Sample experience from memory buffer (optionally with PER)
+        s, a, r, d, new_s, possibleActions, newPossibleActions, idx = self.memory.sample_batch(self.batchSize)
 
-        trainingStates = []
-        trainingTargets = []
-        for state, action, reward, next_state, done, possibleActions in minibatch:
-            ts = ts + 1
-            # print ("--Training " + str(ts))
-            target = reward
-            if not done:
-                # nextQValue = self.targetNetwork.predict([next_state, possibleActions])[0]
-                nextQValue = self.targetNetwork.predict([next_state])[0]
-                target = (reward + self.gamma * numpy.amax(nextQValue))
+        # Apply Bellman Equation on batch samples to train our DDQN
+        q = self.online_network.predict([s, possibleActions])
+        next_q = self.online_network.predict([new_s, newPossibleActions])
+        q_targ = self.targetNetwork.predict([new_s, newPossibleActions])
 
-            # target_f = self.online_network.predict([state, possibleActions])
-            target_f = self.online_network.predict([state])
-            target_f[0][action] = target
-            # self.online_network.fit([state,possibleActions], target_f, epochs=1, verbose=False)
-            # self.online_network.fit([state], target_f, epochs=1, verbose=False)
-            self.online_network.train_on_batch([state], target_f)
-            # self.trainingStep += 1
+        for i in range(s.shape[0]):
+            old_q = q[i, a[i]]
+            if d[i]:
+                q[i, a[i]] = r[i]
+            else:
+                next_best_action = numpy.argmax(next_q[i, :])
+                q[i, a[i]] = r[i] + self.gamma * q_targ[i, next_best_action]
 
-            if ts % self.targetUpdateFrequency == 0:
-                self.updateTargetNetwork()
+            if (self.prioritized_experience_replay):
+                # Update PER Sum Tree
+                self.memory.update(idx[i], abs(old_q - q[i, a[i]]))
 
 
-        self.updateTargetNetwork() # to guarantee that it updates at least once per game
-
-        # if self.epsilon > self.epsilon_min:
-        #     self.epsilon *= self.epsilon_decay
-
-        if (game + 1) % 100 == 0:
-            self.online_network.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
-            self.lastModel = savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5"
+        # Train on batch
+        history = self.online_network.fit([s,possibleActions] , q, verbose=False)
+        self.losses.append(history.history['loss'])
 
         #Update the decay
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-        print (" -- Epsilon:" + str(self.epsilon))
+        if (game + 1) % 100 == 0:
+            self.online_network.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
+            self.lastModel = savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5"
 
-    trainTime = 0
+
+        print (" -- Epsilon:" + str(self.epsilon) + " - Loss:" + str(history.history['loss']))
+
+
+    def memorize(self, state, action, reward, next_state, done, possibleActions, newPossibleActions):
+
+        if (self.prioritized_experience_replay):
+            state = numpy.expand_dims(numpy.array(state), 0)
+            next_state = numpy.expand_dims(numpy.array(next_state), 0)
+            q_val = self.online_network.predict(state)
+            q_val_t = self.targetNetwork.predict(next_state)
+            next_best_action = numpy.argmax(q_val)
+            new_val = reward + self.gamma * q_val_t[0, next_best_action]
+            td_error = abs(new_val - q_val)[0]
+        else:
+            td_error = 0
+
+        self.memory.memorize(state, action, reward, done, next_state, possibleActions, newPossibleActions, td_error)
+
+
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions, thisPlayer = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
 
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
@@ -295,18 +315,20 @@ class AgentDQL(IAgent.IAgent):
 
         if self.training:
             #memorize
-
-
             action = numpy.argmax(action)
-            state = numpy.expand_dims(numpy.array(state), 0)
-            next_state = numpy.expand_dims(numpy.array(next_state), 0)
-            possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
+            # state = numpy.expand_dims(numpy.array(state), 0)
+            # next_state = numpy.expand_dims(numpy.array(next_state), 0)
+            # possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
 
-            self.memory.append((state, action, reward, next_state, done, possibleActions))
+            self.memorize(state, action, reward, next_state, done, possibleActions, newPossibleActions)
 
-            if len(self.memory) > self.batchSize and done:
-                self.trainTime = self.trainTime + 1
+            #
+            # self.memory.append((state, action, reward, next_state, done, possibleActions))
+
+            if self.memory.size() > self.batchSize and done:
                 self.updateModel(savedNetwork, game, thisPlayer)
+                self.updateTargetNetwork()
+
 
 
 

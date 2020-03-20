@@ -1,6 +1,6 @@
 from ExperimentHandler import ChefsHatExperimentHandler
 
-from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
+from Agents import  AgentRandom, AgentDQL_old, AgentA2C, AgentDDPG, AgentDQL_Trfl
 
 from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid
 import tensorflow as tf
@@ -13,10 +13,10 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDQL.AgentDQL([True]) #training agent
-    agent2 = AgentDQL.AgentDQL([True])
-    agent3 = AgentDQL.AgentDQL([True])
-    agent4 = AgentDQL.AgentDQL([True])
+    agent1 = AgentDQL_Trfl.AgentDQL_Trfl([True]) #training agent
+    agent2 = AgentDQL_Trfl.AgentDQL_Trfl([True])
+    agent3 = AgentDQL_Trfl.AgentDQL_Trfl([True])
+    agent4 = AgentDQL_Trfl.AgentDQL_Trfl([True])
 
      # if training specific agents
     playersAgents = [agent1, agent2, agent3, agent4]
@@ -34,15 +34,15 @@ def runModel():
     actorModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingMyAgent_2020-03-17_10:48:23.512129/Model/actor_iteration_499.hd5"
     criticModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/BaselineExperiments/Optmizing/A2C, DQL, DDPG/Player_4_Cards_11_games_500TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_TrainingMyAgent_2020-03-17_10:48:23.512129/Model/critic_iteration_499.hd5"
 
-    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DQL_100x10/MostlyChoosingRandomAgents/Player_4_Cards_11_games_100TrainAgents_['DQL', 'DQL', 'DQL', 'DQL']_Reward_OnlyWinning_Training_SelfPlay__GameExperimentNumber_3_Best_Agent_1_2020-03-18_15:41:31.786142/Model/actor_iteration_99_Player_3.hd5"
+    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments_SelfPlay/DQL_100x10/initial_10_epsilon_0.5/Player_4_Cards_11_games_200TrainAgents_['DQL', 'DQL', 'DQL', 'DQL']_Reward_OnlyWinning_Training_SelfPlay__GameExperimentNumber_9_Best_Agent_2_2020-03-19_16:25:00.815412/Model/actor_iteration_99_Player_0.hd5"
 
 
-    loadModelAgent1 =""#""  #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
+    loadModelAgent1 =""#""#""  #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
 
-    loadModelAgent2 =""# ""#[actorModel,criticModel]
+    loadModelAgent2 =""#""# ""#[actorModel,criticModel]
 
-    loadModelAgent3 =""# ""
-    loadModelAgent4 =""# ""
+    loadModelAgent3 =""#""# ""
+    loadModelAgent4 =""#""# ""
 
     #
     # loadModel = [loadModelAgent1,loadModelAgent2, loadModelAgent3, loadModelAgent4] #indicate where the saved model is
@@ -55,7 +55,7 @@ def runModel():
 
     isPlotting = True #plot the experiment
 
-    plotFrequency = 50 #plot the plots every X games
+    plotFrequency = 100 #plot the plots every X games
 
     createDataset = False # weather to save the dataset
 
@@ -73,10 +73,10 @@ def runModel():
     for i in range(numExperiments):
 
         # Train the best scored one
-        agent1 = AgentDQL.AgentDQL([True])  # training agent
-        agent2 = AgentDQL.AgentDQL([True])
-        agent3 = AgentDQL.AgentDQL([True])
-        agent4 = AgentDQL.AgentDQL([True])
+        agent1 = AgentDQL_Trfl.AgentDQL_Trfl([True])  # training agent
+        agent2 = AgentDQL_Trfl.AgentDQL_Trfl([True])
+        agent3 = AgentDQL_Trfl.AgentDQL_Trfl([True])
+        agent4 = AgentDQL_Trfl.AgentDQL_Trfl([True])
 
         # if training specific agents
         playersAgents = [agent1, agent2, agent3, agent4]
@@ -120,10 +120,10 @@ def runModel():
         loadModel = [loadModelAgent1, loadModelAgent2, loadModelAgent3, loadModelAgent4]
 
         #Initialize evaluation agents
-        agent1 = AgentDQL.AgentDQL([False])
-        agent2 = AgentDQL.AgentDQL([False])
-        agent3 = AgentDQL.AgentDQL([False])
-        agent4 = AgentDQL.AgentDQL([False])
+        agent1 = AgentDQL_old.AgentDQL([False])
+        agent2 = AgentDQL_old.AgentDQL([False])
+        agent3 = AgentDQL_old.AgentDQL([False])
+        agent4 = AgentDQL_old.AgentDQL([False])
         playersAgents = [agent1, agent2, agent3, agent4]
 
         print ("Testing - loading: " + str(loadModel))

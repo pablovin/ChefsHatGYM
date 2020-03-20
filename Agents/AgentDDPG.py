@@ -18,6 +18,8 @@ from keras.models import load_model
 
 import random
 
+
+
 class AgentDDPG(IAgent.IAgent):
 
     name=""
@@ -42,6 +44,8 @@ class AgentDDPG(IAgent.IAgent):
 
     totalAction = []
     totalActionPerGame = 0
+
+    losses = []
 
     def __init__(self, params=[]):
         self.training = params[0]

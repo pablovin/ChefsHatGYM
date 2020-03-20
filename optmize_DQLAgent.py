@@ -8,7 +8,7 @@ import hyperopt.plotting
 from ExperimentHandler import ChefsHatExperimentHandler
 
 
-from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
+from Agents import  AgentRandom, AgentDQL_old, AgentA2C, AgentDDPG
 
 from Rewards import RewardOnlyWinning
 import tensorflow as tf
@@ -23,7 +23,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 def runModel():
     # Parameters for the game
-    agent1 = AgentDQL.AgentDQL([True])  # training agent
+    agent1 = AgentDQL_old.AgentDQL([True])  # training agent
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -82,7 +82,7 @@ def runModel():
                       ])
 
     def objective(args):
-        agent1 = AgentDQL.AgentDQL([True])
+        agent1 = AgentDQL_old.AgentDQL([True])
         agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
         agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
         agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -113,7 +113,7 @@ def runModel():
 
 
         #testing trial
-        agent1 = AgentDQL.AgentDQL([False])  # training agent
+        agent1 = AgentDQL_old.AgentDQL([False])  # training agent
         playersAgents = [agent1, agent2, agent3, agent4]
 
 

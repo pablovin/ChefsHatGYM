@@ -5,6 +5,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
 
+import os
+
 
 from KEF import DataSetManager
 
@@ -119,8 +121,12 @@ class PlotManager():
             # # plt.yticks(np.arange(y.min(), y.max(), 0.005))
             #
 
+            directory = self._plotsDirectory  + "/FinishingPosition_Players/"
 
-            plt.savefig(self._plotsDirectory  + "/Player_HistoryWinners_player_"+str(i)+"_iteration_"+str(iteraction)+"_TotalWin_"+str(totalWins)+".png")
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+            plt.savefig(directory + "/HistoryWinners_player_"+str(i)+"_iteration_"+str(iteraction)+"_TotalWin_"+str(totalWins)+".png")
 
             fig.clf()
 
@@ -134,7 +140,96 @@ class PlotManager():
             if len(actions[i]) > largest:
                 largest = len(actions[i])
 
-        # Plot winning history all players
+        # Plot discard plot for all players
+        for i in range(numPLayers):
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+
+            #obtain all the actions of this player in a vector
+            actionsTotal = []
+            for a in range(len(actions[i])):
+
+                if actions[i][a][0] == DataSetManager.actionPass:
+                    actionsTotal.append(0)
+                else:
+                    actionsTotal.append(1)
+
+            # obtain all the actions of this player in a vector
+            quarterInterval = int(len(actionsTotal) / 4)
+
+            labels = ['Q1', 'Q2', 'Q3', 'Q4']
+            quartersPass = []
+            quarterDiscard = []
+
+            x = numpy.arange(len(labels))  # the label locations
+            width = 0.35  # the width of the bars
+
+
+            for q in range(4):
+                # first quarter
+                quarter = actionsTotal[q * quarterInterval:q * quarterInterval + quarterInterval]
+                unique, counts = numpy.unique(quarter, return_counts=True)
+                currentQuarter = dict(zip(unique, counts))
+
+                if 0 in currentQuarter:
+                 quartersPass.append(currentQuarter[0])
+                else:
+                    quartersPass.append(0)
+
+                if 1 in currentQuarter:
+                    quarterDiscard.append(currentQuarter[1])
+                else:
+                    quarterDiscard.append(0)
+
+
+            rects1 = ax.bar(x - width / 2, quartersPass, width, label='Pass')
+            rects2 = ax.bar(x + width / 2, quarterDiscard, width, label='Discard')
+
+            # Add some text for labels, title and custom x-axis tick labels, etc.
+            ax.set_ylabel('Number of Actions')
+            ax.set_title('Number of Actions')
+            ax.set_ylabel('Game Quarters')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend()
+
+            def autolabel(rects):
+                """Attach a text label above each bar in *rects*, displaying its height."""
+                for rect in rects:
+                    height = rect.get_height()
+                    ax.annotate('{}'.format(height),
+                                xy=(rect.get_x() + rect.get_width() / 2, height),
+                                xytext=(0, 3),  # 3 points vertical offset
+                                textcoords="offset points",
+                                ha='center', va='bottom')
+
+
+            autolabel(rects1)
+            autolabel(rects2)
+
+            directory = self._plotsDirectory + "/ActionBehavior_LastGame_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+            plt.savefig(directory + "/ActionBehavior_" + str(i) + "_iteration_" + str(
+                iteraction) + ".png")
+
+            fig.clf()
+
+
+    def plotDiscardBehavior(self, numPLayers, actions, iteraction):
+
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111)
+
+        largest = 0
+        for i in range(numPLayers):
+            if len(actions[i]) > largest:
+                largest = len(actions[i])
+
+        # Plot discard plot for all players
         for i in range(numPLayers):
 
 
@@ -202,7 +297,13 @@ class PlotManager():
             # # plt.yticks(np.arange(y.min(), y.max(), 0.005))
             #
 
-            plt.savefig(self._plotsDirectory + "/Player_Discards_player_" + str(i) + "_iteration_" + str(
+            directory = self._plotsDirectory + "/DiscardBehavior_LastGame_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+
+            plt.savefig(directory + "/Player_Discards_player_" + str(i) + "_iteration_" + str(
                 iteraction) + ".png")
 
             fig.clf()
@@ -249,7 +350,13 @@ class PlotManager():
             plt.grid()
             ax.plot(dataY, reward)
 
-            plt.savefig(self._plotsDirectory + "/Player_RewardValidAction_player_" + str(i) +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
+
+            directory = self._plotsDirectory + "/Rewards_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+            plt.savefig(directory + "/Reward_player_" + str(i) +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
 
             fig.clf()
 
@@ -291,7 +398,13 @@ class PlotManager():
             ax.set_yticklabels([DataSetManager.actionDiscard, DataSetManager.actionPass,DataSetManager.actionFinish])
 
             if directory == "":
-                plt.savefig(self._plotsDirectory  + "/Game_TimeLine_iteration_"+str(iteration)+"_Player_"+str(i)+".png")
+
+                directory = self._plotsDirectory + "/TimeLine_LastGame_Players/"
+
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+
+                plt.savefig(directory  + "/Game_TimeLine_iteration_"+str(iteration)+"_Player_"+str(i)+".png")
             else:
                 plt.savefig(
                     directory + "/Game_TimeLine_iteration_" + str(iteration) + "_Player_" + str(i) + ".png")
@@ -346,7 +459,12 @@ class PlotManager():
             ax.legend()
             plt.grid()
 
-            plt.savefig(self._plotsDirectory + "/Player_CorrectActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalCorrectActions)+"("+str(totalActionsGame)+").png")
+            directory = self._plotsDirectory + "/CorrectActions_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+            plt.savefig(directory + "/CorrectActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalCorrectActions)+"("+str(totalActionsGame)+").png")
 
             plt.clf()
 
@@ -380,6 +498,39 @@ class PlotManager():
             plt.plot(dataY, wrongActionsPlot)
             plt.grid()
 
-            plt.savefig(self._plotsDirectory + "/Player_WrongActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
+            directory = self._plotsDirectory + "/WrongActions_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+
+            plt.savefig(directory + "/WrongActionsPlot_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
 
             plt.clf()
+
+    def plotLosses(self, numPLayers, losses, iteraction):
+
+        # Plot wrong actions all players
+        for i in range(numPLayers):
+            loss = losses[i]
+
+            dataY = range(len(loss))
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+
+            ax.set_xlabel('Training Steps')
+            ax.set_ylabel('Loss')
+
+            plt.plot(dataY, loss)
+            plt.grid()
+
+            directory = self._plotsDirectory + "/Losses_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+            plt.savefig(directory + "/Loss_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions.png")
+
+            plt.clf()
+

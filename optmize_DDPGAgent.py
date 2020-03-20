@@ -8,7 +8,7 @@ import hyperopt.plotting
 from ExperimentHandler import ChefsHatExperimentHandler
 
 
-from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
+from Agents import  AgentRandom, AgentDQL_old, AgentA2C, AgentDDPG
 
 from Rewards import RewardOnlyWinning
 import tensorflow as tf

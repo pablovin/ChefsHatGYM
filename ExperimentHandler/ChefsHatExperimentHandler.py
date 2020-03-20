@@ -130,20 +130,25 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                         action = players[thisPlayer].getAction((state, validAction))
 
                         newState, reward, validActionPlayer = env.step(action)
+                        newPossibleActions =  env.getPossibleActions(thisPlayer)
 
                         done = False
                         if validActionPlayer:
                             if env.lastActionPlayers[thisPlayer] == DataSetManager.actionFinish:
                                 done = True
+                                newState =  numpy.zeros(len(state))
 
                             # print ("")
                         else:
                             wrongActions = wrongActions+1
 
-                        if done or wrongActions < 10:
+                        # amountOfInvalid = int((100 - game)*0.2)
+                        amountOfInvalid = int((numGames - game)*0.2)
+
+                        if done or wrongActions < amountOfInvalid or validAction:
                         # if validActionPlayer:
                           players[thisPlayer].train((state, action, reward, newState, done,
-                                                     experimentManager.modelDirectory, game, validAction, thisPlayer))
+                                                     experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer))
 
 
                     correctActions = players[thisPlayer].currentCorrectAction
@@ -194,7 +199,9 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         if isPlotting and (game+1)%plotFrequency==0:
             experimentManager.plotManager.plotTimeLine(env.playerActionsTimeLine, len(playersAgents), game)
 
-            experimentManager.plotManager.plotNumberOfActions( len(playersAgents), env.playerActionsComplete, game)
+            experimentManager.plotManager.plotDiscardBehavior(len(playersAgents), env.playerActionsComplete, game)
+
+            experimentManager.plotManager.plotNumberOfActions(len(playersAgents), env.playerActionsComplete, game)
 
         #saving the metrics
         for p in range(len(playersAgents)):
@@ -233,12 +240,16 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
         metrics.append(metricsPerGame)
 
+        agentsType = []
         if isPlotting and (game+1)%plotFrequency==0:
             correctActions = []
             totalActions = []
+            losses = []
             for p in players:
                 correctActions.append(p.totalCorrectAction)
                 totalActions.append(p.totalAction)
+                losses.append(p.losses)
+                agentsType.append(p.name)
 
             experimentManager.plotManager.plotRounds(env.allRounds, game)
             experimentManager.plotManager.plotRewardsAll(len(playersAgents), env.allRewards, game)
@@ -246,6 +257,9 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
             experimentManager.plotManager.plotCorrectActions(len(playersAgents), correctActions,totalActions,  game)
             experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
             experimentManager.plotManager.plotFinishPositionAllPlayers(len(playersAgents), env.allScores, env.winners, game)
+            experimentManager.plotManager.plotLosses(len(playersAgents), losses, game)
+
+
 
 
         # experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)

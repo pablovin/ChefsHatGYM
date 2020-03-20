@@ -1,6 +1,6 @@
 from ExperimentHandler import ChefsHatExperimentHandler
 
-from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
+from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG, AgentDQL_Trfl
 
 from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid, RewardOnlyWinning_ShortRounds, RewardIROSPaper,RewardValidAction
 import tensorflow as tf
@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDQL.AgentDQL([True]) #training agent
+    agent1 = AgentDQL.AgentDQLV3([False]) #training agent
     # agent1 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -24,7 +24,7 @@ def runModel():
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
     numGames = 100# amount of training games
-    experimentDescriptor = "DQLTraining_DoAction"
+    experimentDescriptor = "Test_DQL_WinAll_MaskOn"
 
     actorModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_A2CTraining_2020-03-17_20:01:40.860961/Model/actor_iteration_999_Player_0.hd5"
     criticModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_A2CTraining_2020-03-17_20:01:40.860961/Model/critic_iteration_999_Player_0.hd5"
@@ -32,9 +32,9 @@ def runModel():
     actorModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_DDPGTraining_2020-03-18_11:58:30.344906/Model/actor_iteration_999_Player_0.hd5"
     criticModelDDPG = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['DDPG', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_DDPGTraining_2020-03-18_11:58:30.344906/Model/critic_iteration_999_Player_0.hd5"
 
-    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_500TrainAgents_['DQL', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_ValidAction_DQLTraining_DoAction_2020-03-18_13:56:56.176117/Model/actor_iteration_499_Player_0.hd5"
+    DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_3000TrainAgents_['DQL', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_Test_DQL_WinAll_MaskOn_2020-03-20_19:20:51.555625/Model/actor_iteration_2999_Player_0.hd5"
 
-    loadModelAgent1 = ""#DQLModel#""#[actorModelDDPG,criticModelDDPG] ##""#[actorModelA2C,criticModelA2C] #[actorModelA2C,criticModelA2C] #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
+    loadModelAgent1 = DQLModel #"" #""#""#DQLModel#""#[actorModelDDPG,criticModelDDPG] ##""#[actorModelA2C,criticModelA2C] #[actorModelA2C,criticModelA2C] #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
 
     loadModelAgent2 = ""#DQLModel #"" #DQLModel
 

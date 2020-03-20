@@ -48,7 +48,6 @@ class ChefsHatEnv(gym.Env):
     actionTag = ""
     actionComplete = ""
 
-
     possibleActions = self.getPossibleActions(self.currentPlayer)
 
 
@@ -58,12 +57,12 @@ class ChefsHatEnv(gym.Env):
 
         if numpy.argmax(action) == len(possibleActions) - 1:
 
-            #if there is any other action available, and the pass action was chosen
-            if numpy.argmax(possibleActions) == len(possibleActions) - 1:
-                reward = self.rewardFunction.getRewardPass()
-            else:
-                # reward = 0
+            #if only the pass action is available
+            if numpy.sum(possibleActions) == 1:
                 reward = self.rewardFunction.getRewardOnlyPass()
+            else: # you took the pass action even tho there were other actions available
+                # reward = 0
+                reward = self.rewardFunction.getRewardPass()
                 # validAction = False
 
             actionTaken = DataSetManager.actionPass

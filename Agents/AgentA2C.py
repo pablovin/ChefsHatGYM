@@ -42,6 +42,8 @@ class AgentA2C(IAgent.IAgent):
     totalAction = []
     totalActionPerGame = 0
 
+    losses = []
+
     def __init__(self, params=[]):
         self.training = params[0]
         self.name = "A2C"

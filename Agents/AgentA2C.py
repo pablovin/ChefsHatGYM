@@ -167,6 +167,7 @@ class AgentA2C(IAgent.IAgent):
 
 
     def getOptmizers(self):
+        import tensorflow.compat.v1 as tfc
         rmsOptmizer = RMSprop(lr=self.learning_rate, epsilon=0.1, rho=0.99)
 
         #optmizers
@@ -181,12 +182,10 @@ class AgentA2C(IAgent.IAgent):
         advantage_pl = K.placeholder(shape=(None,))
         k_constants = K.variable(0)
 
-        weighted_actions = K.sum(action_pl * self.actor.output, axis=1)
-        eligibility = K.log(weighted_actions + 1e-10) * K.stop_gradient(advantage_pl)
+        weighted_actions = K.sum(action_pl * self.actor.output, axis=0)
+        eligibility = -tfc.log(weighted_actions + 1e-5) * advantage_pl
         entropy = K.sum(self.actor.output * K.log(self.actor.output + 1e-10), axis=1)
         loss = 0.001 * entropy - K.sum(eligibility)
-        #
-        # loss = entropy
 
         updates = rmsOptmizer.get_updates(self.actor.trainable_weights, [], loss)
 
@@ -204,33 +203,33 @@ class AgentA2C(IAgent.IAgent):
         self.criticOptmizer = K.function([self.critic.input, discounted_r], critic_loss, updates=updates)
 
 
-        def A2CLoss(y_true, y_pred):
-            #y_true = actions + advantages
-            actions = y_true[0:200]
-            advantages = y_true[-1]
-
-            # print ("Actions: " + str(actions))
-            # print ("Advantages: " + str(advantages))
-            #
-            # input("here")
-
-            print('actions.get_shape', actions.get_shape)
-            print('K.shape(actions)', K.shape(actions))
-
-            print('advantages.get_shape', advantages.get_shape)
-            print('K.shape(advantages)', K.shape(advantages))
-
-            print('y_pred.get_shape', y_pred.get_shape)
-            print('K.shape(y_pred)', K.shape(y_pred))
-
-
-            # weightedActions = K.sum(actions*y_pred, axis=1)
-            # eligibility = K.log(weightedActions + 1e-10) * K.stop_gradient(advantages)
-            # entropy = K.sum(y_pred * K.log(y_pred + 1e-10), axis=1)
-            # loss = 0.001 * entropy - K.sum(eligibility)
-
-            loss = advantages
-            return K.mean(loss)
+        # def A2CLoss(y_true, y_pred):
+        #     #y_true = actions + advantages
+        #     actions = y_true[0:200]
+        #     advantages = y_true[-1]
+        #
+        #     # print ("Actions: " + str(actions))
+        #     # print ("Advantages: " + str(advantages))
+        #     #
+        #     # input("here")
+        #
+        #     print('actions.get_shape', actions.get_shape)
+        #     print('K.shape(actions)', K.shape(actions))
+        #
+        #     print('advantages.get_shape', advantages.get_shape)
+        #     print('K.shape(advantages)', K.shape(advantages))
+        #
+        #     print('y_pred.get_shape', y_pred.get_shape)
+        #     print('K.shape(y_pred)', K.shape(y_pred))
+        #
+        #
+        #     # weightedActions = K.sum(actions*y_pred, axis=1)
+        #     # eligibility = K.log(weightedActions + 1e-10) * K.stop_gradient(advantages)
+        #     # entropy = K.sum(y_pred * K.log(y_pred + 1e-10), axis=1)
+        #     # loss = 0.001 * entropy - K.sum(eligibility)
+        #
+        #     loss = advantages
+        #     return K.mean(loss)
 
         #
         # self.actor.compile(loss=A2CLoss, optimizer=rmsOptmizer, metrics=["mse"])
@@ -325,9 +324,15 @@ class AgentA2C(IAgent.IAgent):
         # historyC = self.critic.fit(state , discounted_rewards,  verbose=False)
         # self.losses.append(historyC.history['loss'])
 
-        loss = self.actorOptmizer([[state, possibleActions], action, advantages])
+        actorLoss = self.actorOptmizer([[state, possibleActions], action, advantages])
 
-        self.criticOptmizer([[state,possibleActions], discounted_rewards])
+        actorLoss = numpy.mean(actorLoss)
+
+        criticLoss = self.criticOptmizer([[state,possibleActions], discounted_rewards])
+
+        criticLoss = numpy.mean(criticLoss)
+
+        self.losses.append([actorLoss,criticLoss])
 
         # print ("Loss Critic:" + str(history.history['loss']))
 
@@ -341,6 +346,7 @@ class AgentA2C(IAgent.IAgent):
             self.critic.save(savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5", savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")
 
+        print(" -- Epsilon:" + str(self.epsilon) + " - ALoss:" + str(actorLoss) + " - " + "CLoss: " + str(criticLoss))
 
     def resetMemory (self):
         self.states = []

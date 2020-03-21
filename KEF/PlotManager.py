@@ -518,10 +518,33 @@ class PlotManager():
     def plotLosses(self, numPLayers, losses, iteraction):
 
         # Plot wrong actions all players
-        for i in range(numPLayers):
-            loss = losses[i]
 
-            dataY = range(len(loss))
+        for i in range(numPLayers):
+
+            directory = self._plotsDirectory + "/Losses_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+
+            loss = losses[i]
+            isList = False
+            if isinstance(loss, list):
+                isList = True
+                loss = numpy.array(loss)
+                # print ("Shape:" + str(loss.shape))
+                # loss = numpy.swapaxes(loss, 0, 1)
+                lossActor = []
+                lossCritic = []
+                for u in loss:
+                    lossActor.append(u[0])
+                    lossCritic.append(u[1])
+                # lossActor = loss[:, 0]
+                # lossCritic =  loss[:, 1]
+
+                dataY = range(len(lossActor))
+            else:
+                 dataY = range(len(loss))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
@@ -529,15 +552,41 @@ class PlotManager():
             ax.set_xlabel('Training Steps')
             ax.set_ylabel('Loss')
 
-            plt.plot(dataY, loss)
-            plt.grid()
 
-            directory = self._plotsDirectory + "/Losses_Players/"
+            if isList:
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
 
-            if not os.path.exists(directory):
-                os.mkdir(directory)
+                ax.set_xlabel('Training Steps')
+                ax.set_ylabel('Loss')
 
-            plt.savefig(directory + "/Loss_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions.png")
+                plt.plot(dataY, lossCritic, label="Critic")
+                plt.legend()
 
-            plt.clf()
+                plt.savefig(directory + "/CriticLoss_player_" + str(i) + "_iteration_" + str(iteraction) + "WrongActions.png")
+
+                plt.clf()
+
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+
+                ax.set_xlabel('Training Steps')
+                ax.set_ylabel('Loss')
+
+
+                plt.plot(dataY, lossActor, label="Actor")
+                plt.legend()
+                plt.savefig(
+                    directory + "/ActorLoss_player_" + str(i) + "_iteration_" + str(iteraction) + "WrongActions.png")
+            else:
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+
+                ax.set_xlabel('Training Steps')
+                ax.set_ylabel('Loss')
+                plt.plot(dataY, loss)
+                plt.grid()
+                plt.savefig(directory + "/Loss_player_" + str(i) +"_iteration_"+str(iteraction)+"WrongActions.png")
+
+                plt.clf()
 

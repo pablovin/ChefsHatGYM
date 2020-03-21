@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentDDPG.AgentDDPG([False, 1.0]) #training agent
+    agent1 = AgentA2C.AgentA2C([True, 1.0]) #training agent
     # agent1 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -23,7 +23,7 @@ def runModel():
 
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
-    numGames = 100# amount of training games
+    numGames = 300# amount of training games
     experimentDescriptor = "Test_DQLSelfPlay20"
 
     actorModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_A2CTraining_2020-03-17_20:01:40.860961/Model/actor_iteration_999_Player_0.hd5"
@@ -34,7 +34,7 @@ def runModel():
 
     DQLModel = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/ICPR_Experiments/DQL/DQL_Vs_SelfPlay/Player_4_Cards_11_games_2000TrainAgents_['DQL', 'DQL', 'DQL', 'DQL']_Reward_OnlyWinning_Training_SelfPlay__GameExperimentNumber_17_Best_Agent_3_2020-03-21_10:19:50.794104/Model/actor_iteration_1799_Player_0.hd5"
 
-    loadModelAgent1 = [actorModelDDPG,criticModelDDPG]#DQLModel#""# #"" #""#""#DQLModel#""#[actorModelDDPG,criticModelDDPG] ##""#[actorModelA2C,criticModelA2C] #[actorModelA2C,criticModelA2C] #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
+    loadModelAgent1 = ""#[actorModelDDPG,criticModelDDPG]#DQLModel#""# #"" #""#""#DQLModel#""#[actorModelDDPG,criticModelDDPG] ##""#[actorModelA2C,criticModelA2C] #[actorModelA2C,criticModelA2C] #DQLModel #[actorModelA2C,criticModelA2c] #[actorModelDDPG,criticModelDDPG]
 
     loadModelAgent2 = ""#DQLModel #"" #DQLModel
 

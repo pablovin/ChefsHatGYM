@@ -67,7 +67,7 @@ class AgentDQL(IAgent.IAgent):
 
         if len(agentParams) > 1:
 
-            self.hiddenLayers, self.hiddenUnits, QSize, self.batchSize, self.targetUpdateFrequency = agentParams
+            self.hiddenLayers, self.hiddenUnits, self.batchSize,  self.tau = agentParams
 
         else:
 
@@ -85,8 +85,7 @@ class AgentDQL(IAgent.IAgent):
             self.hiddenLayers = 3
             self.hiddenUnits = 32
             self.batchSize = 256
-            QSize = 20000
-            self.targetUpdateFrequency = 256
+            self.tau = 0.1  # target network update rate
 
             #My initial estimation
             # self.hiddenLayers = 1
@@ -96,14 +95,13 @@ class AgentDQL(IAgent.IAgent):
             # self.targetUpdateFrequency = 100
 
         self.gamma = 0.95  # discount rate
-        self.outputActivation = "linear"
         self.loss = "mse"
 
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.990
 
 
-        self.tau = 0.1 #target network update rate
+        # self.tau = 0.1 #target network update rate
 
         if self.training:
             self.epsilon = self.initialEpsilon  # exploration rate while training
@@ -115,6 +113,7 @@ class AgentDQL(IAgent.IAgent):
         self.prioritized_experience_replay = False
         self.dueling = False
 
+        QSize = 20000
         self.memory = MemoryBuffer.MemoryBuffer(QSize, self.prioritized_experience_replay)
 
         self.learning_rate = 0.001
@@ -162,7 +161,7 @@ class AgentDQL(IAgent.IAgent):
         else:
 
             possibleActions = Input(shape=(self.outputSize,),
-                           name="PossivleActions")
+                           name="PossibleAction")
 
 
             dense = Dense(self.outputSize, activation='softmax')(dense)
@@ -170,35 +169,6 @@ class AgentDQL(IAgent.IAgent):
 
 
         return Model([inputLayer, possibleActions], output)
-
-    # def buildSimpleModel(self):
-    #
-    #     inputSize = self.numCardsPerPlayer + self.numMaxCards
-    #
-    #     inputLayer = Input(shape=(inputSize,),
-    #                        name="State")  # 5 cards in the player's hand + maximum 4 cards in current board
-    #
-    #     # dense = Dense(self.hiddenLayers, activation="relu", name="dense_0")(inputLayer)
-    #     for i in range(self.hiddenLayers+1):
-    #         if i == 0:
-    #             previous = inputLayer
-    #         else:
-    #             previous = dense
-    #
-    #         dense = Dense(self.hiddenUnits*(i+1), name="Dense"+str(i), activation="relu")(previous)
-    #
-    #     possibleActions = Input((self.outputSize), name="possibleActions")
-    #
-    #     multiply = Multiply()([possibleActions,dense])
-    #     dense = Dense(self.outputSize, activation='linear')(multiply)
-    #
-    #
-    #     outputActor = Dense(self.outputSize, activation=self.outputActivation)(
-    #         dense)  # Cards at the player hand plus the pass action
-    #
-    #
-    #     return  Model(inputs=[inputLayer], outputs=[outputActor])
-
 
 
     def getAction(self, params):
@@ -210,9 +180,6 @@ class AgentDQL(IAgent.IAgent):
         possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
 
         if numpy.random.rand() <= self.epsilon:
-            # if numpy.sum(possibleActions2) > 1:
-            #     possibleActions2[199] = 0
-
             itemindex = numpy.array(numpy.where(numpy.array(possibleActions2) == 1))[0].tolist()
             random.shuffle(itemindex)
             aIndex = itemindex[0]
@@ -309,9 +276,6 @@ class AgentDQL(IAgent.IAgent):
 
 
     def train(self, params=[]):
-
-
-
 
         state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
 

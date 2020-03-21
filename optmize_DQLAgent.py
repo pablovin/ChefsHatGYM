@@ -8,7 +8,7 @@ import hyperopt.plotting
 from ExperimentHandler import ChefsHatExperimentHandler
 
 
-from Agents import  AgentRandom, AgentDQL_old, AgentA2C, AgentDDPG
+from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
 
 from Rewards import RewardOnlyWinning
 import tensorflow as tf
@@ -23,7 +23,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 def runModel():
     # Parameters for the game
-    agent1 = AgentDQL_old.AgentDQL([True])  # training agent
+    agent1 = AgentDQL.AgentDQL([True, 1.0])  # training agent
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -63,7 +63,7 @@ def runModel():
 
     isPlotting = False #plot the experiment
 
-    plotFrequency = 100 #plot the plots every X games
+    plotFrequency = 500 #plot the plots every X games
 
     createDataset = False # weather to save the dataset
 
@@ -75,14 +75,13 @@ def runModel():
     space = hp.choice('a',
                       [
                           (hp.choice("layers", [1, 2, 3, 4]), hp.choice("hiddenUnits", [8, 32, 64, 256]),
-                           hp.choice("Qsize", [500, 1000 , 2500, 5000]),
                            hp.choice("batchSize", [16, 64, 128, 256, 512]),
-                           hp.choice("TargetUpdateFunction", [16, 64, 128, 256, 512]),
+                           hp.uniform("tau", 0.01, 0.99)
                           )
                       ])
 
     def objective(args):
-        agent1 = AgentDQL_old.AgentDQL([True])
+        agent1 = AgentDQL.AgentDQL([True, 1.0])
         agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
         agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
         agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -113,7 +112,7 @@ def runModel():
 
 
         #testing trial
-        agent1 = AgentDQL_old.AgentDQL([False])  # training agent
+        agent1 = AgentDQL.AgentDQL([False])  # training agent
         playersAgents = [agent1, agent2, agent3, agent4]
 
 
@@ -148,14 +147,13 @@ def runModel():
         averageRounds = rounds
 
         # return wins
-
-        print("Args: ", args)
+        print("Args: ", args + "Reward:" + str(averageReward))
         return {
-            'loss': wins,
+            'loss': averageReward,
             'status': STATUS_OK,
             # -- store other results like this
             'eval_time': time.time(),
-            'other_stuff': {'reward': averageReward, "rounds": averageRounds, 'wrongMoves': p1_wrongActions},
+            'other_stuff': {'wins': wins, "rounds": averageRounds, 'wrongMoves': p1_wrongActions},
         }
 
     trials = Trials()

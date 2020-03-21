@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def runModel():
     #Parameters for the game
-    agent1 = AgentA2C.AgentA2C([True, 1.0]) #training agent
+    agent1 = AgentDDPG.AgentDDPG([True, 1.0]) #training agent
     # agent1 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent2 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
     agent3 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)
@@ -23,7 +23,7 @@ def runModel():
 
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
-    numGames = 300# amount of training games
+    numGames = 1000# amount of training games
     experimentDescriptor = "Test_DQLSelfPlay20"
 
     actorModelA2C = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_1000TrainAgents_['A2C', 'DUMMY_RANDOM', 'DUMMY_RANDOM', 'DUMMY_RANDOM']_Reward_OnlyWinning_A2CTraining_2020-03-17_20:01:40.860961/Model/actor_iteration_999_Player_0.hd5"
@@ -52,7 +52,7 @@ def runModel():
 
     isPlotting = True #plot the experiment
 
-    plotFrequency = 100 #plot the plots every X games
+    plotFrequency = 1000 #plot the plots every X games
 
     createDataset = False # weather to save the dataset
 

@@ -183,6 +183,7 @@ class ChefsHatEnv(gym.Env):
         for i in range(self.numberPlayers):
             self.allRewards[i].append(self.currentGameRewards[i])
             self.allWrongActions[i].append(self.currentWrongActions[i])
+            self.playerActionsCompleteAllGames[i].append(self.playerActionsComplete[i])
 
         #update the startGame/win game values
 
@@ -603,12 +604,15 @@ class ChefsHatEnv(gym.Env):
 
     self.playerActionsComplete = []
 
+    self.playerActionsCompleteAllGames = []
+
     # Variables to log some statistics per all games
     self.allScores = []
     self.allRewards = []
     self.allWrongActions = []
     self.allRounds = []
     self.winners = []
+    self.playerActionsCompleteAllGames = []
 
     self.startGameFinishingPosition = []
 
@@ -634,6 +638,7 @@ class ChefsHatEnv(gym.Env):
         self.allRewards.append([])
         self.allWrongActions.append([])
         self.startGameFinishingPosition.append(0)
+        self.playerActionsCompleteAllGames.append([])
 
   def declareSpecialAction(self):
 

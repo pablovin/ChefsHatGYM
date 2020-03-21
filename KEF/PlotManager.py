@@ -219,6 +219,141 @@ class PlotManager():
             fig.clf()
 
 
+    def plotNumberOfActionsTotal(self, numPLayers, actions, iteraction):
+
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111)
+
+        largest = 0
+        for i in range(numPLayers):
+            if len(actions[i]) > largest:
+                largest = len(actions[i])
+
+
+
+        # Plot discard plot for all players
+        for i in range(numPLayers):
+
+
+            allPasses = []
+            allDiscards = []
+
+            for i in range(4):
+                allPasses.append([])
+                allDiscards.append([])
+
+            for gameIndex in range(len(actions[i])):
+
+                game = actions[i][gameIndex]
+
+            # obtain all the actions of this player in a vector
+                actionsTotal = []
+                for a in range(len(game)):
+                    if game[a][0] == DataSetManager.actionPass:
+                        actionsTotal.append(0)
+                    else:
+                        actionsTotal.append(1)
+
+                # obtain all the actions of this player in a vector
+                quarterInterval = int(len(actionsTotal) / 4)
+
+                labels = ['Q1', 'Q2', 'Q3', 'Q4']
+                quartersPass = []
+                quarterDiscard = []
+
+                x = numpy.arange(len(labels))  # the label locations
+                width = 0.35  # the width of the bars
+
+
+                for q in range(4):
+                    # first quarter
+                    quarter = actionsTotal[q * quarterInterval:q * quarterInterval + quarterInterval]
+                    unique, counts = numpy.unique(quarter, return_counts=True)
+                    currentQuarter = dict(zip(unique, counts))
+
+                    if 0 in currentQuarter:
+                     allPasses[q].append(currentQuarter[0])
+                    else:
+                        allPasses[q].append(0)
+
+                    if 1 in currentQuarter:
+                        allDiscards[q].append(currentQuarter[1])
+                    else:
+                        allDiscards[q].append(0)
+
+
+
+            fig, axs = plt.subplots(4, 2)
+
+            y = range(len(allPasses[0]))
+
+            rect1 = axs[0, 0].plot(y, allPasses[0])
+            axs[0, 0].set_title('Passes Q1')
+
+            rect2 =axs[1, 0].plot(y, allPasses[1])
+            axs[1, 0].set_title('Passes Q2')
+
+            rect3 =axs[2, 0].plot(y, allPasses[2])
+            axs[2, 0].set_title('Passes Q3')
+
+            rect4 =axs[3, 0].plot(y, allPasses[3])
+            axs[3, 0].set_title('Passes Q4')
+
+            rect5 =axs[0, 1].plot(y, allDiscards[0])
+            axs[0, 1].set_title('Discards Q1')
+
+            rect6 =axs[1, 1].plot(y, allDiscards[1])
+            axs[1, 1].set_title('Discards Q2')
+
+            rect7 =axs[2, 1].plot(y, allDiscards[2])
+            axs[2, 1].set_title('Discards Q3')
+
+            rect8 =axs[3, 1].plot(y, allDiscards[3])
+            axs[3, 1].set_title('Discards Q4')
+
+            # for ax in axs.flat:
+            #     ax.set(xlabel='Quarter', ylabel='Number of Actions')
+
+            # Hide x labels and tick labels for top plots and y ticks for right plots.
+            for ax in axs.flat:
+                ax.label_outer()
+            #
+            #
+            # rects1 = ax.bar(x - width / 2, quartersPass, width, label='Pass')
+            # rects2 = ax.bar(x + width / 2, quarterDiscard, width, label='Discard')
+
+            # Add some text for labels, title and custom x-axis tick labels, etc.
+            ax.set_ylabel('N° Actions')
+            # ax.set_title('Number of Actions')
+            ax.set_ylabel('Game Quarters')
+            # ax.set_xticks(x)
+            # ax.set_xticklabels(labels)
+            # ax.legend()
+
+            # def autolabel(rects):
+            #     """Attach a text label above each bar in *rects*, displaying its height."""
+            #     for rect in rects:
+            #         height = rect.get_height()
+            #         ax.annotate('{}'.format(height),
+            #                     xy=(rect.get_x() + rect.get_width() / 2, height),
+            #                     xytext=(0, 3),  # 3 points vertical offset
+            #                     textcoords="offset points",
+            #                     ha='center', va='bottom')
+            #
+            #
+            # autolabel(rect1)
+            # autolabel(rect2)
+
+            directory = self._plotsDirectory + "/ActionBehavior_AllGames_Players/"
+
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+
+            plt.savefig(directory + "/ActionBehavior_AllGames" + str(i) + "_iteration_" + str(
+                iteraction) + ".png", dpi=500)
+
+            fig.clf()
+
     def plotDiscardBehavior(self, numPLayers, actions, iteraction):
 
         # fig = plt.figure()
@@ -526,25 +661,29 @@ class PlotManager():
             if not os.path.exists(directory):
                 os.mkdir(directory)
 
-
             loss = losses[i]
             isList = False
-            if isinstance(loss, list):
-                isList = True
-                loss = numpy.array(loss)
-                # print ("Shape:" + str(loss.shape))
-                # loss = numpy.swapaxes(loss, 0, 1)
-                lossActor = []
-                lossCritic = []
-                for u in loss:
-                    lossActor.append(u[0])
-                    lossCritic.append(u[1])
-                # lossActor = loss[:, 0]
-                # lossCritic =  loss[:, 1]
 
-                dataY = range(len(lossActor))
-            else:
-                 dataY = range(len(loss))
+            try:
+
+                if isinstance(loss[0], list):
+                    isList = True
+                    loss = numpy.array(loss)
+                    # print ("Shape:" + str(loss.shape))
+                    # loss = numpy.swapaxes(loss, 0, 1)
+                    lossActor = []
+                    lossCritic = []
+                    for u in loss:
+                        lossActor.append(u[0])
+                        lossCritic.append(u[1])
+                    # lossActor = loss[:, 0]
+                    # lossCritic =  loss[:, 1]
+
+                    dataY = range(len(lossActor))
+
+            except:
+                     isList = False
+                     dataY = range(len(loss))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)

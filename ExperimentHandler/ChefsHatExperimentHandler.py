@@ -258,6 +258,8 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
             experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
             experimentManager.plotManager.plotFinishPositionAllPlayers(len(playersAgents), env.allScores, env.winners, game)
             experimentManager.plotManager.plotLosses(len(playersAgents), losses, game)
+            experimentManager.plotManager.plotNumberOfActionsTotal(len(playersAgents), env.playerActionsCompleteAllGames, game)
+
 
 
         # experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)

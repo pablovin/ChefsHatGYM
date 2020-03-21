@@ -259,8 +259,15 @@ class PlotManager():
                 quarter = currentPlayerActions[q*quarterInterval:q*quarterInterval+quarterInterval]
                 unique, counts = numpy.unique(quarter, return_counts=True)
                 currentQuarter = dict(zip(unique, counts))
-                passesCount = currentQuarter[0]
-                discardCount = len(quarter) - passesCount
+
+                if 0 in currentQuarter:
+                    passesCount = currentQuarter[0]
+                else:
+                    passesCount = 0
+                if 1 in currentQuarter:
+                    discardCount = len(quarter) - passesCount
+                else:
+                    discardCount = 0
 
                 ax.axvline(q*quarterInterval, ymin=0, ymax=11, color="r", linestyle='--', label="Q "+str(q)+" - Passes:" + str(passesCount) + " - Discards:" + str(discardCount))
 

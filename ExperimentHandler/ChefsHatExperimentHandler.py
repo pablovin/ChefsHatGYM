@@ -145,10 +145,10 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                         # amountOfInvalid = int((100 - game)*0.2)
                         amountOfInvalid = int((numGames - game)*0.2)
 
-                        if done or wrongActions < amountOfInvalid or validAction:
-                        # if validActionPlayer:
-                          players[thisPlayer].train((state, action, reward, newState, done,
-                                                     experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer))
+                        # if done or wrongActions < amountOfInvalid or validAction:
+                        # # if validActionPlayer:
+                        players[thisPlayer].train((state, action, reward, newState, done,
+                                                 experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer))
 
 
                     correctActions = players[thisPlayer].currentCorrectAction
@@ -258,8 +258,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
             experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
             experimentManager.plotManager.plotFinishPositionAllPlayers(len(playersAgents), env.allScores, env.winners, game)
             experimentManager.plotManager.plotLosses(len(playersAgents), losses, game)
-
-
 
 
         # experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)

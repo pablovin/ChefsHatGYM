@@ -55,6 +55,7 @@ class AgentDQL(IAgent.IAgent):
         self.currentCorrectAction = 0
 
         self.totalCorrectAction = []
+        losses = []
 
 
     def startAgent(self, params=[]):
@@ -122,6 +123,8 @@ class AgentDQL(IAgent.IAgent):
             self.buildModel()
         else:
             self.loadModel(loadModel)
+
+        self.losses = []
 
 
     def buildModel(self):
@@ -207,8 +210,8 @@ class AgentDQL(IAgent.IAgent):
         possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
 
         if numpy.random.rand() <= self.epsilon:
-            if numpy.sum(possibleActions2) > 1:
-                possibleActions2[199] = 0
+            # if numpy.sum(possibleActions2) > 1:
+            #     possibleActions2[199] = 0
 
             itemindex = numpy.array(numpy.where(numpy.array(possibleActions2) == 1))[0].tolist()
             random.shuffle(itemindex)
@@ -222,6 +225,8 @@ class AgentDQL(IAgent.IAgent):
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
+
+
 
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
@@ -304,6 +309,9 @@ class AgentDQL(IAgent.IAgent):
 
 
     def train(self, params=[]):
+
+
+
 
         state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
 

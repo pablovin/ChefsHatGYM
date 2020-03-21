@@ -6,7 +6,7 @@ import numpy
 import copy
 
 from collections import deque
-from keras.layers import Input, Dense, Flatten, Concatenate
+from keras.layers import Input, Dense, Flatten, Concatenate, Multiply
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.optimizers import RMSprop
@@ -15,10 +15,9 @@ import tensorflow as tf
 import keras.backend as K
 
 from keras.models import load_model
+from Agents import MemoryBuffer
 
 import random
-
-
 
 class AgentDDPG(IAgent.IAgent):
 
@@ -91,7 +90,8 @@ class AgentDDPG(IAgent.IAgent):
 
         self.learning_rate = 0.0001
         #Game memory
-        self.memory = deque(maxlen=5000)
+        QSize = 5000
+        self.memory = MemoryBuffer.MemoryBuffer(QSize, False)
 
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.995
@@ -107,6 +107,8 @@ class AgentDDPG(IAgent.IAgent):
         else:
             self.loadModel(loadModel)
 
+        self.losses = []
+
     def buildActorNetwork(self):
 
         inputSize = self.numCardsPerPlayer + self.numMaxCards
@@ -120,10 +122,16 @@ class AgentDDPG(IAgent.IAgent):
 
             dense = Dense(self.hiddenUnits * (i + 1), name="Actor_Dense" + str(i), activation="relu")(previous)
 
+        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
 
-        outputActor = Dense(self.outputSize, activation='linear', name="actor_output")(dense)
+        actionsOutput = Input(shape=(self.outputSize,),
+                                name="PossibleActions")
 
-        self.actor = Model(inp,outputActor)
+
+
+        outputPossibleActor = Multiply()([actionsOutput, outputActor])
+
+        self.actor = Model([inp,actionsOutput], outputPossibleActor)
 
         inputSize = self.numCardsPerPlayer + self.numMaxCards
         inp = Input((inputSize,), name="Actor_State")
@@ -137,9 +145,16 @@ class AgentDDPG(IAgent.IAgent):
             dense = Dense(self.hiddenUnits * (i + 1), name="Actor_Dense" + str(i), activation="relu")(previous)
 
 
-        outputActor = Dense(self.outputSize, activation='linear', name="actor_output")(dense)
+        outputActor = Dense(self.outputSize, activation='softmax', name="actor_output")(dense)
 
-        self.actorTarget = Model(inp,outputActor)
+        actionsOutput = Input(shape=(self.outputSize,),
+                                name="PossibleActions")
+
+
+
+        outputPossibleActor = Multiply()([actionsOutput, outputActor])
+
+        self.actorTarget = Model([inp,actionsOutput], outputPossibleActor)
 
         #actor optmizer
         # action_gdts = K.placeholder(shape=(None, self.outputSize))
@@ -159,12 +174,12 @@ class AgentDDPG(IAgent.IAgent):
                    updates=[tf.train.AdamOptimizer(self.learning_rate).apply_gradients(grads)][1:])
 
 
-        # Function to compute Q-value gradients (Actor Optimization)
+        # # Function to compute Q-value gradients (Actor Optimization)
         self.criticGrandients = K.function([self.critic.input[0], self.critic.input[1]],outputs=
                                        K.gradients(self.critic.output, [self.critic.input[1]]))
         #
         #
-        # self.actor.compile(Adam(self.learning_rate), 'mse')
+        # self.critic.compile(Adam(self.learning_rate), 'mse')
         # self.actorTarget.compile(Adam(self.learning_rate), 'mse')
 
 
@@ -251,6 +266,9 @@ class AgentDDPG(IAgent.IAgent):
         stateVector, possibleActionsOriginal = params
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
+        possibleActions2 = copy.copy(possibleActionsOriginal)
+        possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
+
         if numpy.random.rand() <= self.epsilon:
             itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
             random.shuffle(itemindex)
@@ -263,7 +281,7 @@ class AgentDDPG(IAgent.IAgent):
             # a = numpy.zeros(self.outputSize)
             # a[aIndex] = 1
         else:
-            a = self.actor.predict([stateVector])[0]
+            a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
 
             if possibleActionsOriginal[aIndex] == 1:
@@ -272,82 +290,6 @@ class AgentDDPG(IAgent.IAgent):
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
 
-        # # print ("Shape vector: " + str(stateVector.shape))
-        #
-        # possibleActions = copy.copy(possibleActionsOriginal)
-        #
-        # # if numpy.sum(possibleActions) >1:
-        # #     possibleActions[199] = 0
-        #     # input("Other actions are allowed!")
-        #
-        # prediction = self.actor.predict([stateVector])[0]
-        #
-        # aIndex = numpy.argmax(prediction)
-        # a = prediction
-        #
-        #
-        #
-        #
-        # if possibleActions[aIndex] == 0:
-        #
-        #     a = numpy.zeros(self.outputSize)
-        #     aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
-        #     a[aIndex] = 1
-        #
-        #     if possibleActions[aIndex] == 0:
-        #
-        #             itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
-        #             random.shuffle(itemindex)
-        #
-        #             aIndex = itemindex[0]
-        #             a = numpy.zeros(self.outputSize)
-        #             a[aIndex] = 1
-        #     else:
-        #         # print ("Correct action!")
-        #         self.currentCorrectAction = self.currentCorrectAction + 1
-        #
-        # else:
-        #     # print ("Correct action!")
-        #     self.currentCorrectAction = self.currentCorrectAction+1
-        #
-        # self.totalActionPerGame = self.totalActionPerGame+1
-
-
-
-        # testIndex = numpy.where(numpy.array(possibleActions) == 1)
-        #
-        # print ("testIndex:" + str(testIndex))
-        #
-        # print ("AIndex:" + str(aIndex))
-
-
-        # if possibleActions[aIndex] == 0:
-        #     # print("Incorrect action!")
-        #     # print ("Predictions:", prediction)
-        #     # input("here")
-        #
-        #     number = random.random()
-        #     if number < 0.5:
-        #         a = numpy.zeros(self.outputSize)
-        #         aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
-        #         a[aIndex] = 1
-        #
-        #         number = random.random()
-        #
-        #         if possibleActions[aIndex] == 0:
-        #              if number < 0.5:
-        #                 itemindex = numpy.where(numpy.array(possibleActions) == 1)
-        #                 numpy.random.shuffle(itemindex)
-        #                 aIndex = itemindex[0]
-        #                 a = numpy.zeros(self.outputSize)
-        #                 a[aIndex] = 1
-        #
-        # else:
-        #     # print ("Correct action!")
-        #     self.currentCorrectAction = self.currentCorrectAction+1
-        #
-        # self.totalActionPerGame = self.totalActionPerGame+1
-        # return a
 
 
     def discount(self, r):
@@ -387,23 +329,29 @@ class AgentDDPG(IAgent.IAgent):
     def updateModel(self, savedNetwork, game, thisPlayer):
 
         # Sample experience from buffer
-        minibatch = random.sample(self.memory, self.batchSize)
+        # minibatch = random.sample(self.memory, self.batchSize)
+        #
+        # minibatch = numpy.swapaxes(numpy.array(copy.copy(minibatch)),0,1)
 
-        minibatch = numpy.swapaxes(numpy.array(copy.copy(minibatch)),0,1)
-        states,actions,rewards,nextStates, done = minibatch
+        states, actions, rewards, dones, nextStates, possibleActions, newPossibleActions, idx = self.memory.sample_batch(self.batchSize)
+        #
+        #
+        # states,actions,rewards,nextStates, done = minibatch
 
-        states = states.tolist()
-        nextStates = nextStates.tolist()
-        actions = actions.tolist()
-        rewards = rewards.tolist()
-        dones = done.tolist()
-
-        #auxiliary
-        actions2 = numpy.array(actions)
-        states2 = numpy.array(states)
+        # states = states.tolist()
+        # nextStates = nextStates.tolist()
+        # actions = actions.tolist()
+        # rewards = rewards.tolist()
+        # dones = done.tolist()
+        # possibleActions = possibleActions.tolist()
+        # newPossibleActions = newPossibleActions.tolist()
+        #
+        # #auxiliary
+        # actions2 = numpy.array(actions)
+        # states2 = numpy.array(states)
 
         # Predict target q-values using target networks
-        actorTarget = self.actorTarget.predict([nextStates])
+        actorTarget = self.actorTarget.predict([nextStates, newPossibleActions])
         q_values = self.criticTarget.predict([nextStates, actorTarget])
         # Compute critic target
         critic_target = self.bellman(rewards, q_values, dones)
@@ -411,17 +359,15 @@ class AgentDDPG(IAgent.IAgent):
         # Train both networks on sampled batch, update target networks
 
         # Train critic
-
-        self.critic.train_on_batch([states2, actions2], critic_target)
+        history = self.critic.fit([states, actions], critic_target, verbose=False)
+        self.losses.append(history.history['loss'])
 
         # Q-Value Gradients under Current Policy
-        actions = self.actor.predict([states])
-        grads = self.criticGrandients([states2, actions2])
+        actions = self.actor.predict([states, possibleActions])
+        grads = self.criticGrandients([states, actions])
 
         # Train actor
-        self.actorOptmizer([states2, numpy.array(grads).reshape((-1, self.outputSize))])
-
-        # self.actorOptmizer([state[0], numpy.array(grads).reshape((-1, self.outputSize))])
+        self.actorOptmizer([[states, possibleActions], numpy.array(grads).reshape((-1, self.outputSize))])
 
         # Transfer weights to target networks at rate Tau
         self.transferWeights()
@@ -438,12 +384,16 @@ class AgentDDPG(IAgent.IAgent):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-        print (" -- Epsilon:" + str(self.epsilon))
+        print (" -- Epsilon:" + str(self.epsilon) + " - Loss:" + str(history.history['loss']))
 
+    def memorize(self, state, action, reward, next_state, done, possibleActions, newPossibleActions):
+
+        td_error = 0
+        self.memory.memorize(state, action, reward, done, next_state, possibleActions, newPossibleActions, td_error)
 
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions, thisPlayer = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
             self.totalAction.append(self.totalActionPerGame)
@@ -453,9 +403,9 @@ class AgentDDPG(IAgent.IAgent):
 
         if self.training:
             #memorize
-            self.memory.append((state,action,reward,next_state, done))
+            self.memorize(state, action, reward, next_state, done, possibleActions, newPossibleActions)
 
-            if len(self.memory) > self.batchSize and done: # if a game is over for this player, train it.
+            if self.memory.size() > self.batchSize and done:
                 self.updateModel(savedNetwork, game, thisPlayer)
 
 

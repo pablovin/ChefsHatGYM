@@ -6,7 +6,7 @@ import numpy
 import copy
 
 from collections import deque
-from keras.layers import Input, Dense, Flatten, Concatenate
+from keras.layers import Input, Dense, Flatten, Concatenate, Multiply
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.optimizers import RMSprop
@@ -46,6 +46,8 @@ class AgentA2C(IAgent.IAgent):
 
     def __init__(self, params=[]):
         self.training = params[0]
+        self.initialEpsilon = params[1]
+
         self.name = "A2C"
         self.totalAction = []
         self.totalActionPerGame = 0
@@ -104,8 +106,18 @@ class AgentA2C(IAgent.IAgent):
         self.states = []
         self.actions = []
         self.rewards = []
+        self.possibleActions = []
+
+        self.losses = []
 
 
+        if self.training:
+            self.epsilon = self.initialEpsilon  # exploration rate while training
+        else:
+            self.epsilon = 0.1 #no exploration while testing
+
+        self.epsilon_min = 0.1
+        self.epsilon_decay = 0.990
 
         if loadModel == "":
             self.buildModel()
@@ -130,10 +142,14 @@ class AgentA2C(IAgent.IAgent):
 
             dense = Dense(self.hiddenUnits * (i + 1), name="Dense" + str(i), activation="relu")(previous)
 
-
         #Actor network
         densea1 = Dense(128, activation='relu', name="actor_dense_3")(dense)
+
         outActor = Dense(self.outputSize, activation='softmax', name="Actor_output")(densea1)
+
+        possibleActions = Input(shape=(self.outputSize,),
+                                name="PossivleActions")
+        outputPossibleActor = Multiply()([possibleActions, outActor])
 
         #Critic network
         densec1 = Dense(128, activation='relu', name="critic_dense_3")(dense)
@@ -142,10 +158,13 @@ class AgentA2C(IAgent.IAgent):
 
         #build networks
         self.critic = Model(inp, outCritic)
-        self.actor = Model(inp, outActor)
+        self.actor = Model([inp,possibleActions] , outputPossibleActor)
 
         #get optmizers
         self.getOptmizers()
+
+
+
 
     def getOptmizers(self):
         rmsOptmizer = RMSprop(lr=self.learning_rate, epsilon=0.1, rho=0.99)
@@ -160,17 +179,18 @@ class AgentA2C(IAgent.IAgent):
 
         action_pl= K.placeholder(shape=(None, self.outputSize))
         advantage_pl = K.placeholder(shape=(None,))
-        outputPlaceholder = K.placeholder(shape=(None,))
         k_constants = K.variable(0)
 
         weighted_actions = K.sum(action_pl * self.actor.output, axis=1)
         eligibility = K.log(weighted_actions + 1e-10) * K.stop_gradient(advantage_pl)
         entropy = K.sum(self.actor.output * K.log(self.actor.output + 1e-10), axis=1)
         loss = 0.001 * entropy - K.sum(eligibility)
+        #
+        # loss = entropy
 
         updates = rmsOptmizer.get_updates(self.actor.trainable_weights, [], loss)
 
-        self.actorOptmizer = K.function([self.actor.input, action_pl, advantage_pl], k_constants, updates=updates)
+        self.actorOptmizer = K.function([self.actor.input, action_pl, advantage_pl], loss, updates=updates)
 
 
         #Critic optmizer
@@ -181,27 +201,60 @@ class AgentA2C(IAgent.IAgent):
         discounted_r = K.placeholder(shape=(None,))
         critic_loss = K.mean(K.square(discounted_r - self.critic.output))
         updates = rmsOptmizer.get_updates(self.critic.trainable_weights, [], critic_loss)
-        self.criticOptmizer = K.function([self.critic.input, discounted_r], k_constants, updates=updates)
+        self.criticOptmizer = K.function([self.critic.input, discounted_r], critic_loss, updates=updates)
 
+
+        def A2CLoss(y_true, y_pred):
+            #y_true = actions + advantages
+            actions = y_true[0:200]
+            advantages = y_true[-1]
+
+            # print ("Actions: " + str(actions))
+            # print ("Advantages: " + str(advantages))
+            #
+            # input("here")
+
+            print('actions.get_shape', actions.get_shape)
+            print('K.shape(actions)', K.shape(actions))
+
+            print('advantages.get_shape', advantages.get_shape)
+            print('K.shape(advantages)', K.shape(advantages))
+
+            print('y_pred.get_shape', y_pred.get_shape)
+            print('K.shape(y_pred)', K.shape(y_pred))
+
+
+            # weightedActions = K.sum(actions*y_pred, axis=1)
+            # eligibility = K.log(weightedActions + 1e-10) * K.stop_gradient(advantages)
+            # entropy = K.sum(y_pred * K.log(y_pred + 1e-10), axis=1)
+            # loss = 0.001 * entropy - K.sum(eligibility)
+
+            loss = advantages
+            return K.mean(loss)
+
+        #
+        # self.actor.compile(loss=A2CLoss, optimizer=rmsOptmizer, metrics=["mse"])
+        # self.critic.compile(loss=self.loss, optimizer=rmsOptmizer, metrics=["mse"])
+        #
 
     def getAction(self, params):
 
         stateVector, possibleActionsOriginal = params
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
+        possibleActions2 = copy.copy(possibleActionsOriginal)
+        possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
+
         if numpy.random.rand() <= self.epsilon:
-            itemindex = numpy.array(numpy.where(numpy.array(possibleActionsOriginal) == 1))[0].tolist()
+
+            itemindex = numpy.array(numpy.where(numpy.array(possibleActions2) == 1))[0].tolist()
             random.shuffle(itemindex)
             aIndex = itemindex[0]
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
-            #
-            #
-            # aIndex = numpy.random.randint(0, self.outputSize)
-            # a = numpy.zeros(self.outputSize)
-            # a[aIndex] = 1
+
         else:
-            a = self.actor.predict([stateVector])[0]
+            a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
 
             if possibleActionsOriginal[aIndex] == 1:
@@ -210,35 +263,6 @@ class AgentA2C(IAgent.IAgent):
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
 
-
-        # stateVector, possibleActionsOriginal = params
-        # stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
-        #
-        # possibleActions = copy.copy(possibleActionsOriginal)
-        #
-        # prediction = self.actor.predict([stateVector])[0]
-        # aIndex = numpy.argmax(prediction)
-        # a = prediction
-        #
-        # if possibleActions[aIndex] == 0:
-        #     a = numpy.zeros(self.outputSize)
-        #     aIndex = numpy.random.choice(numpy.arange(self.outputSize), 1, p=prediction)[0]
-        #     a[aIndex] = 1
-        #
-        #     if possibleActions[aIndex] == 0:
-        #         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
-        #         random.shuffle(itemindex)
-        #         aIndex = itemindex[0]
-        #         a = numpy.zeros(self.outputSize)
-        #         a[aIndex] = 1
-        #     else:
-        #         # print ("Correct action!")
-        #         self.currentCorrectAction = self.currentCorrectAction + 1
-        # else:
-        #     self.currentCorrectAction = self.currentCorrectAction + 1
-        #
-        # self.totalActionPerGame = self.totalActionPerGame+1
-        # return a
 
 
     def discount(self, r):
@@ -252,8 +276,6 @@ class AgentA2C(IAgent.IAgent):
 
 
     def loadModel(self, model):
-        # print ("loading:" + str(model))
-        # input("here")
         actorModel, criticModel = model
         self.actor  = load_model(actorModel)
         self.critic = load_model(criticModel)
@@ -269,6 +291,7 @@ class AgentA2C(IAgent.IAgent):
         state =  numpy.array(self.states)
         action = self.actions
         reward = self.rewards
+        possibleActions = numpy.array(self.possibleActions)
         #
         #
         # state, action, reward, done = self.memory[:, 0], self.memory[:, 1], self.memory[:, 2], self.memory[:, 3]
@@ -279,12 +302,40 @@ class AgentA2C(IAgent.IAgent):
         state_values = self.critic.predict(numpy.array(state))
         advantages = discounted_rewards - numpy.reshape(state_values, len(state_values))
 
-        # Networks optimization
-        self.actorOptmizer([state, action, advantages])
-        self.criticOptmizer([state, discounted_rewards])
+        # newAction = []
+        # for index, h in enumerate(action):
+        #     hlist = h.tolist()
+        #     hlist.append(advantages[index])
+        #     newAction.append(numpy.array(hlist))
+        #
+        # newAction = numpy.array(newAction)
+        #     # h.tolist().append(advantages[index])
+        #
+        # # # Networks optimization
+        # # flattenActions = numpy.array(action).flatten()
+        #
+        # # concatenatedYTrue = numpy.concatenate((flattenActions,advantages))
+        # # actions = y_true[0:200]
+        # # advantages = y_true[200:]
+        #
+        # historyA = self.actor.fit([state, possibleActions], newAction, verbose=False)
+        # self.losses.append(historyA.history['loss'])
+        #
+        #
+        # historyC = self.critic.fit(state , discounted_rewards,  verbose=False)
+        # self.losses.append(historyC.history['loss'])
 
-        # print ("train")
+        loss = self.actorOptmizer([[state, possibleActions], action, advantages])
 
+        self.criticOptmizer([[state,possibleActions], discounted_rewards])
+
+        # print ("Loss Critic:" + str(history.history['loss']))
+
+        #Update the decay
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
+        #save model
         if (game + 1) % 100 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.critic.save(savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")
@@ -295,11 +346,12 @@ class AgentA2C(IAgent.IAgent):
         self.states = []
         self.actions = []
         self.rewards = []
+        self.possibleActions = []
 
 
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions, thisPlayer = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
 
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
@@ -312,11 +364,12 @@ class AgentA2C(IAgent.IAgent):
             # print ("train")
             #memorize
 
-            action = numpy.argmax(action)
+            # action = numpy.argmax(action)
 
             self.states.append(state)
             self.actions.append(action)
             self.rewards.append(reward)
+            self.possibleActions.append(possibleActions)
 
             if done: # if a game is over for this player, train it.
                 self.updateModel(savedNetwork, game, thisPlayer)

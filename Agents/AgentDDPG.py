@@ -99,7 +99,7 @@ class AgentDDPG(IAgent.IAgent):
         if self.training:
             self.epsilon = 1.0  # exploration rate while training
         else:
-            self.epsilon = 0.1 #no exploration while testing
+            self.epsilon = 0.0 #no exploration while testing
 
 
         if loadModel == "":
@@ -407,8 +407,5 @@ class AgentDDPG(IAgent.IAgent):
 
             if self.memory.size() > self.batchSize and done:
                 self.updateModel(savedNetwork, game, thisPlayer)
-
-
-
 
 

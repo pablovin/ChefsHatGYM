@@ -82,15 +82,27 @@ class AgentDQL(IAgent.IAgent):
 
             #Best Hyperopt:{'Qsize': 1000, 'TargetUpdateFunction': 256, 'a': 0, 'batchSize': 256, 'hiddenUnits': 256, 'layers': 3}
             #(3, 256, 1000, 256, 256)
-            self.hiddenLayers = 3
-            self.hiddenUnits = 32
-            self.batchSize = 256
-            self.tau = 0.1  # target network update rate
 
-            #My initial estimation
-            # self.hiddenLayers = 1
+            # BEst: (1, 256, 128, 0.5217984836612634)
+            # Best: {'a': 0, 'batchSize': 2, 'hiddenUnits': 3, 'layers': 0, 'tau': 0.5217984836612634}
+            # avg
+            # best
+            # error: 0.9378571428571428
+
+            self.hiddenLayers = 1
+            self.hiddenUnits = 256
+            self.batchSize = 128
+            self.tau = 0.52  # target network update rate
+
+
+
+            # #My initial estimation
+            # self.hiddenLayers = 3
             # self.hiddenUnits = 32
             # self.batchSize = 256
+            # self.tau = 0.1  # target network update rate
+
+
             # QSize = 1000
             # self.targetUpdateFrequency = 100
 
@@ -106,7 +118,7 @@ class AgentDQL(IAgent.IAgent):
         if self.training:
             self.epsilon = self.initialEpsilon  # exploration rate while training
         else:
-            self.epsilon = 0.1 #no exploration while testing
+            self.epsilon = 0.0 #no exploration while testing
 
 
         # behavior parameters

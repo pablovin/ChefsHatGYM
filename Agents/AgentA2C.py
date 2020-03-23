@@ -89,6 +89,7 @@ class AgentA2C(IAgent.IAgent):
             self.hiddenUnits = 64
             self.gamma = 0.24 # discount rate
 
+
             #My Estimation
             # self.hiddenLayers = 2
             # self.hiddenUnits = 64
@@ -100,7 +101,6 @@ class AgentA2C(IAgent.IAgent):
 
 
         self.memory = []
-        self.learning_rate = 0.0001
 
         #Game memory
         self.states = []
@@ -110,11 +110,12 @@ class AgentA2C(IAgent.IAgent):
 
         self.losses = []
 
+        self.learning_rate = 0.001
 
         if self.training:
             self.epsilon = self.initialEpsilon  # exploration rate while training
         else:
-            self.epsilon = 0.1 #no exploration while testing
+            self.epsilon = 0.0 #no exploration while testing
 
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.990
@@ -168,7 +169,8 @@ class AgentA2C(IAgent.IAgent):
 
     def getOptmizers(self):
         import tensorflow.compat.v1 as tfc
-        rmsOptmizer = RMSprop(lr=self.learning_rate, epsilon=0.1, rho=0.99)
+        # rmsOptmizer = RMSprop(lr=self.learning_rate, epsilon=0.1, rho=0.99)
+        rmsOptmizer = Adam(lr=self.learning_rate)
 
         #optmizers
 

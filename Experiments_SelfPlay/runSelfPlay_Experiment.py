@@ -1,6 +1,6 @@
 from ExperimentHandler import ChefsHatExperimentHandler
 
-from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG, AgentDQL_Trfl
+from Agents import  AgentRandom, AgentDQL, AgentA2C, AgentDDPG
 
 from Rewards import RewardOnlyWinning, RewardOnlyWinning_PunishmentInvalid
 import tensorflow as tf

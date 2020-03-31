@@ -22,6 +22,11 @@ class AgentRandom(IAgent.IAgent):
     totalActionPerGame = 0
 
     losses = []
+    QValues = []
+
+    Probability = []
+
+    SelectedActions = []
 
     def __init__(self, name):
 

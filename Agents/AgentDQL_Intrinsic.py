@@ -206,7 +206,7 @@ class AgentDQL(IAgent.IAgent):
 
     def calculateProbabilityOfSuccess(self, QValue):
         theta = 0.0
-        maxreward = 0.1
+        maxreward = 1
         probability = (1-theta) * (1/2*numpy.log10(QValue/maxreward)+1)
 
         if probability <= 0:
@@ -245,26 +245,27 @@ class AgentDQL(IAgent.IAgent):
             # self.online_network.summary()
             qvalues = self.QValueReader.predict([stateVector, possibleActionsVector])[0]
 
+            # nonzeros = numpy.nonzero(qvalues)
+            nonzeros = numpy.array(numpy.where(numpy.array(qvalues))>= 0.1)[0].tolist()
+            nonzerosA = numpy.copy(a[nonzeros,])
 
-            # nonzeros = numpy.nonzero(a)
-            # nonzeros = numpy.array(numpy.where(numpy.array(a) >= 0.1))[0].tolist()
-            # nonzerosA = numpy.copy(a[nonzeros,])
-            # while len(nonzerosA) <3:
-            #     nonzerosA = numpy.append(nonzerosA, 0)
+            while len(nonzerosA) < 10:
+                nonzerosA = numpy.append(nonzerosA, 0)
 
-            # def softmax(x):
-            #     """Compute softmax values for each sets of scores in x."""
-            #     e_x = numpy.exp(x - numpy.max(x))
-            #     return e_x / e_x.sum(axis=0)  # only difference
-            # # aSort = numpy.sort(a)
-            # # aSortShort = aSort
-            # softMaxA = numpy.array(softmax(a))
-            # argSoftMax = numpy.argmax(softMaxA)
+            def softmax(x):
+                """Compute softmax values for each sets of scores in x."""
+                e_x = numpy.exp(x - numpy.max(x))
+                return e_x / e_x.sum(axis=0)  # only difference
+
+            # aSort = numpy.sort(a)
+            # aSortShort = aSort
+            softMaxA = numpy.array(softmax(nonzerosA))
+            argSoftMax = numpy.argmax(softMaxA)
             # print ("AIndex: "  + str(aIndex) + "("+str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax])+")")
 
-            self.QValues.append(qvalues)
+            self.QValues.append(softMaxA)
 
-            self.Probability.append(self.calculateProbabilityOfSuccess(a[aIndex]))
+            self.Probability.append(self.calculateProbabilityOfSuccess(qvalues[aIndex]))
 
             # self.SelectedActions.append(aIndex)
 

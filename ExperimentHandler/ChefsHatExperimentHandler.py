@@ -16,7 +16,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
     for i in range(len(playersAgents)):
      playersNames.append(playersAgents[i].name)
 
-    experimentName = "Player_" + str(len(playersAgents)) + "_Cards_" + str(numMaxCards) + "_games_" + str(numGames) + "TrainAgents_" + str(playersNames) + "_Reward_" + str(rewardFunction.rewardName)+"_"+experimentDescriptor
+    experimentName = "Player_" + str(len(playersAgents)) + "_Cards_" + str(numMaxCards) + "_games_" + str(numGames) + "TrainingAgents_" + str(playersNames) + "_Reward_" + str(rewardFunction.rewardName)+"_"+experimentDescriptor
 
     experimentManager = ExperimentManager.ExperimentManager(saveExperimentsIn,
                                                             experimentName,
@@ -245,20 +245,28 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
             correctActions = []
             totalActions = []
             losses = []
+            qvalues = []
+            probs = []
+            sActions = []
             for p in players:
                 correctActions.append(p.totalCorrectAction)
                 totalActions.append(p.totalAction)
                 losses.append(p.losses)
                 agentsType.append(p.name)
+                qvalues.append(p.QValues)
+                probs.append(p.Probability)
+                # sActions.append(p.SelectedActions)
 
             experimentManager.plotManager.plotRounds(env.allRounds, game)
             experimentManager.plotManager.plotRewardsAll(len(playersAgents), env.allRewards, game)
-            experimentManager.plotManager.plotWinners(len(playersAgents), env.winners, game)
+            experimentManager.plotManager.plotWinners(len(playersAgents), env.winners, game, agentsType)
             experimentManager.plotManager.plotCorrectActions(len(playersAgents), correctActions,totalActions,  game)
             experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
             experimentManager.plotManager.plotFinishPositionAllPlayers(len(playersAgents), env.allScores, env.winners, game)
             experimentManager.plotManager.plotLosses(len(playersAgents), losses, game)
             experimentManager.plotManager.plotNumberOfActionsTotal(len(playersAgents), env.playerActionsCompleteAllGames, game)
+            experimentManager.plotManager.plotQValues(len(playersAgents), qvalues, sActions, env.highLevelActions,  game)
+            experimentManager.plotManager.plotProbabilitySuccess(len(playersAgents), probs, game)
 
 
 
@@ -316,9 +324,13 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
             logger.write(" -- Wrong Actions: " + str(env.allWrongActions[i]))
             logger.write(" -- Correct Actions: " + str(players[i].totalCorrectAction))
 
-        playerReturn.append(env.allRewards[i][a]) #rewards
+        playerReturn.append(averageRewards) #rewards
         playerReturn.append(env.allWrongActions[i])  # wrong actions
         playerReturn.append(players[i].lastModel)
+
+        QValues = players[i].QValues
+        playerReturn.append(QValues)
+
         returns.append(playerReturn)
 
 

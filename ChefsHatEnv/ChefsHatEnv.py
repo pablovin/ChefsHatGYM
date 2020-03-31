@@ -324,6 +324,7 @@ class ChefsHatEnv(gym.Env):
           firstAction = False
 
 
+      highLevelActions = []
       #print ("Player:", player)
       possibleActions = []
 
@@ -346,6 +347,7 @@ class ChefsHatEnv(gym.Env):
       #
       # print("Possible actions:", possibleActions)
 
+      cardDescription = ""
       for cardNumber in range (self.maxCardNumber):
           possibleAction = 0
           # print ("Card Number:", cardNumber+1)
@@ -387,18 +389,26 @@ class ChefsHatEnv(gym.Env):
                              possibleActions.append(1)
                          else:
                              possibleActions.append(0)
+                             # highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J0")
                       else:
                           # print("----- Added here!")
                           possibleActions.append(1)
+                          # highLevelActions.append("C" + str(cardNumber+1) + ";Q" + str(cardQuantity+1) + ";J0")
                   else:
 
                           possibleActions.append(0)
+                          # highLevelActions.append("C" + str(cardNumber+1) + ";Q" + str(cardQuantity+1) + ";J0")
 
               else:
                   possibleActions.append(0)
+                  # highLevelActions.append("C" + str(cardNumber+1) + ";Q" + str(cardQuantity+1) + ";J0")
 
-
+              highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J0")
+              highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J1")
+              highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J2")
               # if cardNumber
+
+
 
               # add the joker possibilities
               if self.maxCardNumber + 1 in self.playersHand[player]:  # there is a joker in the hand
@@ -412,13 +422,17 @@ class ChefsHatEnv(gym.Env):
                          if firstAction:  # if this is the first move
                              if cardNumber + 1 == self.maxCardNumber:  # if this is the highest card
                                  possibleActions.append(1) # I can discard one joker
+
                              else:
                                  possibleActions.append(0)  # I cannot discard one joker
 
+
                          else:
                              possibleActions.append(1) # I can discard one joker
+
                      else:
                          possibleActions.append(0) # I cannot discard one joker
+
 
 
                      if jokerQuantity == 2:
@@ -429,48 +443,63 @@ class ChefsHatEnv(gym.Env):
                             if firstAction:  # if this is the first move
                                 if cardNumber + 1 == self.maxCardNumber:  # if this is the highest card
                                     possibleActions.append(1)  # I can discard two jokers
+
                                 else:
                                     possibleActions.append(0)  # I can discard two jokers
+
                             else:
                               possibleActions.append(1) # I can discard two jokers
+
                         else:
                             possibleActions.append(0) # I cannot discard two jokers
 
+
                      else:
                         possibleActions.append(0) # I cannot discard two jokers
+
                   # elif highestCardOnBoard == self.maxCardNumber: # if I do not have the card in the hand
                   #       possibleActions.append(1)
                   #       possibleActions.append(0)
 
                   else:  # there is no joker in the hand
                       possibleActions.append(0) # I cannot discard one joker
+
                       possibleActions.append(0) # I cannot discard two joker
+
+
 
 
               else:
                   possibleActions.append(0)  # I cannot discard one joker
+
                   possibleActions.append(0)  # I cannot discard two joker
 
-              # possibleActions.append(possibleAction)
+
 
       # print ("Possible actions:", possibleActions)
       # input("here")
 
       #Joker actions
       # verify how many jokers the player has at hand
+      highLevelActions.append("C0;Q0;J1")
       if self.maxCardNumber+1 in self.playersHand[player]: # there is a joker in the hand
           if firstAction:
               possibleActions.append(0)
           else:
               if highestCardOnBoard == self.maxCardNumber+2:
                   possibleActions.append(1) # I can discard the joker
+
               else:
                   possibleActions.append(0)  # I cannot discard the joker
+
       else:
           possibleActions.append(0) #I can not discard one joker
 
       possibleActions.append(1) #the pass action, which is always a valid action
+      highLevelActions.append("pass")
 
+
+      self.highLevelActions = highLevelActions
       return possibleActions
 
   def isActionAllowed(self, player, action):
@@ -623,7 +652,7 @@ class ChefsHatEnv(gym.Env):
     self.takenActions = []  # store a set of actions that were taken by a certain agent
     self.currentActionRewards = []
 
-
+    self.highLevelActions = []
 
     # update the max number of cards
     self.maxCardNumber = maxCardNumber

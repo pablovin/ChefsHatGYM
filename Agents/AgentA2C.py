@@ -15,7 +15,25 @@ import keras.backend as K
 
 from keras.models import load_model
 
+import tensorflow.compat.v1 as tfc
+
 import random
+
+
+def actorLoss():
+
+    def loss(y_true, y_pred):
+
+        y_tru_valid = y_true[:, 0:200]
+        advantage = y_true[:, 200][0]
+
+        weighted_actions = K.sum(y_tru_valid * y_pred, axis=0)
+        eligibility = -tfc.log(weighted_actions + 1e-5) * advantage
+        entropy = K.sum(y_pred * K.log(y_pred + 1e-10), axis=1)
+        return K.mean(0.001 * entropy - K.sum(eligibility))
+
+    return loss
+
 
 class AgentA2C(IAgent.IAgent):
 
@@ -43,6 +61,9 @@ class AgentA2C(IAgent.IAgent):
     totalActionPerGame = 0
 
     losses = []
+    Probability = []
+
+    SelectedActions = []
 
     def __init__(self, params=[]):
         self.training = params[0]
@@ -85,15 +106,15 @@ class AgentA2C(IAgent.IAgent):
             # error: 65.0
 
 
-            self.hiddenLayers = 1
-            self.hiddenUnits = 64
-            self.gamma = 0.24 # discount rate
+            # self.hiddenLayers = 1
+            # self.hiddenUnits = 64
+            # self.gamma = 0.24 # discount rate
 
 
             #My Estimation
-            # self.hiddenLayers = 2
-            # self.hiddenUnits = 64
-            # self.gamma = 0.99  # discount rate
+            self.hiddenLayers = 2
+            self.hiddenUnits = 64
+            self.gamma = 0.95  # discount rate
 
 
         self.outputActivation = "linear"
@@ -109,6 +130,7 @@ class AgentA2C(IAgent.IAgent):
         self.possibleActions = []
 
         self.losses = []
+        self.QValues = []
 
         self.learning_rate = 0.001
 
@@ -125,6 +147,7 @@ class AgentA2C(IAgent.IAgent):
         else:
             # print ("loading from:" + str(loadModel))
             self.loadModel(loadModel)
+
 
 
     def buildModel(self):
@@ -160,15 +183,19 @@ class AgentA2C(IAgent.IAgent):
         #build networks
         self.critic = Model(inp, outCritic)
         self.actor = Model([inp,possibleActions] , outputPossibleActor)
-
+        #
+        # self.actor.compile(optimizer=Adam(lr=self.learning_rate),
+        #               loss=[actorLoss()])
         #get optmizers
         self.getOptmizers()
+
+        self.loadQValueReader()
 
 
 
 
     def getOptmizers(self):
-        import tensorflow.compat.v1 as tfc
+
         # rmsOptmizer = RMSprop(lr=self.learning_rate, epsilon=0.1, rho=0.99)
         rmsOptmizer = Adam(lr=self.learning_rate)
 
@@ -204,39 +231,22 @@ class AgentA2C(IAgent.IAgent):
         updates = rmsOptmizer.get_updates(self.critic.trainable_weights, [], critic_loss)
         self.criticOptmizer = K.function([self.critic.input, discounted_r], critic_loss, updates=updates)
 
+    def loadQValueReader(self):
+        softmaxLayer = self.actor.get_layer(index=-2)
+        self.QValueReader = Model(self.actor.inputs, softmaxLayer.output)
 
-        # def A2CLoss(y_true, y_pred):
-        #     #y_true = actions + advantages
-        #     actions = y_true[0:200]
-        #     advantages = y_true[-1]
-        #
-        #     # print ("Actions: " + str(actions))
-        #     # print ("Advantages: " + str(advantages))
-        #     #
-        #     # input("here")
-        #
-        #     print('actions.get_shape', actions.get_shape)
-        #     print('K.shape(actions)', K.shape(actions))
-        #
-        #     print('advantages.get_shape', advantages.get_shape)
-        #     print('K.shape(advantages)', K.shape(advantages))
-        #
-        #     print('y_pred.get_shape', y_pred.get_shape)
-        #     print('K.shape(y_pred)', K.shape(y_pred))
-        #
-        #
-        #     # weightedActions = K.sum(actions*y_pred, axis=1)
-        #     # eligibility = K.log(weightedActions + 1e-10) * K.stop_gradient(advantages)
-        #     # entropy = K.sum(y_pred * K.log(y_pred + 1e-10), axis=1)
-        #     # loss = 0.001 * entropy - K.sum(eligibility)
-        #
-        #     loss = advantages
-        #     return K.mean(loss)
 
-        #
-        # self.actor.compile(loss=A2CLoss, optimizer=rmsOptmizer, metrics=["mse"])
-        # self.critic.compile(loss=self.loss, optimizer=rmsOptmizer, metrics=["mse"])
-        #
+    def calculateProbabilityOfSuccess(self, QValue):
+        theta = 0.0
+        maxreward = 1
+        probability = (1-theta) * (1/2*numpy.log10(QValue/maxreward)+1)
+
+        if probability <= 0:
+            probability = 0
+        if probability >= 1:
+            probability =1
+
+        self.Probability.append(probability)
 
     def getAction(self, params):
 
@@ -258,8 +268,28 @@ class AgentA2C(IAgent.IAgent):
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
 
+            qvalues = self.QValueReader.predict([stateVector, possibleActionsVector])[0]
+
+            # def softmax(x):
+            #     """Compute softmax values for each sets of scores in x."""
+            #     e_x = numpy.exp(x - numpy.max(x))
+            #     return e_x / e_x.sum(axis=0)  # only difference
+            #     # aSort = numpy.sort(a)
+            #     # aSortShort = aSort
+            #
+            # softMaxA = softmax(numpy.sort(a))
+            #
+            # argSoftMax = numpy.argmax(softMaxA)
+            # print("AIndex: " + str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax]))
+
+            self.QValues.append(qvalues)
+            self.calculateProbabilityOfSuccess(qvalues[aIndex])
+
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
+            else:
+                a = numpy.zeros(self.outputSize)
+                a[-1] = 1
 
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
@@ -281,6 +311,11 @@ class AgentA2C(IAgent.IAgent):
         self.actor  = load_model(actorModel)
         self.critic = load_model(criticModel)
         self.getOptmizers()
+        self.loadQValueReader()
+
+
+
+
 
 
     def updateModel(self, savedNetwork, game, thisPlayer):
@@ -326,11 +361,24 @@ class AgentA2C(IAgent.IAgent):
         # historyC = self.critic.fit(state , discounted_rewards,  verbose=False)
         # self.losses.append(historyC.history['loss'])
 
+
+        # actions = []
+        # for i in range(len(action)):
+        #     # print ("Action:" + str(action[i]))
+        #     # concatenated = numpy.concatenate((action[i], numpy.zeros(numpy.array(action[i].shape))))
+        #     advantage = numpy.zeros(numpy.array(action[i]).shape)
+        #     advantage[0] = advantages[i]
+        #     concatenated = numpy.concatenate((action[i], advantage))
+        #     actions.append(concatenated)
+
+        #
+        # actorLoss = self.actor.train_on_batch([state, possibleActions], [actions])
+
         actorLoss = self.actorOptmizer([[state, possibleActions], action, advantages])
 
-        actorLoss = numpy.mean(actorLoss)
+        actorLoss = numpy.average(actorLoss)
 
-        criticLoss = self.criticOptmizer([[state,possibleActions], discounted_rewards])
+        criticLoss = self.criticOptmizer([state, discounted_rewards])
 
         criticLoss = numpy.mean(criticLoss)
 
@@ -343,7 +391,7 @@ class AgentA2C(IAgent.IAgent):
             self.epsilon *= self.epsilon_decay
 
         #save model
-        if (game + 1) % 100 == 0:
+        if (game + 1) % 1000 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.critic.save(savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5", savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")

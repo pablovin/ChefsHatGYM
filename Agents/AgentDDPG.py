@@ -128,7 +128,6 @@ class AgentDDPG(IAgent.IAgent):
                                 name="PossibleActions")
 
 
-
         outputPossibleActor = Multiply()([actionsOutput, outputActor])
 
         self.actor = Model([inp,actionsOutput], outputPossibleActor)
@@ -156,12 +155,14 @@ class AgentDDPG(IAgent.IAgent):
 
         self.actorTarget = Model([inp,actionsOutput], outputPossibleActor)
 
-        #actor optmizer
-        # action_gdts = K.placeholder(shape=(None, self.outputSize))
-        # params_grad = tf.gradients(self.actor.output, self.actor.trainable_weights, -action_gdts)
-        # grads = zip(params_grad, self.actor.trainable_weights)
-        # self.actorOptmizer = K.function([self.actor.input, action_gdts], [tf.train.AdamOptimizer(self.learning_rate).apply_gradients(grads)])
-        #
+
+        advantage = Input(shape=(1,))
+        old_prediction = Input(shape=(self.outputSize,))
+
+        self.actor.compile(optimizer=Adam(lr=self.learning_rate),
+                      loss=[proximal_policy_optimization_loss(
+                          advantage=advantage,
+                          old_prediction=old_prediction)])
 
     def getOptmizers(self):
         k_constants = K.variable(0)

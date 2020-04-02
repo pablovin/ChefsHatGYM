@@ -1,6 +1,5 @@
 #Adapted from: https://github.com/LuEE-C/PPO-Keras/blob/master/Main.py
 
-
 from Agents import IAgent
 import numpy
 import copy
@@ -75,13 +74,25 @@ class AgentPPO(IAgent.IAgent):
 
     SelectedActions = []
 
+    ProbAffMemory = []
 
+    ProbabilityLearning = []
 
     def __init__(self, params=[]):
         self.training = params[0]
         self.initialEpsilon = params[1]
 
-        self.name = "PPO"
+        if len(params) > 2:
+            agentName = "_" + params[2]
+        else:
+            agentName = ""
+
+        if len(params) > 3:
+            self.intrinsic = params[3]
+        else:
+            self.intrinsic = None
+
+        self.name = "PPO" + agentName
         self.totalAction = []
         self.totalActionPerGame = 0
 
@@ -283,19 +294,6 @@ class AgentPPO(IAgent.IAgent):
         softmaxLayer = self.actor.get_layer(index=-2)
         self.QValueReader = Model(self.actor.inputs, softmaxLayer.output)
 
-    def calculateProbabilityOfSuccess(self, QValue):
-        theta = 0.0
-        maxreward = 1
-        probability = (1-theta) * (1/2*numpy.log10(QValue/maxreward)+1)
-
-        if probability <= 0:
-            probability = 0
-        if probability >= 1:
-            probability =1
-
-        self.Probability.append(probability)
-
-
     def getAction(self, params):
 
         stateVector, possibleActionsOriginal = params
@@ -333,8 +331,11 @@ class AgentPPO(IAgent.IAgent):
             # argSoftMax = numpy.argmax(softMaxA)
             # print("AIndex: " + str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax]))
 
-            self.QValues.append(qvalues)
-            self.calculateProbabilityOfSuccess(qvalues[aIndex])
+            self.QValues.append(a)
+
+            if not self.intrinsic == None:
+                self.intrinsic.performAction(a[aIndex])
+
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
 
@@ -471,7 +472,7 @@ class AgentPPO(IAgent.IAgent):
 
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer, score = params
 
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
@@ -479,6 +480,11 @@ class AgentPPO(IAgent.IAgent):
 
             self.currentCorrectAction = 0
             self.totalActionPerGame = 0
+
+            if not self.intrinsic == None:
+                if len(score) >= 1:
+                    if thisPlayer in score:
+                        self.intrinsic.performEndOfGame(score, thisPlayer)
 
         if self.training:
             # print ("train")

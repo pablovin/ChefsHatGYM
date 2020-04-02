@@ -28,6 +28,12 @@ class AgentRandom(IAgent.IAgent):
 
     SelectedActions = []
 
+    ProbabilityLearning = []
+
+    ProbAffMemory = []
+
+    intrinsic = None
+
     def __init__(self, name):
 
         self.name = name

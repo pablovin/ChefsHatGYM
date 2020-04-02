@@ -19,7 +19,6 @@ import tensorflow.compat.v1 as tfc
 
 import random
 
-
 def actorLoss():
 
     def loss(y_true, y_pred):
@@ -69,7 +68,19 @@ class AgentA2C(IAgent.IAgent):
         self.training = params[0]
         self.initialEpsilon = params[1]
 
-        self.name = "A2C"
+        if len(params) > 2:
+            agentName = "_" + params[2]
+        else:
+            agentName = ""
+
+        if len(params) > 3:
+            self.intrinsic = params[3]
+        else:
+            self.intrinsic = None
+
+        self.name = "A2C" + agentName
+
+
         self.totalAction = []
         self.totalActionPerGame = 0
 
@@ -236,18 +247,6 @@ class AgentA2C(IAgent.IAgent):
         self.QValueReader = Model(self.actor.inputs, softmaxLayer.output)
 
 
-    def calculateProbabilityOfSuccess(self, QValue):
-        theta = 0.0
-        maxreward = 1
-        probability = (1-theta) * (1/2*numpy.log10(QValue/maxreward)+1)
-
-        if probability <= 0:
-            probability = 0
-        if probability >= 1:
-            probability =1
-
-        self.Probability.append(probability)
-
     def getAction(self, params):
 
         stateVector, possibleActionsOriginal = params
@@ -282,8 +281,10 @@ class AgentA2C(IAgent.IAgent):
             # argSoftMax = numpy.argmax(softMaxA)
             # print("AIndex: " + str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax]))
 
-            self.QValues.append(qvalues)
-            self.calculateProbabilityOfSuccess(qvalues[aIndex])
+            self.QValues.append(a)
+
+            if not self.intrinsic == None:
+                self.intrinsic.performAction(a[aIndex])
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
@@ -407,7 +408,7 @@ class AgentA2C(IAgent.IAgent):
 
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer, score = params
 
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
@@ -415,6 +416,11 @@ class AgentA2C(IAgent.IAgent):
 
             self.currentCorrectAction = 0
             self.totalActionPerGame = 0
+
+            if not self.intrinsic == None:
+                if len(score) >= 1:
+                    if thisPlayer in score:
+                        self.intrinsic.performEndOfGame(score, thisPlayer)
 
         if self.training:
             # print ("train")

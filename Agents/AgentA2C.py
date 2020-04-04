@@ -284,7 +284,7 @@ class AgentA2C(IAgent.IAgent):
             self.QValues.append(a)
 
             if not self.intrinsic == None:
-                self.intrinsic.performAction(a[aIndex])
+                self.intrinsic.doSelfAction(a[aIndex], params)
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
@@ -420,9 +420,14 @@ class AgentA2C(IAgent.IAgent):
             if not self.intrinsic == None:
                 if len(score) >= 1:
                     if thisPlayer in score:
-                        self.intrinsic.performEndOfGame(score, thisPlayer)
+                        self.intrinsic.doEndOfGame(score, thisPlayer, params)
 
         if self.training:
+
+            if not self.intrinsic == None:
+                self.intrinsic.trainPModel(params)
+
+
             # print ("train")
             #memorize
 

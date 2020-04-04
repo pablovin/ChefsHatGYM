@@ -218,6 +218,10 @@ class AgentDQL(IAgent.IAgent):
         self.QValueReader = Model(self.online_network.inputs, softmaxLayer.output)
 
 
+
+    def observeOponentAction(self, params):
+        self.intrinsic.observeOponentAction(params, self.online_network)
+
     def getAction(self, params):
 
         stateVector, possibleActionsOriginal = params
@@ -260,7 +264,7 @@ class AgentDQL(IAgent.IAgent):
 
 
             if not self.intrinsic == None:
-                self.intrinsic.performAction(a[aIndex])
+                self.intrinsic.doSelfAction(a, params)
 
             self.QValues.append(a)
 
@@ -358,9 +362,14 @@ class AgentDQL(IAgent.IAgent):
             if not self.intrinsic == None:
                 if len(score) >= 1:
                     if thisPlayer in score:
-                        self.intrinsic.performEndOfGame(score, thisPlayer)
+                        self.intrinsic.doEndOfGame(score, thisPlayer, params)
+
 
         if self.training:
+
+            if not self.intrinsic == None:
+                self.intrinsic.trainPModel(params)
+
             #memorize
             action = numpy.argmax(action)
             # state = numpy.expand_dims(numpy.array(state), 0)
@@ -377,9 +386,9 @@ class AgentDQL(IAgent.IAgent):
                 self.updateModel(savedNetwork, game, thisPlayer)
                 self.updateTargetNetwork()
 
-            # Update the decay
-            if self.epsilon > self.epsilon_min:
-                self.epsilon *= self.epsilon_decay
+                # Update the decay
+                if self.epsilon > self.epsilon_min:
+                    self.epsilon *= self.epsilon_decay
 
 
 

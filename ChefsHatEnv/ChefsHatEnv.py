@@ -774,7 +774,7 @@ class ChefsHatEnv(gym.Env):
     for a in self.board:
       stateVector.append(a)
 
-    return numpy.array(stateVector) / self.maxCardNumber  # preprocess the state input
+    return numpy.array(stateVector) / (self.maxCardNumber+2)  # preprocess the state input
 
   def writeLog(self, message):
       self.logger.write(message)

@@ -32,6 +32,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
     #Experimental variables
 
     players = [] # hold the players of the game
+    playersObservingOthers = [] #hold the index of the players that are observign the oponent moves
 
     env = gym.make('chefshat-v0') #starting the game Environment
     env.startNewGame(maxCardNumber=numMaxCards, numberPlayers=len(playersAgents), rewardFunction=rewardFunction) # initialize the environment
@@ -47,6 +48,8 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
     for i in range(len(playersAgents)):
          playersAgents[i].startAgent((numMaxCards, env.numberOfCardsPerPlayer,  env.numberOfActions, loadModel[i], params))
          players.append(playersAgents[i])
+         if not playersAgents[i].intrinsic == None and playersAgents[i].intrinsic.isUsingOponentMood:
+            playersObservingOthers.append(i)
 
     metrics = []
     qvaluesStore = []
@@ -129,6 +132,8 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
                     while not validActionPlayer:
                         state = env.getCurrentPlayerState()
+                        cardsInHandN = numpy.nonzero(env.playersHand[thisPlayer])[0]
+                        cardsInHand = len(cardsInHandN)
 
                         #get an action
                         validAction = env.getPossibleActions(thisPlayer)
@@ -147,13 +152,24 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                         else:
                             wrongActions = wrongActions+1
 
+
+                        for observerIndex in playersObservingOthers:
+                            if not observerIndex == thisPlayer:
+                                    players[observerIndex].observeOponentAction((action,
+                                                                                 env.lastActionPlayers[thisPlayer],
+                                                                                 state[17:], newState[17:], validAction,
+                                                                                 cardsInHand, thisPlayer,
+                                                                                 observerIndex, done, env.score))
+
                         # # amountOfInvalid = int((100 - game)*0.2)
                         # amountOfInvalid = int((numGames - game)*0.2)
                         #
-                        if done or wrongActions < 10 or validAction:
+                        # if done or wrongActions < 10 or validAction:
                         # # # if validActionPlayer:
-                            players[thisPlayer].train((state, action, reward, newState, done,
-                                                     experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
+                        players[thisPlayer].train((state, action, reward, newState, done,
+                                                 experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
+
+
 
 
                     correctActions = players[thisPlayer].currentCorrectAction
@@ -205,11 +221,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         #Plot information per 1 game
         if isPlotting and (game+1)%plotFrequency==0:
             experimentManager.plotManager.generateSingleGame(plots,env,players, game)
-            # experimentManager.plotManager.plotTimeLine(env.playerActionsTimeLine, len(playersAgents), game)
-            #
-            # experimentManager.plotManager.plotDiscardBehavior(len(playersAgents), env.playerActionsComplete, game)
-            #
-            # experimentManager.plotManager.plotNumberOfActions(len(playersAgents), env.playerActionsComplete, game)
 
         #saving the metrics
         for p in range(len(playersAgents)):
@@ -261,43 +272,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         if isPlotting and (game+1)%plotFrequency==0:
             experimentManager.plotManager.generateExperimentPlots(plots, env, players, game)
 
-            # correctActions = []
-            # totalActions = []
-            # losses = []
-            # qvalues = []
-            # probs = []
-            # probsAff = []
-            # sActions = []
-            # for p in players:
-            #     correctActions.append(p.totalCorrectAction)
-            #     totalActions.append(p.totalAction)
-            #     losses.append(p.losses)
-            #     agentsType.append(p.name)
-            #     qvalues.append(p.QValues)
-            #
-            #     if not p.intrinsic == None:
-            #         probs.append(p.intrinsic.probabilities)
-            #         probsAff.append(p.intrinsic.moodReadings)
-            #     # sActions.append(p.SelectedActions)
-            #
-            # experimentManager.plotManager.plotRounds(env.allRounds, game)
-            # experimentManager.plotManager.plotRewardsAll(len(playersAgents), env.allRewards, game)
-            # experimentManager.plotManager.plotWinners(len(playersAgents), env.winners, game, agentsType)
-            # experimentManager.plotManager.plotCorrectActions(len(playersAgents), correctActions,totalActions,  game)
-            # experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
-            # experimentManager.plotManager.plotFinishPositionAllPlayers(len(playersAgents), env.allScores, env.winners, game)
-            # experimentManager.plotManager.plotLosses(len(playersAgents), losses, game)
-            # experimentManager.plotManager.plotNumberOfActionsTotal(len(playersAgents), env.playerActionsCompleteAllGames, game)
-            # experimentManager.plotManager.plotQValues(len(playersAgents), qvalues, sActions, env.highLevelActions,  game)
-            # experimentManager.plotManager.plotProbabilitySuccess(len(playersAgents), probs, game, name="Phonomenological")
-            # # experimentManager.plotManager.plotProbabilitySuccess(len(playersAgents), probsLearning, game, name="Learning")
-            # experimentManager.plotManager.plotAffMemory(len(playersAgents), probsAff, game,
-            #                                                      name="AffMemoryReading")
-            #
-
-        # experimentManager.plotManager.plotWrongActions(len(playersAgents), env.allWrongActions, game)
-        #
-        #
 
     experimentManager.metricManager.saveMetricPlayer(metrics)
     returns = []

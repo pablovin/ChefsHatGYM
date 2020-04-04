@@ -158,7 +158,7 @@ def plotFinishPositions(names, scoresAll, winners, iteraction, plotDirectory):
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/HistoryWinners_player_"+str(names[i])+"_iteration_"+str(iteraction)+"_TotalWin_"+str(totalWins)+".png")
+        plt.savefig(directory + "/HistoryWinners_player_"+str(names[i])+"("+str(i)+")"+"_iteration_"+str(iteraction)+"_TotalWin_"+str(totalWins)+".png")
 
         fig.clf()
 
@@ -268,7 +268,7 @@ def plotActionBehavior(names, actions, iteraction, plotsDirectory):
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/ActionBehavior_AllGames_Player_" + str(names[i]) + "_iteration_" + str(
+        plt.savefig(directory + "/ActionBehavior_AllGames_Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(
             iteraction) + ".png", dpi=500)
 
         fig.clf()
@@ -284,64 +284,110 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
     for i in range(len(names)):
 
         if len(moodReading) > i:
-            reward = moodReading[i]
-            dataY = range(len(reward))
-            # input("here")
 
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+            for index, moodReadings in enumerate(moodReading[i]):
 
-            ax.set_xlabel('Actions')
-            ax.set_ylabel('Mood Value')
+                directory = plotsDirectory + "/Mood_Players/"
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
 
-            plt.yticks(numpy.arange(0, 1.1, 0.1))
-            # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+                if index == 0:
+                    directory = plotsDirectory + "/Mood_Players/Self/"
+                    plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_iteration_" + str(iteraction) + ".png"
+                else:
+                    directory = plotsDirectory + "/Mood_Players/Oponents/"
+                    nameIndex = index
+                    if nameIndex > 3:
+                        nameIndex = 0
+                    plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_AboutPlayer_" + str(names[nameIndex]) + "(" + str(
+                        nameIndex) + ")_iteration_" + str(
+                        iteraction) + ".png"
 
-            plt.ylim(-0.1, 1.1)
-            # plt.xlim(0, range(len(dataY)))
-            plt.grid()
-            ax.plot(dataY, reward)
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
 
-            directory = plotsDirectory + "/AffMemory_Players/"
+                reward = moodReadings
+                dataY = range(len(reward))
+                # input("here")
 
-            if not os.path.exists(directory):
-                os.mkdir(directory)
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
 
-            plt.savefig(directory + "/AffMemory_Players" + str(names[i]) +"_iteration_"+str(iteraction)+".png")
+                ax.set_xlabel('Actions')
+                ax.set_ylabel('Mood Value')
 
-            fig.clf()
+                plt.yticks(numpy.arange(0, 1.1, 0.1))
+                # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+
+                plt.ylim(-0.1, 1.1)
+                # plt.xlim(0, range(len(dataY)))
+                plt.grid()
+                ax.plot(dataY, reward)
+
+                plt.savefig(plotName)
+
+                fig.clf()
 
 def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name=""):
 
     for i in range(len(names)):
 
         if len(prob) >i:
-            reward = prob[i]
-            dataY = range(len(reward))
-            # input("here")
 
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+            for index, probabilities in enumerate(prob[i]):
+                #
+                # print ("---------")
+                # print ("I:" + str(names[i]))
+                # print ("Index: " + str(index))
 
-            ax.set_xlabel('Actions')
-            ax.set_ylabel('Probability')
+                directory = plotsDirectory + "/ProbabilitySuccess_Players/"
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
 
-            plt.yticks(numpy.arange(0, 1.1, 0.1))
-            # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+                if index == 0:
+                    directory = plotsDirectory + "/ProbabilitySuccess_Players/Self/"
+                    plotName = directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png"
+                else:
+                    directory = plotsDirectory + "/ProbabilitySuccess_Players/Oponents/"
 
-            plt.ylim(-0.1, 1.1)
-            # plt.xlim(0, range(len(dataY)))
-            plt.grid()
-            ax.plot(dataY, reward)
 
-            directory = plotsDirectory + "/ProbabilitySuccess_Players/"
+                    newNames = names.copy()
+                    newNames.remove(names[i])
+                    #Get the correct name for each plot
+                    # nameIndex = (i+index) % 4
 
-            if not os.path.exists(directory):
-                os.mkdir(directory)
 
-            plt.savefig(directory + "/ProbabilitySuccess_Players" + str(names[i]) +"_iteration_"+str(iteraction)+"_Type_"+str(name)+".png")
+                    plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i])+"("+str(i)+")" + "_AboutPlayer_"+str(newNames[index-1])+")_iteration_" + str(
+                        iteraction) + ".png"
 
-            fig.clf()
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+
+
+                reward = probabilities
+                dataY = range(len(reward))
+                # input("here")
+
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+
+                ax.set_xlabel('Actions')
+                ax.set_ylabel('Probability')
+
+                plt.yticks(numpy.arange(0, 1.1, 0.1))
+                # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+
+                plt.ylim(-0.1, 1.1)
+                # plt.xlim(0, range(len(dataY)))
+                plt.grid()
+                ax.plot(dataY, reward)
+
+
+                plt.savefig(plotName)
+
+                fig.clf()
 
 def plotRewardsAll(names, rewards, iteraction, plotsDirectory):
 
@@ -376,7 +422,7 @@ def plotRewardsAll(names, rewards, iteraction, plotsDirectory):
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/Reward_player_" + str(names[i]) +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
+        plt.savefig(directory + "/Reward_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
 
         fig.clf()
 
@@ -409,7 +455,7 @@ def plotCorrectActions(names, wrongActions, totalActions, iteraction, plotsDirec
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/CorrectActionsPlot_player_" + str(names[i]) +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalCorrectActions)+"("+str(totalActionsGame)+").png")
+        plt.savefig(directory + "/CorrectActionsPlot_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalCorrectActions)+"("+str(totalActionsGame)+").png")
 
         plt.clf()
 
@@ -448,7 +494,7 @@ def plotWrongActions( names, wrongActions, iteraction, plotsDirectory):
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/WrongActionsPlot_player_" + str(names[i]) +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
+        plt.savefig(directory + "/WrongActionsPlot_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
 
         plt.clf()
 
@@ -481,7 +527,7 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
 
         plt.ylim(0, 1)
 
-        plt.savefig(directory + "/SelectedQValues_player_" + str(names[i]) + "_iteration_" + str(iteraction) + ".png")
+        plt.savefig(directory + "/SelectedQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
 
         plt.clf()
 
@@ -491,65 +537,46 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
 
         plt.ylim(0, 1)
 
-        plt.savefig(directory + "/SummedQValues_player_" + str(names[i]) + "_iteration_" + str(iteraction) + ".png")
+        plt.savefig(directory + "/SummedQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
 
         plt.clf()
 
-def plotLosses(names, losses, iteraction, plotsDirectory):
+def plotLosses(names, losses, iteraction, name, plotsDirectory):
 
     # Plot wrong actions all players
+    directory = plotsDirectory + "/Losses_" + str(name) + "/"
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
 
     for i in range(len(names)):
 
-        directory = plotsDirectory + "/Losses_Players/"
+        if len(losses) > i:
 
-        if not os.path.exists(directory):
-            os.mkdir(directory)
+            loss = losses[i]
+            isList = False
 
-        loss = losses[i]
-        isList = False
+            try:
 
-        try:
+                if isinstance(loss[0], list):
+                    isList = True
+                    loss = numpy.array(loss)
+                    # print ("Shape:" + str(loss.shape))
+                    # loss = numpy.swapaxes(loss, 0, 1)
+                    lossActor = []
+                    lossCritic = []
+                    for u in loss:
+                        lossActor.append(u[0])
+                        lossCritic.append(u[1])
+                    # lossActor = loss[:, 0]
+                    # lossCritic =  loss[:, 1]
 
-            if isinstance(loss[0], list):
-                isList = True
-                loss = numpy.array(loss)
-                # print ("Shape:" + str(loss.shape))
-                # loss = numpy.swapaxes(loss, 0, 1)
-                lossActor = []
-                lossCritic = []
-                for u in loss:
-                    lossActor.append(u[0])
-                    lossCritic.append(u[1])
-                # lossActor = loss[:, 0]
-                # lossCritic =  loss[:, 1]
+                    dataY = range(len(lossActor))
 
-                dataY = range(len(lossActor))
-
-        except:
-                 isList = False
-                 dataY = range(len(loss))
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-
-        ax.set_xlabel('Training Steps')
-        ax.set_ylabel('Loss')
-
-
-        if isList:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-
-            ax.set_xlabel('Training Steps')
-            ax.set_ylabel('Loss')
-
-            plt.plot(dataY, lossCritic, label="Critic")
-            plt.legend()
-
-            plt.savefig(directory + "/CriticLoss_player_" + str(names[i]) + "_iteration_" + str(iteraction) + "WrongActions.png")
-
-            plt.clf()
+            except:
+                     isList = False
+                     dataY = range(len(loss))
 
             fig = plt.figure()
             ax = fig.add_subplot(111)
@@ -558,22 +585,43 @@ def plotLosses(names, losses, iteraction, plotsDirectory):
             ax.set_ylabel('Loss')
 
 
-            plt.plot(dataY, lossActor, label="Actor")
-            plt.legend()
-            plt.savefig(
-                directory + "/ActorLoss_player_" + str(names[i]) + "_iteration_" + str(iteraction) + "WrongActions.png")
-        else:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+            if isList:
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
 
-            dataY = range(len(loss))
-            ax.set_xlabel('Training Steps')
-            ax.set_ylabel('Loss')
-            plt.plot(dataY, loss)
-            plt.grid()
-            plt.savefig(directory + "/Loss_player_" + str(names[i]) +"_iteration_"+str(iteraction)+"WrongActions.png")
+                ax.set_xlabel('Training Steps')
+                ax.set_ylabel('Loss')
 
-            plt.clf()
+                plt.plot(dataY, lossCritic, label="Critic")
+                plt.legend()
+
+                plt.savefig(directory + "/"+str(name)+"CriticLoss_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "WrongActions.png")
+
+                plt.clf()
+
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+
+                ax.set_xlabel('Training Steps')
+                ax.set_ylabel('Loss')
+
+
+                plt.plot(dataY, lossActor, label="Actor")
+                plt.legend()
+                plt.savefig(
+                    directory + "/ActorLoss_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "WrongActions.png")
+            else:
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+
+                dataY = range(len(loss))
+                ax.set_xlabel('Training Steps')
+                ax.set_ylabel('Loss')
+                plt.plot(dataY, loss)
+                plt.grid()
+                plt.savefig(directory + "/Loss_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"WrongActions.png")
+
+                plt.clf()
 
 
 """
@@ -667,7 +715,7 @@ def plotNumberOfActions(names, actions, gameNumber, plotsDirectory):
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/ActionBehavior_" + str(names[i]) + "_Game_"+str(gameNumber)+".png")
+        plt.savefig(directory + "/ActionBehavior_" + str(names[i])+"("+str(i)+")" + "_Game_"+str(gameNumber)+".png")
 
         fig.clf()
 
@@ -739,7 +787,6 @@ def plotDiscardBehavior( names, actions, gameNumber, plotsDirectory):
             ax.set_xlabel('Rounds')
             ax.set_ylabel('Discards')
 
-
             # ax.text(1, 1, "TotalWin:"+str(totalWins), style='italic',
             #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
 
@@ -766,7 +813,7 @@ def plotDiscardBehavior( names, actions, gameNumber, plotsDirectory):
                 os.mkdir(directory)
 
 
-            plt.savefig(directory + "/Player_Discards_player_" + str(str(names)) + "_Game_" + str(
+            plt.savefig(directory + "/Player_Discards_player_" + str(names[i])+"("+str(i)+")" + "_Game_" + str(
                 gameNumber) + ".png")
 
             fig.clf()
@@ -814,7 +861,7 @@ def plotTimeLine (names,actions,  gameNumber=0, plotsDirectory=""):
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory  + "/Game_TimeLine_Game_"+str(gameNumber)+"_Player_"+str(names[i])+".png")
+        plt.savefig(directory  + "/Game_TimeLine_Game_"+str(gameNumber)+"_Player_"+str(names[i])+"("+str(i)+")"+".png")
 
         fig.clf()
 
@@ -956,6 +1003,7 @@ class PlotManager():
             totalActions = []
             qvalues = []
             losses = []
+            lossesPModel = []
 
             for p in players:
                 agentNames.append(p.name)
@@ -967,6 +1015,8 @@ class PlotManager():
                     selfProbabilities.append(p.intrinsic.probabilities)
                     moodReadings.append(p.intrinsic.moodReadings)
                     selfProbabilitiesNames.append(p.intrinsic.selfConfidenceType)
+                    if not p.intrinsic.pModel == None:
+                        lossesPModel.append(p.intrinsic.pModel.losses)
 
             if plots["Experiment_Winners"] in plotsToGenerate:
                 plotWinners(len(agentNames), env.winners, gameRound, agentNames, self._plotsDirectory)
@@ -999,6 +1049,7 @@ class PlotManager():
                 plotQValues( agentNames, qvalues, gameRound, self._plotsDirectory)
 
             if plots["Experiment_Losses"] in plotsToGenerate:
-                plotLosses(agentNames, losses, gameRound, self._plotsDirectory)
+                plotLosses(agentNames, losses, gameRound, "Player", self._plotsDirectory)
+                plotLosses(agentNames, lossesPModel, gameRound, "PModel", self._plotsDirectory)
 
 

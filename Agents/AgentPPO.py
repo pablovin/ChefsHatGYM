@@ -100,6 +100,9 @@ class AgentPPO(IAgent.IAgent):
 
         self.totalCorrectAction = []
 
+        self.MeanQValuesPerGame = []
+        self.currentGameQValues = []
+
 
     def startAgent(self, params=[]):
         numMaxCards, numCardsPerPlayer, actionNumber, loadModel, agentParams = params
@@ -308,6 +311,8 @@ class AgentPPO(IAgent.IAgent):
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
 
+            self.currentGameQValues.append(0)
+
         else:
             # if numpy.sum(possibleActions2) > 1:
             #     possibleActions2[199] = 0
@@ -315,9 +320,6 @@ class AgentPPO(IAgent.IAgent):
             possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
-
-            qvalues = self.QValueReader.predict([stateVector, possibleActionsVector])[0]
-
 
             # def softmax(x):
             #     """Compute softmax values for each sets of scores in x."""
@@ -332,6 +334,7 @@ class AgentPPO(IAgent.IAgent):
             # print("AIndex: " + str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax]))
 
             self.QValues.append(a)
+            self.currentGameQValues.append(numpy.sum(a))
 
             if not self.intrinsic == None:
                 self.intrinsic.doSelfAction(a, params)
@@ -482,6 +485,11 @@ class AgentPPO(IAgent.IAgent):
 
             self.currentCorrectAction = 0
             self.totalActionPerGame = 0
+
+            meanQValueThisGame = numpy.average(self.currentGameQValues)
+
+            self.MeanQValuesPerGame.append(meanQValueThisGame)
+            self.currentGameQValues = []
 
             if not self.intrinsic == None:
                 if len(score) >= 1:

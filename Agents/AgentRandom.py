@@ -14,25 +14,6 @@ class AgentRandom(IAgent.IAgent):
     name = ""
     lastModel = ""
 
-    currentCorrectAction = 0
-
-    totalCorrectAction = []
-
-    totalAction = []
-    totalActionPerGame = 0
-
-    losses = []
-    QValues = []
-
-    Probability = []
-
-    SelectedActions = []
-
-    ProbabilityLearning = []
-
-    ProbAffMemory = []
-
-    intrinsic = None
 
     def __init__(self, name):
 
@@ -80,26 +61,6 @@ class AgentRandom(IAgent.IAgent):
 
         return a
 
-
-
-        # aIndex = numpy.random.randint(0, self.outputSize)
-        # if possibleActions[aIndex] == 0:
-        # possibleActions[199] = 0 #pass action always will be selected if nothing else is possible
-        #
-        # trials = 0
-        # aIndex = numpy.random.randint(0, self.outputSize)
-        #
-        #
-        # while not possibleActions[aIndex] == 1:
-        #     aIndex = aIndex + 1
-        #
-        #     if aIndex >= len(possibleActions):
-        #         aIndex = 0
-        #
-        #     trials = trials+1
-        #     if trials == len(possibleActions)-1:
-        #         aIndex = 199
-        #         break
 
 
     def loadModel(self, params):

@@ -29,11 +29,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         logger.write("Players :" + str(len(playersAgents)))
         logger.write("Played games :"+ str(numGames))
 
-    #Experimental variables
-
-    players = [] # hold the players of the game
-    playersObservingOthers = [] #hold the index of the players that are observign the oponent moves
-
     env = gym.make('chefshat-v0') #starting the game Environment
     env.startNewGame(maxCardNumber=numMaxCards, numberPlayers=len(playersAgents), rewardFunction=rewardFunction) # initialize the environment
     env.reset() # to calculate the initial variables
@@ -44,6 +39,11 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
     params = []
     if len(agentParams)>0:
         params = agentParams[0]
+
+    #Experimental variables
+
+    players = [] # hold the players of the game
+    playersObservingOthers = [] #hold the index of the players that are observign the oponent moves
 
     for i in range(len(playersAgents)):
          playersAgents[i].startAgent((numMaxCards, env.numberOfCardsPerPlayer,  env.numberOfActions, loadModel[i], params))

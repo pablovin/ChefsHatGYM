@@ -159,6 +159,8 @@ class AgentA2C(IAgent.IAgent):
             # print ("loading from:" + str(loadModel))
             self.loadModel(loadModel)
 
+        self.MeanQValuesPerGame = []
+        self.currentGameQValues = []
 
 
     def buildModel(self):
@@ -263,6 +265,8 @@ class AgentA2C(IAgent.IAgent):
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
 
+            self.currentGameQValues.append(0)
+
         else:
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
@@ -282,6 +286,7 @@ class AgentA2C(IAgent.IAgent):
             # print("AIndex: " + str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax]))
 
             self.QValues.append(a)
+            self.currentGameQValues.append(numpy.sum(a))
 
             if not self.intrinsic == None:
                 self.intrinsic.doSelfAction(a[aIndex], params)
@@ -416,6 +421,11 @@ class AgentA2C(IAgent.IAgent):
 
             self.currentCorrectAction = 0
             self.totalActionPerGame = 0
+
+            meanQValueThisGame = numpy.average(self.currentGameQValues)
+
+            self.MeanQValuesPerGame.append(meanQValueThisGame)
+            self.currentGameQValues = []
 
             if not self.intrinsic == None:
                 if len(score) >= 1:

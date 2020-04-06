@@ -158,6 +158,9 @@ class AgentDQL(IAgent.IAgent):
 
         self.SelectedActions = []
 
+        self.MeanQValuesPerGame = []
+        self.currentGameQValues = []
+
 
     def buildModel(self):
 
@@ -266,7 +269,9 @@ class AgentDQL(IAgent.IAgent):
             if not self.intrinsic == None:
                 self.intrinsic.doSelfAction(a, params)
 
+            #Update QValues
             self.QValues.append(a)
+            self.currentGameQValues.append(numpy.sum(a))
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
@@ -314,6 +319,7 @@ class AgentDQL(IAgent.IAgent):
                 next_best_action = numpy.argmax(next_q[i, :])
                 q[i, a[i]] = r[i] + self.gamma * q_targ[i, next_best_action]
 
+
             if (self.prioritized_experience_replay):
                 # Update PER Sum Tree
                 self.memory.update(idx[i], abs(old_q - q[i, a[i]]))
@@ -350,6 +356,9 @@ class AgentDQL(IAgent.IAgent):
     def train(self, params=[]):
 
         state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer, score = params
+        action = numpy.argmax(action)
+        self.memorize(state, action, reward, next_state, done, possibleActions, newPossibleActions)
+
 
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
@@ -358,6 +367,10 @@ class AgentDQL(IAgent.IAgent):
             self.currentCorrectAction = 0
             self.totalActionPerGame = 0
 
+            meanQValueThisGame = numpy.average(self.currentGameQValues)
+
+            self.MeanQValuesPerGame.append(meanQValueThisGame)
+            self.currentGameQValues = []
 
             if not self.intrinsic == None:
                 if len(score) >= 1:
@@ -371,12 +384,12 @@ class AgentDQL(IAgent.IAgent):
                 self.intrinsic.trainPModel(params)
 
             #memorize
-            action = numpy.argmax(action)
+
             # state = numpy.expand_dims(numpy.array(state), 0)
             # next_state = numpy.expand_dims(numpy.array(next_state), 0)
             # possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
 
-            self.memorize(state, action, reward, next_state, done, possibleActions, newPossibleActions)
+
 
             #
             # self.memory.append((state, action, reward, next_state, done, possibleActions))

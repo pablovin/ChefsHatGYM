@@ -14,25 +14,27 @@ from matplotlib.collections import PolyCollection
 
 
 plots = {
-    "all": 0,
-    "Experiment_Winners":1,
-    "Experiment_Rounds":2,
-    "Experiment_FinishingPosition":3,
-    "Experiment_ActionsBehavior":4,
-    "Experiment_Mood":5,
-    "Experiment_SelfProbabilitySuccess":6,
-    "Experiment_Reward": 7,
-    "Experiment_CorrectActions":8,
-    "Experiment_WrongActions": 9,
-    "Experiment_QValues": 10,
-    "Experiment_Losses": 11,
+    "all": "all",
+    "Experiment_Winners":"expWin",
+    "Experiment_Rounds":"expRound",
+    "Experiment_FinishingPosition":"expFinish",
+    "Experiment_ActionsBehavior":"expActionBeh",
+    "Experiment_Mood":"expMood",
+    "Experiment_SelfProbabilitySuccess":"expSelfProb",
+    "Experiment_Reward": "expReward",
+    "Experiment_SelfReward": "expSelfReward",
+    "Experiment_CorrectActions":"expCorrect",
+    "Experiment_WrongActions": "expWrong",
+    "Experiment_QValues": "expQValue",
+    "Experiment_MeanQValues": "expMeanQ",
+    "Experiment_Losses": "expLoss",
 
-    "OneGame_NumberOfActions": 12,
-    "OneGame_DiscardBehavior": 13,
-    "OneGame_Timeline": 14,
+    "OneGame_NumberOfActions": "oneGNumbAct",
+    "OneGame_DiscardBehavior": "oneGDiscard",
+    "OneGame_Timeline": "oneGTimeline",
 
-    "SeveralGames_QValues": 15,
-    "SeveralGames_Victories:":16
+    "SeveralGames_QValues": "sevQVal",
+    "SeveralGames_Victories:":"sevVic"
 
 
 }
@@ -297,12 +299,17 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
                         i) + ")" + "_iteration_" + str(iteraction) + ".png"
                 else:
                     directory = plotsDirectory + "/Mood_Players/Oponents/"
-                    nameIndex = index
-                    if nameIndex > 3:
-                        nameIndex = 0
+
+                    newIndexes = range(4)
+                    newIndexes.remove(i)
+                    newNames = names.copy()
+                    newNames.remove(names[i])
+                    # Get the correct name for each plot
+                    # nameIndex = (i+index) % 4
+
                     plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_AboutPlayer_" + str(names[nameIndex]) + "(" + str(
-                        nameIndex) + ")_iteration_" + str(
+                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
+                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
                         iteraction) + ".png"
 
                 if not os.path.exists(directory):
@@ -353,13 +360,15 @@ def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name="")
                     directory = plotsDirectory + "/ProbabilitySuccess_Players/Oponents/"
 
 
+                    newIndexes = range(4)
+                    newIndexes.remove(i)
                     newNames = names.copy()
                     newNames.remove(names[i])
                     #Get the correct name for each plot
                     # nameIndex = (i+index) % 4
 
 
-                    plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i])+"("+str(i)+")" + "_AboutPlayer_"+str(newNames[index-1])+")_iteration_" + str(
+                    plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i])+"("+str(i)+")" + "_AboutPlayer_"+str(newNames[index-1])+"("+str(newIndexes[index-1])+")" +")_iteration_" + str(
                         iteraction) + ".png"
 
                 if not os.path.exists(directory):
@@ -425,6 +434,64 @@ def plotRewardsAll(names, rewards, iteraction, plotsDirectory):
         plt.savefig(directory + "/Reward_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
 
         fig.clf()
+
+
+def plotSelfRewardsAll(names, meanReward, allReward, iteraction, plotsDirectory):
+
+    for i in range(len(names)):
+
+        directory = plotsDirectory + "/Self_Rewards_Players/"
+
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+
+        reward = allReward[i]
+
+        dataY = range(len(reward))
+
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        ax.set_xlabel('Games')
+        ax.set_ylabel('Self Reward')
+
+        plt.yticks(numpy.arange(-1, 1, 0.1))
+        # plt.xticks(numpy.arange(0, len(dataY) + 1, 500))
+
+        plt.ylim(-1, 1)
+        # plt.xlim(0, range(len(dataY)))
+        plt.grid()
+        ax.plot(dataY, reward)
+
+        plt.savefig(directory + "/Reward_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png")
+
+        fig.clf()
+
+        reward = meanReward[i]
+
+        dataY = range(len(reward))
+        # input("here")
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        ax.set_xlabel('Games')
+        ax.set_ylabel('Self Average Reward')
+
+        plt.yticks(numpy.arange(-1, 1, 0.1))
+        # plt.xticks(numpy.arange(0, len(dataY) + 1, 500))
+
+        plt.ylim(-1, 1)
+        # plt.xlim(0, range(len(dataY)))
+        plt.grid()
+        ax.plot(dataY, reward)
+
+        plt.savefig(directory + "/AverageReward_player_" + str(names[i]) + "(" + str(i) + ")" + "_iteration_" + str(
+            iteraction) +".png")
+
+        fig.clf()
+
 
 def plotCorrectActions(names, wrongActions, totalActions, iteraction, plotsDirectory):
 
@@ -527,7 +594,7 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
 
         plt.ylim(0, 1)
 
-        plt.savefig(directory + "/SelectedQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
+        plt.savefig(directory + "/BestQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
 
         plt.clf()
 
@@ -540,6 +607,34 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
         plt.savefig(directory + "/SummedQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
 
         plt.clf()
+
+def plotMeanQValuesGames( names, meanQValues, iteraction, plotsDirectory):
+
+    # Plot selected QValues for an agent.
+
+    for i in range(len(names)):
+
+        directory = plotsDirectory + "/Mean_QValues_Players/"
+
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+
+        qValue = meanQValues[i]
+
+        dataY = range(len(qValue))
+
+        fig, axs = plt.subplots(1, 1)
+        axs.plot(dataY, qValue)
+
+        plt.ylim(0, 1)
+
+        plt.savefig(directory + "/MeanValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
+
+        plt.clf()
+
+
+
+
 
 def plotLosses(names, losses, iteraction, name, plotsDirectory):
 
@@ -1004,6 +1099,10 @@ class PlotManager():
             qvalues = []
             losses = []
             lossesPModel = []
+            meanQValues = []
+
+            selfReward = []
+            selfRewardAvg = []
 
             for p in players:
                 agentNames.append(p.name)
@@ -1011,6 +1110,9 @@ class PlotManager():
                 totalActions.append(p.totalAction)
                 qvalues.append(p.QValues)
                 losses.append(p.losses)
+                meanQValues.append(p.MeanQValuesPerGame)
+                selfReward.append(p.selfReward)
+                selfRewardAvg.append(p.meanReward)
                 if not p.intrinsic == None:
                     selfProbabilities.append(p.intrinsic.probabilities)
                     moodReadings.append(p.intrinsic.moodReadings)
@@ -1051,5 +1153,12 @@ class PlotManager():
             if plots["Experiment_Losses"] in plotsToGenerate:
                 plotLosses(agentNames, losses, gameRound, "Player", self._plotsDirectory)
                 plotLosses(agentNames, lossesPModel, gameRound, "PModel", self._plotsDirectory)
+
+            if plots["Experiment_MeanQValues"] in plotsToGenerate:
+                plotMeanQValuesGames( agentNames, meanQValues, gameRound, self._plotsDirectory)
+
+            if plots["Experiment_SelfReward"] in plotsToGenerate:
+                plotSelfRewardsAll(agentNames, selfRewardAvg, selfReward, gameRound, self._plotsDirectory)
+
 
 

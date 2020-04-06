@@ -7,6 +7,33 @@ class IAgent():
 
     __metaclass__ = ABCMeta
 
+    #Needed atributes
+    MeanQValuesPerGame = []
+
+    currentCorrectAction = 0
+
+    totalCorrectAction = []
+
+    totalAction = []
+    totalActionPerGame = 0
+
+    losses = []
+    QValues = []
+
+    Probability = []
+
+    SelectedActions = []
+
+    ProbabilityLearning = []
+
+    ProbAffMemory = []
+
+    intrinsic = None
+
+    selfReward = []
+    currentReward = []
+    meanReward = []
+
     @abstractmethod
     def train(self, params):
         pass

@@ -29,6 +29,17 @@ class AgentRandom(IAgent.IAgent):
         self.outputSize = numActions # all the possible ways to play cards plus the pass action
 
 
+
+        self.losses = []
+
+        self.QValues = []
+
+        self.SelectedActions = []
+
+        self.MeanQValuesPerGame = []
+        self.currentGameQValues = []
+
+
     def getAction(self, params):
 
         state, possibleActions2 = params

@@ -248,6 +248,8 @@ class AgentA2C(IAgent.IAgent):
         softmaxLayer = self.actor.get_layer(index=-2)
         self.QValueReader = Model(self.actor.inputs, softmaxLayer.output)
 
+    def observeOponentAction(self, params):
+        self.intrinsic.observeOponentAction(params, self.actor)
 
     def getAction(self, params):
 
@@ -289,7 +291,7 @@ class AgentA2C(IAgent.IAgent):
             self.currentGameQValues.append(numpy.sum(a))
 
             if not self.intrinsic == None:
-                self.intrinsic.doSelfAction(a[aIndex], params)
+                self.intrinsic.doSelfAction(a, params)
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1

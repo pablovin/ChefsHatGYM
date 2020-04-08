@@ -7,6 +7,7 @@ import numpy
 
 import os
 
+import csv
 
 from KEF import DataSetManager
 
@@ -20,6 +21,7 @@ plots = {
     "Experiment_FinishingPosition":"expFinish",
     "Experiment_ActionsBehavior":"expActionBeh",
     "Experiment_Mood":"expMood",
+    "Experiment_MoodNeurons": "expMoodNeurons",
     "Experiment_SelfProbabilitySuccess":"expSelfProb",
     "Experiment_Reward": "expReward",
     "Experiment_SelfReward": "expSelfReward",
@@ -275,6 +277,110 @@ def plotActionBehavior(names, actions, iteraction, plotsDirectory):
 
         fig.clf()
 
+def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory):
+
+    for i in range(len(names)):
+
+        if len(moodNeurons) > i:
+
+            for index, moodNeuronReadings in enumerate(moodNeurons[i]):
+
+                directory = plotsDirectory + "/MoodNeurons_Players/"
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+
+                if index == 0:
+                    directory = plotsDirectory + "/MoodNeurons_Players/Self/"
+                    plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_iteration_" + str(iteraction) + ".png"
+
+                    csvName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_iteration_" + str(iteraction) + ".csv"
+                else:
+                    directory = plotsDirectory + "/MoodNeurons_Players/Oponents/"
+
+                    newIndexes = numpy.array(range(4)).tolist()
+                    newIndexes.remove(i)
+                    newNames = names.copy()
+                    newNames.remove(names[i])
+
+                    plotName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
+                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
+                        iteraction) + ".png"
+
+                    csvName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
+                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
+                        iteraction) + "..csv"
+
+
+
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+
+
+                thisPlayerNeurons = moodNeuronReadings
+
+                neuronsX = []
+                neuronsY = []
+                neuronsAge = []
+
+                for indexA, action in enumerate(thisPlayerNeurons):
+                    neuronsAction = []
+                    for n in action[0]:
+                        neuronsX.append(n[0])
+                        neuronsY.append(indexA)
+                        neuronsAction.append(n[0])
+
+                    for n in action[1]:
+                        neuronsAge.append(n)
+
+                neuronsX = numpy.tanh(numpy.array(neuronsX).flatten())
+                averageNeuron = moodReading[i][index]
+                dataYAverageNeuron = range(len(averageNeuron))
+
+
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+
+                cmap = plt.cm.rainbow
+                norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
+
+                ax.set_xlabel('Actions')
+                ax.set_ylabel('Mood Neurons')
+
+                plt.yticks(numpy.arange(0, 1.1, 0.1))
+                # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+
+                plt.ylim(-0.1, 1.1)
+                # plt.xlim(0, range(len(dataY)))
+                plt.grid()
+
+                for nindex,neuron in enumerate(neuronsX):
+                    alpha = neuronsAge[nindex]
+                    ax.scatter(neuronsY[nindex], neuron, alpha = alpha, c="red")
+
+                ax.plot(dataYAverageNeuron,averageNeuron,label="Avg Mood")
+
+                with open(csvName, mode='w') as employee_file:
+                    employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+                    employee_writer.writerow(['Action', 'NeuronAverageValue'])
+
+                    for nI, nvalue in enumerate(averageNeuron):
+                      employee_writer.writerow([str(nI), str(nvalue)])
+
+
+
+                # # sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+                # fig.colorbar(sm)
+                plt.legend()
+                plt.savefig(plotName)
+
+                fig.clf()
+
+
 def plotMood(names, moodReading, iteraction, plotsDirectory):
 
     # Plot mean reward all players
@@ -297,10 +403,13 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
                     directory = plotsDirectory + "/Mood_Players/Self/"
                     plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
                         i) + ")" + "_iteration_" + str(iteraction) + ".png"
+
+                    csvName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_iteration_" + str(iteraction) + ".csv"
                 else:
                     directory = plotsDirectory + "/Mood_Players/Oponents/"
 
-                    newIndexes = range(4)
+                    newIndexes = numpy.array(range(4)).tolist()
                     newIndexes.remove(i)
                     newNames = names.copy()
                     newNames.remove(names[i])
@@ -311,6 +420,11 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
                         i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
                         newIndexes[index - 1]) + ")" + ")_iteration_" + str(
                         iteraction) + ".png"
+
+                    csvName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
+                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
+                        iteraction) + ".csv"
 
                 if not os.path.exists(directory):
                     os.mkdir(directory)
@@ -356,11 +470,12 @@ def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name="")
                 if index == 0:
                     directory = plotsDirectory + "/ProbabilitySuccess_Players/Self/"
                     plotName = directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png"
+                    csvName =  directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".csv"
                 else:
                     directory = plotsDirectory + "/ProbabilitySuccess_Players/Oponents/"
 
 
-                    newIndexes = range(4)
+                    newIndexes = numpy.array(range(4)).tolist()
                     newIndexes.remove(i)
                     newNames = names.copy()
                     newNames.remove(names[i])
@@ -370,6 +485,11 @@ def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name="")
 
                     plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i])+"("+str(i)+")" + "_AboutPlayer_"+str(newNames[index-1])+"("+str(newIndexes[index-1])+")" +")_iteration_" + str(
                         iteraction) + ".png"
+
+                    csvName = directory + "/ProbabilitySuccess_Players_" + str(names[i]) + "(" + str(
+                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
+                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
+                        iteraction) + ".csv"
 
                 if not os.path.exists(directory):
                     os.mkdir(directory)
@@ -386,13 +506,21 @@ def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name="")
                 ax.set_ylabel('Probability')
 
                 plt.yticks(numpy.arange(0, 1.1, 0.1))
-                # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+                # plt.xticks(numpy.arange(0, len(dataY) + 1, 1))
 
                 plt.ylim(-0.1, 1.1)
                 # plt.xlim(0, range(len(dataY)))
                 plt.grid()
                 ax.plot(dataY, reward)
 
+
+                with open(csvName, mode='w') as employee_file:
+                    employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+                    employee_writer.writerow(['Action', 'NeuronAverageValue'])
+
+                    for nI, nvalue in enumerate(reward):
+                      employee_writer.writerow([str(nI), str(nvalue)])
 
                 plt.savefig(plotName)
 
@@ -434,7 +562,6 @@ def plotRewardsAll(names, rewards, iteraction, plotsDirectory):
         plt.savefig(directory + "/Reward_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
 
         fig.clf()
-
 
 def plotSelfRewardsAll(names, meanReward, allReward, iteraction, plotsDirectory):
 
@@ -491,7 +618,6 @@ def plotSelfRewardsAll(names, meanReward, allReward, iteraction, plotsDirectory)
             iteraction) +".png")
 
         fig.clf()
-
 
 def plotCorrectActions(names, wrongActions, totalActions, iteraction, plotsDirectory):
 
@@ -631,9 +757,6 @@ def plotMeanQValuesGames( names, meanQValues, iteraction, plotsDirectory):
         plt.savefig(directory + "/MeanValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
 
         plt.clf()
-
-
-
 
 
 def plotLosses(names, losses, iteraction, name, plotsDirectory):
@@ -886,7 +1009,7 @@ def plotDiscardBehavior( names, actions, gameNumber, plotsDirectory):
             #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
 
             plt.yticks(numpy.arange(0, 12, 1.0))
-            # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
+            plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
 
             plt.ylim(0, 12)
             plt.xlim(0, largest)
@@ -1069,8 +1192,8 @@ class PlotManager():
                     plotsToGenerate.append(plots[i])
 
             agentNames = []
-            for p in players:
-                agentNames.append(p.name)
+            for index, p in enumerate(players):
+                agentNames.append(p.name+"_"+str(index))
 
             if plots["OneGame_NumberOfActions"] in plotsToGenerate:
                 plotNumberOfActions(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
@@ -1092,6 +1215,7 @@ class PlotManager():
 
             agentNames = []
             moodReadings = []
+            moodNeurons = []
             selfProbabilities = []
             selfProbabilitiesNames = []
             correctActions = []
@@ -1104,8 +1228,8 @@ class PlotManager():
             selfReward = []
             selfRewardAvg = []
 
-            for p in players:
-                agentNames.append(p.name)
+            for index, p in enumerate(players):
+                agentNames.append(p.name+"_"+str(index))
                 correctActions.append(p.totalCorrectAction)
                 totalActions.append(p.totalAction)
                 qvalues.append(p.QValues)
@@ -1117,6 +1241,7 @@ class PlotManager():
                     selfProbabilities.append(p.intrinsic.probabilities)
                     moodReadings.append(p.intrinsic.moodReadings)
                     selfProbabilitiesNames.append(p.intrinsic.selfConfidenceType)
+                    moodNeurons.append(p.intrinsic.moodNeurons)
                     if not p.intrinsic.pModel == None:
                         lossesPModel.append(p.intrinsic.pModel.losses)
 
@@ -1134,6 +1259,9 @@ class PlotManager():
 
             if plots["Experiment_Mood"] in plotsToGenerate:
                 plotMood(agentNames, moodReadings, gameRound,  self._plotsDirectory)
+
+            if plots["Experiment_MoodNeurons"] in plotsToGenerate:
+                plotMoodNeurons(agentNames, moodNeurons, moodReadings, gameRound, self._plotsDirectory)
 
             if plots["Experiment_SelfProbabilitySuccess"] in plotsToGenerate:
                 plotSelfProbabilitySuccess(agentNames, selfProbabilities, gameRound, self._plotsDirectory, name=selfProbabilitiesNames)

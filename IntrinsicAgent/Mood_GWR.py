@@ -102,8 +102,8 @@ class AssociativeGWR:
 
         self.distanceMetric = 1
         self.habThreshold = 0.3
-        self.tau_b = 0.3
-        self.tau_n = 0.1
+        self.tau_b = 0.009
+        self.tau_n = 0.009
         self.maxNodes = 5000  # OK for batch, bad for incremental
         self.maxNeighbours = 6
         self.maxAge = 100

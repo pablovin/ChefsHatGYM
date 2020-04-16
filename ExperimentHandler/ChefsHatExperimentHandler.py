@@ -335,7 +335,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 intrinsicMoods.append(p.intrinsic)
 
         if len(intrinsicMoods) >0:
-            from MoodyFramework.IntrinsicAgent import GenerateMoodFromDataset
+            from MoodyFramework.Mood.Intrinsic import GenerateMoodFromDataset
             GenerateMoodFromDataset.generateMoodFromDataset(intrinsicModels=intrinsicMoods,
                                                             dataset=experimentManager.dataSetManager.currentDataSetFile,
                                                             qModels=qvalueModels, saveDirectory=experimentManager.dataSetManager.dataSetDirectory)

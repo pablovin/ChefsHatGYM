@@ -39,8 +39,6 @@ plots = {
 
     "SeveralGames_QValues": "sevQVal",
     "SeveralGames_Victories:":"sevVic"
-
-
 }
 
 """

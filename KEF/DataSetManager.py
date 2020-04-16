@@ -3,6 +3,8 @@ import datetime
 import sys
 import datetime
 import csv
+import pandas as pd
+import numpy
 
 # Action types
 actionDeal = "DEAL"
@@ -11,6 +13,9 @@ actionPizzaReady = "PIZZA_READY"
 actionChangeRole ="ROLE_CHANGE"
 actionPass = "PASS"
 actionFinish = "FINISH"
+actionInvalid = "INVALID"
+
+actionNewGame = "New_Game"
 
 
 class DataSetManager:
@@ -48,6 +53,8 @@ class DataSetManager:
     def verbose(self):
         return self._verbose
 
+
+    dataFrame = ""
     def __init__(self, dataSetDirectory=None, verbose=True):
 
         # sys.stdout = open(logDirectory+"2.txt",'w')
@@ -69,149 +76,94 @@ class DataSetManager:
 
         self._actions = []
 
-    def startNewGame(self, gameNumber):
 
-        self._currentDataSetFile = self._dataSetDirectory+"/Game_"+str(gameNumber)+".csv"
+    def addDataFrame(self, gameNumber ="", roundNumber ="", player="", actionType="", playersHand="", board="",
+                     cardsAction="", reward="", qvalues="", loss="", wrongActions="", totalActions="",
+                     score="", roles="", playersStatus=[], agentNames="", possibleActions=[]):
 
-        with open(self._currentDataSetFile, mode='a') as employee_file:
-            employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        #Guarantee is a copy
 
-            employee_writer.writerow(
-                ["Time", "Action Type", "Player Hand",  "Board", "Cards Action",
-                 "Wrong Actions", "Correct Actions", "Reward", "Score", "Roles", "Round Number", "Player", "Players Status"])
+        score = numpy.copy(score)
+        playersHand = numpy.copy(playersHand)
+        board = numpy.copy(board)
+        reward = numpy.copy(reward)
+        qvalues = numpy.copy(qvalues)
+        loss = numpy.copy(loss)
+        roles= numpy.copy(roles)
+        playersStatus = numpy.copy(playersStatus)
+
+        date =  str(datetime.datetime.now()).replace(" ", "_")
+        dataframe= [date, gameNumber,roundNumber,player,actionType,playersHand,board,possibleActions, cardsAction,reward,qvalues,loss,wrongActions,totalActions,
+                    score,roles,playersStatus,agentNames]
+
+        self.dataFrame.loc[-1] = dataframe
+        self.dataFrame.index = self.dataFrame.index + 1
 
 
-    def logAction(self, actionType,  playersHand="",  board="", cardsAction="", wrongActions="", reward="", score="", roles="", roundNumber ="", player="", playersStatus ="", correctActions=""):
 
-        time = str(datetime.datetime.now()).replace(" ", "_")
-        # message = time + ";" + actionType + ";" + playersHandBefore + ";" + playersHandAfter + ";" + boardBefore + ";" + boardAfter + ";" + cardsAction + ";" + wrongActions + ";" + reward + ";" + score
+    def startNewExperiment(self):
 
-        with open(self._currentDataSetFile, mode='a') as employee_file:
-            employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        self._currentDataSetFile = self._dataSetDirectory+"/Dataset.pkl"
 
-            employee_writer.writerow([time, actionType , playersHand , board ,cardsAction , wrongActions , correctActions, reward , score, roles, roundNumber, player, playersStatus])
+        columns = ["Time", "Game Number", "Round Number", "Player", "Action Type", "Player Hand",  "Board", "Possible Actions","Cards Action", "Reward",
+                   "Qvalues", "Loss", "Wrong Actions", "Total Actions", # Current turn actions
+                     "Scores", "Roles", "Players Status", "Agent Names",  # Game status
+                         ]
 
-        #
-        # try:
-        #     logFile = open(self._currentDataSetFile, "a")
-        # except:
-        #     raise Exception("Dataset file not found!")
-        #
-        # else:
-        #     logFile.write(str(message) + "\n")
-        #     logFile.close
+        self.dataFrame = pd.DataFrame(columns = columns)
 
-    def dealAction(self, playersHand, score):
+
+
+    def startNewGame(self, gameNumber, agentsNames):
+
+        self.addDataFrame(gameNumber=gameNumber, agentNames=agentsNames)
+
+
+    def dealAction(self, playersHand, game):
 
         actionType = actionDeal
 
-        playersHandAfter = ""
-        for i in range(len(playersHand)):
-            playersHandAfter += str(playersHand[i])
-            if i < len(playersHand)-1:
-                playersHandAfter+="_"
 
-        score = ""
-        for i in range(len(score)):
-            score+= str(score[i])
-            if i <len(playersHand)-1:
-                score+="_"
-
-        self.logAction(actionType=actionType, playersHand=playersHandAfter, score=score)
+        self.addDataFrame(actionType=actionType, playersHand=playersHand, gameNumber=game)
 
 
-    def doActionPizzaReady(self, roundNumber, board, playersHand, roles, score, playersStatus):
 
+    def doActionPizzaReady(self, roundNumber, board, playersHand, roles, score, playersStatus, game):
 
         actionType = actionPizzaReady
 
-        playersHandAfter = ""
-        for i in range(len(playersHand)):
-            playersHandAfter += str(playersHand[i])
-            if i < len(playersHand) - 1:
-                playersHandAfter += "_"
 
-        boardList = ""
-        for i in range(len(board)):
-            boardList += str(board[i])
-            if i < len(board) - 1:
-                boardList += "_"
-
-        playStatusList = ""
-        for i in range(len(playersStatus)):
-            playStatusList += str(playersStatus[i])
-            if i < len(playersHand) - 1:
-                playStatusList += "_"
-
-        roles = str(roles)
-
-        playersStatus = str(playStatusList)
-
-        self.logAction(actionType=actionType, playersHand=playersHandAfter, score=score,
-                       roundNumber=roundNumber, board=board,
-                       roles=roles, playersStatus=playersStatus)
+        self.addDataFrame(actionType=actionType, playersHand=playersHand, score=score,
+                                      roundNumber=roundNumber, board=board,
+                                      roles=roles, playersStatus=playersStatus, gameNumber=game)
 
 
 
-    def doActionAction(self, player, roundNumber, action, board, wrongActions, correctActions, reward, playersHand, roles, score, playersStatus):
+    def doActionAction(self, game, player, roundNumber, action, board, wrongActions, reward,
+                       playersHand, roles, score, playersStatus, qValue, loss, totalActions, possibleActions):
 
         actionCards = ""
-
-        if action == "Pass":
-            actionType = actionPass
-        elif action == "Finish" :
-            actionType = actionFinish
-        else:
-            actionType = actionDiscard
-            actionCards = action[1]
+        actionType = action[0]
+        actionCards = action[1]
 
 
-        playersHandAfter = ""
-        for i in range(len(playersHand)):
-            playersHandAfter += str(playersHand[i])
-            if i < len(playersHand)-1:
-                playersHandAfter+="_"
-
-        boardList = ""
-        for i in range(len(board)):
-            boardList += str(board[i])
-            if i < len(board)-1:
-                boardList+="_"
-
-        playStatusList = ""
-        for i in range(len(playersStatus)):
-            playStatusList += str(playersStatus[i])
-            if i < len(playersHand)-1:
-                playStatusList+="_"
-
-        roles = str(roles)
-
-        playersStatus = str(playStatusList)
-
-
-        self.logAction(actionType=actionType, cardsAction =actionCards, playersHand=playersHandAfter, score=score, roundNumber=roundNumber, board=board, player=player, wrongActions=wrongActions, correctActions=correctActions, reward=reward, roles=roles, playersStatus=playersStatus)
+        self.addDataFrame(gameNumber=game, roundNumber=roundNumber, player=player,
+                                      actionType=actionType, playersHand=playersHand,
+                                      board=board, cardsAction=actionCards, reward=reward,
+                                      qvalues=qValue, loss=loss, wrongActions=wrongActions,
+                                      totalActions=totalActions, score=score, roles=roles, playersStatus=playersStatus, possibleActions=possibleActions
+                                      )
 
 
 
-    def exchangeRolesAction(self, playersHand, roles, cardsAction, score):
+    def exchangeRolesAction(self, playersHand, roles, cardsAction, game):
 
         actionType = actionChangeRole
-
-        playersHandAfter = ""
-        for i in range(len(playersHand)):
-            playersHandAfter += str(playersHand[i])
-            if i < len(playersHand)-1:
-                playersHandAfter+="_"
+        self.addDataFrame(actionType=actionType, playersHand=playersHand, cardsAction=cardsAction, roles=roles, gameNumber=game)
 
 
-        cardsActionList = ""
-        for i in range(len(cardsAction)):
-            cardsActionList += str(cardsAction[i])
-            if i < len(cardsAction) - 1:
-                cardsActionList += "_"
 
-
-        roles = str(roles)
-
-        self.logAction(actionType=actionType, playersHand=playersHandAfter, roles=roles, score=score, cardsAction=cardsActionList)
+    def saveFile(self):
+        self.dataFrame.to_pickle(self.currentDataSetFile)
+        self.dataFrame.to_csv(self.currentDataSetFile+".csv", index=False, header=True)
 

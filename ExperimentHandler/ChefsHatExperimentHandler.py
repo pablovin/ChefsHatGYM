@@ -7,8 +7,10 @@ from KEF import ExperimentManager
 
 from KEF import DataSetManager
 
+from IntrinsicAgent import GenerateMoodFromDataset
 
-def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, plotFrequency=1, saveExperimentsIn="", loadModel=[], agentParams=[], rewardFunction ="", plots=[]):
+
+def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, saveExperimentsIn="", loadModel=[], agentParams=[], rewardFunction ="", plots=[]):
 
     numMaxCards = 11
 
@@ -56,6 +58,10 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
     for a in range (len(playersAgents)):
         qvaluesStore.append([])
 
+        #Log the dataset
+        if createDataset:
+            experimentManager.dataSetManager.startNewExperiment()
+
 
     #start the experiment
     for game in range(numGames):
@@ -66,7 +72,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
         #Log the dataset
         if createDataset:
-            experimentManager.dataSetManager.startNewGame(game)
+            experimentManager.dataSetManager.startNewGame(game, playersNames)
 
         if isLogging:
             logger.newLogSession("Game : " + str(game))
@@ -76,7 +82,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 logger.write("Player " + str(i) + ":" + str(env.playersHand[i]))
 
         if createDataset:
-            experimentManager.dataSetManager.dealAction(env.playersHand, env.allScores)
+            experimentManager.dataSetManager.dealAction(env.playersHand, game)
 
         roles = ""
         if game > 0:
@@ -107,7 +113,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                     logger.write("--- Chef gave:" + str(chefCards))
 
             if createDataset:
-                experimentManager.dataSetManager.exchangeRolesAction(env.playersHand, roles, (env.currentSpecialAction, env.currentPlayerDeclaredSpecialAction, dishwasherCards, waiterCard, souschefCard, chefCards), env.allScores)
+                experimentManager.dataSetManager.exchangeRolesAction(env.playersHand, roles, (env.currentSpecialAction, env.currentPlayerDeclaredSpecialAction, dishwasherCards, waiterCard, souschefCard, chefCards), game)
 
         # #Start the game
         gameFinished = env.hasGameFinished()
@@ -123,13 +129,14 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                     logger.write(" --- Board Before: " + str(env.board))
 
                 wrongActions = 0
+                totalActions = 0
+
+
+
                 if not env.hasPlayerFinished(thisPlayer):
                     validActionPlayer = False
 
                     #while the action is not valid, loop over the actions until it is valid
-
-                    # players[thisPlayer].resetActionsTaken()  # resets the list of actions taken
-
                     while not validActionPlayer:
                         state = env.getCurrentPlayerState()
                         cardsInHandN = numpy.nonzero(env.playersHand[thisPlayer])[0]
@@ -144,43 +151,51 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
                         done = False
                         if validActionPlayer:
-                            if env.lastActionPlayers[thisPlayer] == DataSetManager.actionFinish:
+
+                            if env.lastActionPlayers[thisPlayer][0] == DataSetManager.actionFinish:
                                 done = True
                                 newState =  numpy.zeros(len(state))
 
-                            # print ("")
                         else:
                             wrongActions = wrongActions+1
 
+                        totalActions = totalActions+1
 
-                        for observerIndex in playersObservingOthers:
-                            if not observerIndex == thisPlayer:
-                                    players[observerIndex].observeOponentAction((action,
-                                                                                 env.lastActionPlayers[thisPlayer],
-                                                                                 state[17:], newState[17:], validAction,
-                                                                                 cardsInHand, thisPlayer,
-                                                                                 observerIndex, done, env.score))
 
-                        # # amountOfInvalid = int((100 - game)*0.2)
-                        # amountOfInvalid = int((numGames - game)*0.2)
-                        #
-                        # if done or wrongActions < 10 or validAction:
-                        # # # if validActionPlayer:
                         players[thisPlayer].train((state, action, reward, newState, done,
                                                  experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
 
 
 
-
-                    correctActions = players[thisPlayer].currentCorrectAction
-                    totalActions = players[thisPlayer].totalActionPerGame
-                    # players[thisPlayer].resetActionsTaken() #resets the list of actions taken
                     if isLogging:
                         logger.write(" ---  Reward: " + str(reward))
-                        logger.write(" ---  Correct actions: " + str(correctActions) + "/" + str(totalActions))
+                        logger.write(" ---  Correct actions: " + str(totalActions-wrongActions) + "/" + str(totalActions))
                         logger.write(" ---  Wrong actions: " + str(wrongActions))
 
-                correctActions = players[thisPlayer].currentCorrectAction
+
+                    if createDataset:
+                        if len(players[thisPlayer].QValues) >= 1:
+                            qvalues = players[thisPlayer].QValues[-1]
+                        else:
+                            qvalues = []
+                        if len(players[thisPlayer].losses) >= 1:
+                            loss = players[thisPlayer].losses[-1]
+                        else:
+                            loss = []
+
+                        playersStatus = []
+                        for i in range(len(playersAgents)):
+                            playersStatus.append(env.lastActionPlayers[i])
+
+                        # print ("Player " + str(thisPlayer) + " - Wrong: " + str(wrongActions) + " - Total:" + str(totalActions))
+                        print ("Player: " + str(thisPlayer) + " - Round:" + str(env.rounds))
+                        experimentManager.dataSetManager.doActionAction(game, thisPlayer, env.rounds,
+                                                                        env.lastActionPlayers[thisPlayer], env.board,
+                                                                        wrongActions, reward,
+                                                                        env.playersHand, roles,
+                                                                        env.score, playersStatus,
+                                                                        qvalues, loss, totalActions,validAction)
+
                 env.nextPlayer()
                 if isLogging:
                     logger.write(" ---  Action: " + str(env.lastActionPlayers[thisPlayer]))
@@ -188,39 +203,25 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                     logger.write(" ---  Hand: " + str(env.playersHand[thisPlayer]))
                     logger.write(" --- Board After: " + str(env.board))
 
-                if createDataset:
-                    playersStatus = []
-                    for i in range(len(playersAgents)):
-                        playersStatus.append(env.lastActionPlayers[i])
 
-                    experimentManager.dataSetManager.doActionAction(thisPlayer, env.rounds, env.lastActionPlayers[thisPlayer], env.board, wrongActions, correctActions, reward , env.playersHand, roles,
-                                                                         env.score, playersStatus)
-
-            #input("here")
             env.nextRound() # All players played, now one more round
-            # print ("Next round")
+
             pizzaReady = env.isEndRound() # check if the pizza is ready
             if pizzaReady:
                 if isLogging:
                     logger.newLogSession("Pizza ready!!!")
 
                 if createDataset:
+                    print ("Pizza!")
                     experimentManager.dataSetManager.doActionPizzaReady(env.rounds,
                                                                     env.board, env.playersHand, roles,
-                                                                    env.score, playersStatus)
+                                                                    env.score, playersStatus, game)
             gameFinished = env.hasGameFinished()
+
 
         if isLogging:
             logger.write("Game finished:" + str(gameFinished))
 
-        if isLogging:
-            logger.newLogSession("Plotting...")
-            logger.write("Plots saved in:" + str(experimentManager.plotManager.plotsDirectory))
-
-
-        #Plot information per 1 game
-        if isPlotting and (game+1)%plotFrequency==0:
-            experimentManager.plotManager.generateSingleGame(plots,env,players, game)
 
         #saving the metrics
         for p in range(len(playersAgents)):
@@ -255,22 +256,11 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         env.reset()  # start a new game
 
 
-        # for a in range(len(playersAgents) - 1):
-        #     qvaluesStore[a].append(players[a].QValues)
-        #     players[a].QValues = []
-
-
         unique, counts = numpy.unique(env.winners, return_counts=True)
         winners = dict(zip(unique, counts))
         print( "Game " + str(game) + " - Victories:" +str(winners) )
 
         metrics.append(metricsPerGame)
-
-
-
-        #Plotting plots per entire experiment
-        if isPlotting and (game+1)%plotFrequency==0:
-            experimentManager.plotManager.generateExperimentPlots(plots, env, players, game)
 
 
     experimentManager.metricManager.saveMetricPlayer(metrics)
@@ -298,7 +288,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         winners = numpy.array(env.winners)
         currentPLayerData = []
 
-        # print("Score:", scoresAll)
+
         totalWins = 0
         for a in range(len(winners)):
             result = env.allScores[a].index(i) + 1
@@ -331,8 +321,27 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         playerReturn.append(QValues)
 
         returns.append(playerReturn)
-    #
-    # from KEF.PlotManager import  plotQValuesOverSeveralGames
-    # plotQValuesOverSeveralGames(len(playersAgents), qvaluesStore, experimentDescriptor, saveExperimentsIn)
+
+
+    experimentManager.dataSetManager.saveFile()
+
+    if createDataset and isPlotting:
+        if isLogging:
+            logger.newLogSession("Plotting...")
+            logger.write("Plots saved in:" + str(experimentManager.plotManager.plotsDirectory))
+
+        qvalueModels = []
+        intrinsicMoods = []
+        for p in players:
+            if not p.intrinsic == None:
+                qvalueModels.append(p.actor)
+                intrinsicMoods.append(p.intrinsic)
+
+        GenerateMoodFromDataset.generateMoodFromDataset(intrinsicModels=intrinsicMoods,
+                                                        dataset=experimentManager.dataSetManager.currentDataSetFile,
+                                                        qModels=qvalueModels,saveDirectory=experimentManager.dataSetManager.dataSetDirectory)
+
+        experimentManager.plotManager.generateAllPlots(plots, experimentManager.dataSetManager.currentDataSetFile, game, intrinsicDataset=experimentManager.dataSetManager.dataSetDirectory)
+
     return returns
 

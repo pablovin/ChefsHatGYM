@@ -4,12 +4,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
+import pandas as pd
 
 import os
 
 import csv
 
 from KEF import DataSetManager
+from KEF.DataSetManager import actionFinish
 
 from matplotlib.collections import PolyCollection
 
@@ -21,7 +23,7 @@ plots = {
     "Experiment_FinishingPosition":"expFinish",
     "Experiment_ActionsBehavior":"expActionBeh",
     "Experiment_Mood":"expMood",
-    "Experiment_MoodNeurons": "expMoodNeurons",
+    "Experiment_MoodNeurons": "expNeuronsMood",
     "Experiment_SelfProbabilitySuccess":"expSelfProb",
     "Experiment_Reward": "expReward",
     "Experiment_SelfReward": "expSelfReward",
@@ -285,100 +287,95 @@ def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory)
 
             for index, moodNeuronReadings in enumerate(moodNeurons[i]):
 
-                directory = plotsDirectory + "/MoodNeurons_Players/"
-                if not os.path.exists(directory):
-                    os.mkdir(directory)
+                if len(moodNeuronReadings) > 0:
+                    directory = plotsDirectory + "/MoodNeurons_Players/"
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
 
-                if index == 0:
-                    directory = plotsDirectory + "/MoodNeurons_Players/Self/"
-                    plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_iteration_" + str(iteraction) + ".png"
+                    if index == i:
+                        directory = plotsDirectory + "/MoodNeurons_Players/Self/"
+                        plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                            i) + ")" + "_iteration_" + str(iteraction) + ".png"
 
-                    csvName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_iteration_" + str(iteraction) + ".csv"
-                else:
-                    directory = plotsDirectory + "/MoodNeurons_Players/Oponents/"
+                    else:
+                        directory = plotsDirectory + "/MoodNeurons_Players/Oponents/"
 
-                    newIndexes = numpy.array(range(4)).tolist()
-                    newIndexes.remove(i)
-                    newNames = names.copy()
-                    newNames.remove(names[i])
+                        newIndexes = numpy.array(range(4)).tolist()
+                        newIndexes.remove(i)
+                        newNames = names.copy()
+                        newNames.remove(names[i])
 
-                    plotName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
-                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
-                        iteraction) + ".png"
-
-                    csvName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
-                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
-                        iteraction) + "..csv"
+                        plotName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
+                            i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
+                            names[index]) + ")" + ")_iteration_" + str(
+                            iteraction) + ".png"
 
 
 
-                if not os.path.exists(directory):
-                    os.mkdir(directory)
+
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
 
 
-                thisPlayerNeurons = moodNeuronReadings
+                    thisPlayerNeurons = moodNeuronReadings
 
-                neuronsX = []
-                neuronsY = []
-                neuronsAge = []
+                    neuronsX = []
+                    neuronsY = []
+                    neuronsAge = []
 
-                for indexA, action in enumerate(thisPlayerNeurons):
-                    neuronsAction = []
-                    for n in action[0]:
-                        neuronsX.append(n[0])
-                        neuronsY.append(indexA)
-                        neuronsAction.append(n[0])
+                    for indexA, action in enumerate(thisPlayerNeurons):
+                        neuronsAction = []
+                        for n in action[0]:
+                            neuronsX.append(n[0])
+                            neuronsY.append(indexA)
+                            neuronsAction.append(n[0])
 
-                    for n in action[1]:
-                        neuronsAge.append(n)
+                        for n in action[1]:
+                            neuronsAge.append(n)
 
-                neuronsX = numpy.tanh(numpy.array(neuronsX).flatten())
-                averageNeuron = moodReading[i][index]
-                dataYAverageNeuron = range(len(averageNeuron))
-
-
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
-
-                cmap = plt.cm.rainbow
-                norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
-
-                ax.set_xlabel('Actions')
-                ax.set_ylabel('Mood Neurons')
-
-                plt.yticks(numpy.arange(0, 1.1, 0.1))
-                # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
-
-                plt.ylim(-0.1, 1.1)
-                # plt.xlim(0, range(len(dataY)))
-                plt.grid()
-
-                for nindex,neuron in enumerate(neuronsX):
-                    alpha = neuronsAge[nindex]
-                    ax.scatter(neuronsY[nindex], neuron, alpha = alpha, c="red")
-
-                ax.plot(dataYAverageNeuron,averageNeuron,label="Avg Mood")
-
-                with open(csvName, mode='w') as employee_file:
-                    employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-                    employee_writer.writerow(['Action', 'NeuronAverageValue'])
-
-                    for nI, nvalue in enumerate(averageNeuron):
-                      employee_writer.writerow([str(nI), str(nvalue)])
+                    neuronsX = numpy.tanh(numpy.array(neuronsX).flatten())
+                    averageNeuron = moodReading[i][index]
+                    dataYAverageNeuron = range(len(averageNeuron))
 
 
+                    fig = plt.figure()
+                    ax = fig.add_subplot(111)
 
-                # # sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-                # fig.colorbar(sm)
-                plt.legend()
-                plt.savefig(plotName)
+                    cmap = plt.cm.rainbow
+                    norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
 
-                fig.clf()
+                    ax.set_xlabel('Actions')
+                    ax.set_ylabel('Mood Neurons')
+
+                    plt.yticks(numpy.arange(0, 1.1, 0.1))
+                    # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+
+                    plt.ylim(-0.1, 1.1)
+                    # plt.xlim(0, range(len(dataY)))
+                    plt.grid()
+
+                    for nindex,neuron in enumerate(neuronsX):
+                        alpha = neuronsAge[nindex]
+                        ax.scatter(neuronsY[nindex], neuron, alpha = alpha, c="red")
+
+                    ax.plot(dataYAverageNeuron,averageNeuron,label="Avg Mood")
+
+                    # with open(csvName, mode='w') as employee_file:
+                    #     employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    #
+                    #     employee_writer.writerow(['Action', 'NeuronAverageValue'])
+                    #
+                    #     for nI, nvalue in enumerate(averageNeuron):
+                    #       employee_writer.writerow([str(nI), str(nvalue)])
+                    #
+
+
+                    # # sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+                    # fig.colorbar(sm)
+                    plt.legend()
+                    plt.savefig(plotName)
+
+                    fig.clf()
 
 
 def plotMood(names, moodReading, iteraction, plotsDirectory):
@@ -394,137 +391,114 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
         if len(moodReading) > i:
 
             for index, moodReadings in enumerate(moodReading[i]):
+                if len(moodReadings) > 0:
+                    directory = plotsDirectory + "/Mood_Players/"
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
 
-                directory = plotsDirectory + "/Mood_Players/"
-                if not os.path.exists(directory):
-                    os.mkdir(directory)
+                    if index == i:
+                        directory = plotsDirectory + "/Mood_Players/Self/"
+                        plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                            i) + ")" + "_iteration_" + str(iteraction) + ".png"
 
-                if index == 0:
-                    directory = plotsDirectory + "/Mood_Players/Self/"
-                    plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_iteration_" + str(iteraction) + ".png"
+                    else:
+                        directory = plotsDirectory + "/Mood_Players/Oponents/"
 
-                    csvName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_iteration_" + str(iteraction) + ".csv"
-                else:
-                    directory = plotsDirectory + "/Mood_Players/Oponents/"
+                        plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                            i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
+                            names[index]) + ")" + ")_iteration_" + str(
+                            iteraction) + ".png"
 
-                    newIndexes = numpy.array(range(4)).tolist()
-                    newIndexes.remove(i)
-                    newNames = names.copy()
-                    newNames.remove(names[i])
-                    # Get the correct name for each plot
-                    # nameIndex = (i+index) % 4
 
-                    plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
-                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
-                        iteraction) + ".png"
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
 
-                    csvName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
-                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
-                        iteraction) + ".csv"
+                    reward = moodReadings
+                    dataY = range(len(reward))
+                    # input("here")
 
-                if not os.path.exists(directory):
-                    os.mkdir(directory)
+                    fig = plt.figure()
+                    ax = fig.add_subplot(111)
 
-                reward = moodReadings
-                dataY = range(len(reward))
-                # input("here")
+                    ax.set_xlabel('Actions')
+                    ax.set_ylabel('Mood Value')
 
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
+                    plt.yticks(numpy.arange(0, 1.1, 0.1))
+                    # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
 
-                ax.set_xlabel('Actions')
-                ax.set_ylabel('Mood Value')
+                    plt.ylim(-0.1, 1.1)
+                    # plt.xlim(0, range(len(dataY)))
+                    plt.grid()
+                    ax.plot(dataY, reward)
 
-                plt.yticks(numpy.arange(0, 1.1, 0.1))
-                # plt.xticks(numpy.arange(0, len(dataY) + 1, 2))
+                    plt.savefig(plotName)
 
-                plt.ylim(-0.1, 1.1)
-                # plt.xlim(0, range(len(dataY)))
-                plt.grid()
-                ax.plot(dataY, reward)
-
-                plt.savefig(plotName)
-
-                fig.clf()
+                    fig.clf()
 
 def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name=""):
 
     for i in range(len(names)):
-
         if len(prob) >i:
 
             for index, probabilities in enumerate(prob[i]):
-                #
-                # print ("---------")
-                # print ("I:" + str(names[i]))
-                # print ("Index: " + str(index))
-
-                directory = plotsDirectory + "/ProbabilitySuccess_Players/"
-                if not os.path.exists(directory):
-                    os.mkdir(directory)
-
-                if index == 0:
-                    directory = plotsDirectory + "/ProbabilitySuccess_Players/Self/"
-                    plotName = directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png"
-                    csvName =  directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".csv"
-                else:
-                    directory = plotsDirectory + "/ProbabilitySuccess_Players/Oponents/"
 
 
-                    newIndexes = numpy.array(range(4)).tolist()
-                    newIndexes.remove(i)
-                    newNames = names.copy()
-                    newNames.remove(names[i])
-                    #Get the correct name for each plot
-                    # nameIndex = (i+index) % 4
+                if len(probabilities) > 0:
+                    #
+                    # print ("---------")
+                    # print ("I:" + str(names[i]))
+                    # print ("Index: " + str(index))
+
+                    directory = plotsDirectory + "/ProbabilitySuccess_Players/"
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
+
+                    if index == i:
+                        directory = plotsDirectory + "/ProbabilitySuccess_Players/Self/"
+                        plotName = directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png"
+
+                    else:
+                        directory = plotsDirectory + "/ProbabilitySuccess_Players/Oponents/"
+
+                        plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i]) + "(" + str(
+                            i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
+                            i) + ")" + ")_iteration_" + str(
+                            iteraction) + ".png"
 
 
-                    plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i])+"("+str(i)+")" + "_AboutPlayer_"+str(newNames[index-1])+"("+str(newIndexes[index-1])+")" +")_iteration_" + str(
-                        iteraction) + ".png"
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
 
-                    csvName = directory + "/ProbabilitySuccess_Players_" + str(names[i]) + "(" + str(
-                        i) + ")" + "_AboutPlayer_" + str(newNames[index - 1]) + "(" + str(
-                        newIndexes[index - 1]) + ")" + ")_iteration_" + str(
-                        iteraction) + ".csv"
+                    reward = probabilities
+                    dataY = range(len(reward))
+                    # input("here")
 
-                if not os.path.exists(directory):
-                    os.mkdir(directory)
+                    fig = plt.figure()
+                    ax = fig.add_subplot(111)
 
+                    ax.set_xlabel('Actions')
+                    ax.set_ylabel('Probability')
 
-                reward = probabilities
-                dataY = range(len(reward))
-                # input("here")
+                    plt.yticks(numpy.arange(0, 1.1, 0.1))
+                    # plt.xticks(numpy.arange(0, len(dataY) + 1, 1))
 
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
+                    plt.ylim(-0.1, 1.1)
+                    # plt.xlim(0, range(len(dataY)))
+                    plt.grid()
+                    ax.plot(dataY, reward)
 
-                ax.set_xlabel('Actions')
-                ax.set_ylabel('Probability')
+                    #
+                    # with open(csvName, mode='w') as employee_file:
+                    #     employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    #
+                    #     employee_writer.writerow(['Action', 'NeuronAverageValue'])
+                    #
+                    #     for nI, nvalue in enumerate(reward):
+                    #       employee_writer.writerow([str(nI), str(nvalue)])
 
-                plt.yticks(numpy.arange(0, 1.1, 0.1))
-                # plt.xticks(numpy.arange(0, len(dataY) + 1, 1))
+                    plt.savefig(plotName)
 
-                plt.ylim(-0.1, 1.1)
-                # plt.xlim(0, range(len(dataY)))
-                plt.grid()
-                ax.plot(dataY, reward)
-
-
-                with open(csvName, mode='w') as employee_file:
-                    employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-                    employee_writer.writerow(['Action', 'NeuronAverageValue'])
-
-                    for nI, nvalue in enumerate(reward):
-                      employee_writer.writerow([str(nI), str(nvalue)])
-
-                plt.savefig(plotName)
-
-                fig.clf()
+                    fig.clf()
 
 def plotRewardsAll(names, rewards, iteraction, plotsDirectory):
 
@@ -705,34 +679,53 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
         qValue = Qvalues[i]
         selectedQValues = []
         summedQValues = []
+        averagedQValues = []
 
         for a in qValue:
-            sortedA = numpy.array(a)
-            sortedA.sort()
 
-            selectedQValues.append(sortedA[-1])
-            summedQValues.append(sortedA.sum())
+            valueGame = []
+            for q in a:
+                if len(q)>1:
+                    sortedA = numpy.array(q)
+                    sortedA.sort()
+                    selectedQValues.append(sortedA[-1])
+                    summedQValues.append(sortedA.sum())
+                    valueGame.append(sortedA.sum())
+            # print ("Vlaue:" + str(len(valueGame)) + "-avg: " + str(numpy.average(valueGame)))
+            averagedQValues.append(numpy.average(valueGame))
 
-        dataY = range(len(selectedQValues))
 
-        fig, axs = plt.subplots(1, 1)
-        axs.plot(dataY, selectedQValues)
+        if len(selectedQValues) > 1:
+            dataY = range(len(selectedQValues))
 
-        plt.ylim(0, 1)
+            fig, axs = plt.subplots(1, 1)
+            axs.plot(dataY, selectedQValues)
 
-        plt.savefig(directory + "/BestQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
+            # plt.ylim(0, 1)
 
-        plt.clf()
+            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_BestQValue.png")
 
-        dataY = range(len(summedQValues))
-        fig, axs = plt.subplots(1, 1)
-        axs.plot(dataY, summedQValues)
+            plt.clf()
 
-        plt.ylim(0, 1)
+            dataY = range(len(summedQValues))
+            fig, axs = plt.subplots(1, 1)
+            axs.plot(dataY, summedQValues)
 
-        plt.savefig(directory + "/SummedQValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
+            # plt.ylim(0, 1)
 
-        plt.clf()
+            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_SummedQValue.png")
+
+            plt.clf()
+
+            dataY = range(len(averagedQValues))
+            fig, axs = plt.subplots(1, 1)
+            axs.plot(dataY, averagedQValues)
+
+            # plt.ylim(0, 1)
+
+            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_AvgQValue.png")
+
+            plt.clf()
 
 def plotMeanQValuesGames( names, meanQValues, iteraction, plotsDirectory):
 
@@ -767,79 +760,49 @@ def plotLosses(names, losses, iteraction, name, plotsDirectory):
     if not os.path.exists(directory):
         os.mkdir(directory)
 
-
     for i in range(len(names)):
+        loss = losses[i]
 
-        if len(losses) > i:
 
-            loss = losses[i]
-            isList = False
+        actorLoss = []
+        criticLoss = []
+        for a in loss:
+            if len(a) > 0:
+                l = a[0]
+                if len(a[0]) > 1:
+                    criticLoss.append(a[0][1])
 
-            try:
+                actorLoss.append(a[0][0])
 
-                if isinstance(loss[0], list):
-                    isList = True
-                    loss = numpy.array(loss)
-                    # print ("Shape:" + str(loss.shape))
-                    # loss = numpy.swapaxes(loss, 0, 1)
-                    lossActor = []
-                    lossCritic = []
-                    for u in loss:
-                        lossActor.append(u[0])
-                        lossCritic.append(u[1])
-                    # lossActor = loss[:, 0]
-                    # lossCritic =  loss[:, 1]
-
-                    dataY = range(len(lossActor))
-
-            except:
-                     isList = False
-                     dataY = range(len(loss))
-
+        if len(actorLoss) > 1:
             fig = plt.figure()
             ax = fig.add_subplot(111)
 
+            dataY = range(len(actorLoss))
             ax.set_xlabel('Training Steps')
             ax.set_ylabel('Loss')
+            plt.plot(dataY, actorLoss)
+            plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
+            plt.grid()
+            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"_Actor.png")
 
+            plt.clf()
 
-            if isList:
+            if len(criticLoss)> 1:
                 fig = plt.figure()
                 ax = fig.add_subplot(111)
 
+                dataY = range(len(criticLoss))
                 ax.set_xlabel('Training Steps')
                 ax.set_ylabel('Loss')
-
-                plt.plot(dataY, lossCritic, label="Critic")
-                plt.legend()
-
-                plt.savefig(directory + "/"+str(name)+"CriticLoss_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "WrongActions.png")
-
-                plt.clf()
-
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
-
-                ax.set_xlabel('Training Steps')
-                ax.set_ylabel('Loss')
-
-
-                plt.plot(dataY, lossActor, label="Actor")
-                plt.legend()
-                plt.savefig(
-                    directory + "/ActorLoss_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "WrongActions.png")
-            else:
-                fig = plt.figure()
-                ax = fig.add_subplot(111)
-
-                dataY = range(len(loss))
-                ax.set_xlabel('Training Steps')
-                ax.set_ylabel('Loss')
-                plt.plot(dataY, loss)
+                plt.plot(dataY, criticLoss)
+                plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
                 plt.grid()
-                plt.savefig(directory + "/Loss_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"WrongActions.png")
+                plt.savefig(directory + "/Player_" + str(names[i]) + "(" + str(i) + ")" + "_iteration_" + str(
+                    iteraction) + "_Critic.png")
 
                 plt.clf()
+
 
 
 """
@@ -1171,6 +1134,315 @@ def plotVictoriesTotal(winsP1, winsP2, winsP3, winsP4, maxNumGames, experimentNa
 
     plt.clf()
 
+def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNumber=-1, specificLine=-1, saveDirectory=""):
+
+    readFile = pd.read_pickle(IntrinsicDataset)
+
+    moodReadingsAll = []
+    probabilitiesAll = []
+    moodNeuronsAll = []
+
+    #Each player
+    for a in range(4):
+        moodReadingsAll.append([])
+        probabilitiesAll.append([])
+        moodNeuronsAll.append([])
+
+        for i in range(4):
+            moodReadingsAll[a].append([])
+            probabilitiesAll[a].append([])
+            moodNeuronsAll[a].append([])
+
+    agentsNames = []
+    currentLine = 0
+    for lineCounter, row in readFile.iterrows():
+        game = row["Game Number"]
+
+        if len(agentsNames) == 0:
+            agentsNames = row["Agent Names"]
+
+        if gameNumber == -1 or  game <= gameNumber:
+
+            if specificLine == -1 or currentLine <= specificLine:
+                player = row["Player"]
+                if not player == "":
+                    P1Prob = row["P1 probability"]
+                    P2Prob = row["P2 probability"]
+                    P3Prob = row["P3 probability"]
+                    P4Prob = row["P4 probability"]
+
+                    P1Mood = row["P1 Mood Reading"]
+                    P2Mood = row["P2 Mood Reading"]
+                    P3Mood = row["P3 Mood Reading"]
+                    P4Mood = row["P4 Mood Reading"]
+
+                    P1Neurons = row["P1 Mood Neuron"]
+                    P2Neurons= row["P2 Mood Neuron"]
+                    P3Neurons = row["P3 Mood Neuron"]
+                    P4Neurons = row["P4 Mood Neuron"]
+
+                    player = row["Player"]
+
+                    if P1Prob > -1:
+                        probabilitiesAll[0][player].append(P1Prob)
+                    if P2Prob > -1:
+                        probabilitiesAll[1][player].append(P2Prob)
+                    if P3Prob > -1:
+                      probabilitiesAll[2][player].append(P3Prob)
+                    if P4Prob > -1:
+                     probabilitiesAll[3][player].append(P4Prob)
+
+                    if P1Mood > -1:
+                        moodReadingsAll[0][player].append(P1Mood)
+                    if P2Mood > -1:
+                        moodReadingsAll[1][player].append(P2Mood)
+                    if P3Mood > -1:
+                      moodReadingsAll[2][player].append(P3Mood)
+                    if P4Mood > -1:
+                     moodReadingsAll[3][player].append(P4Mood)
+
+                    if isinstance(P1Neurons, tuple):
+                        moodNeuronsAll[0][player].append(P1Neurons)
+                    if isinstance(P2Neurons, tuple):
+                        moodNeuronsAll[1][player].append(P2Neurons)
+                    if isinstance(P3Neurons, tuple):
+                      moodNeuronsAll[2][player].append(P3Neurons)
+                    if isinstance(P4Neurons, tuple):
+                     moodNeuronsAll[3][player].append(P4Neurons)
+            currentLine = currentLine + 1
+
+    if specificLine >0:
+        gameNumber = str(gameNumber)+"_"+str(specificLine)
+
+    if plots["Experiment_SelfProbabilitySuccess"] in plotsToGenerate:
+        print("Generating:" + str(plots["Experiment_SelfProbabilitySuccess"]))
+        plotSelfProbabilitySuccess(agentsNames, probabilitiesAll, gameNumber, saveDirectory, name="Self")
+    #
+    if plots["Experiment_Mood"] in plotsToGenerate:
+        print ("Generating:" + str(plots["Experiment_Mood"]))
+        plotMood(agentsNames, moodReadingsAll, gameNumber,  saveDirectory)
+    #
+    if plots["Experiment_MoodNeurons"] in plotsToGenerate:
+        print ("Generating:" + str(plots["Experiment_MoodNeurons"]))
+        plotMoodNeurons(agentsNames, moodNeuronsAll, moodReadingsAll, gameNumber, saveDirectory)
+
+
+
+def generateSingleGamePlotsFromDataset(plotsToGenerate, dataset, gameNumber, saveDirectory = ""):
+
+    readFile = pd.read_pickle(dataset)
+    gameNumber = gameNumber-1
+
+    playersAction = []
+    playersActionName = []
+    for a in range(4):
+        playersAction.append([])
+        playersActionName.append([])
+
+
+
+    agentsNames = []
+    for lineCounter, row in readFile.iterrows():
+        game = row["Game Number"]
+        # print ("GameNumber: " + str(gameNumber) + "- " + str(game))
+
+        if game == gameNumber:
+            if len(agentsNames) == 0:
+                agentsNames = row["Agent Names"]
+
+            player = row["Player"]
+            action = row["Players Status"]
+            if not player=="":
+                # print ("player:" + str(player))
+                thisPlayerAction = action[player]
+                # print("action:" + str(thisPlayerAction) + " - Len:" + str(len(thisPlayerAction)))
+                if len(thisPlayerAction) == 2:
+                    actionName = thisPlayerAction[0]
+                    actionComplete = thisPlayerAction[0]
+                else:
+                    actionName = thisPlayerAction
+                    actionComplete = (thisPlayerAction,[0])
+
+                playersActionName[player].append(actionName)
+                playersAction[player].append(actionComplete)
+
+    if plots["OneGame_NumberOfActions"] in plotsToGenerate:
+        print ("Generating:" + str(plots["OneGame_NumberOfActions"]))
+        plotNumberOfActions(agentsNames, playersAction, gameNumber, saveDirectory)
+
+    if plots["OneGame_DiscardBehavior"] in plotsToGenerate:
+        print("Generating:" + str(plots["OneGame_DiscardBehavior"]))
+        plotDiscardBehavior(agentsNames, playersAction, gameNumber, saveDirectory)
+
+    if plots["OneGame_Timeline"] in plotsToGenerate:
+        print("Generating:" + str(plots["OneGame_Timeline"]))
+        plotTimeLine(agentsNames, playersActionName, gameNumber, saveDirectory)
+
+def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1, saveDirectory = ""):
+
+    readFile = pd.read_pickle(dataset)
+
+    agentsNames = []
+    winners = []
+    scoresAll = []
+
+    rounds = []
+    rounds.append(0)
+
+    playersActionComplete = []
+    playersActionName = []
+
+    totalActionsAll = []
+    correctActionsAll = []
+    qValuesAll = []
+    lossesAll = []
+    meanQValuesAll = []
+    rewardsAll = []
+
+    #auxiliary variables
+    currentGameTotalActions = []
+    currentGameWrongActions = []
+    for a in range(4):
+        playersActionComplete.append([])
+        playersActionComplete[a].append([])
+
+        rewardsAll.append([])
+        rewardsAll[a].append([])
+
+        qValuesAll.append([])
+        qValuesAll[a].append([])
+
+        lossesAll.append([])
+        lossesAll[a].append([])
+
+        playersActionName.append([])
+
+        meanQValuesAll.append([])
+
+        totalActionsAll.append([])
+        totalActionsAll[a].append(0)
+        correctActionsAll.append([])
+        correctActionsAll[a].append(0)
+
+        currentGameTotalActions.append(0)
+        currentGameWrongActions.append(0)
+
+
+    for lineCounter, row in readFile.iterrows():
+        game = row["Game Number"]
+        player = row["Player"]
+
+        if len(agentsNames) == 0:
+            agentsNames = row["Agent Names"]
+
+        if not player == "":
+
+            totalActionsThisPLayer = row["Total Actions"]
+            wrongActionsThisPlayer = row["Wrong Actions"]
+            score = row["Scores"]
+            roundNumber = row["Round Number"]
+            action = row["Players Status"]
+            reward = row["Reward"]
+            qValues = row["Qvalues"]
+            loss = row["Loss"]
+            actionType = row["Action Type"]
+
+            #Update all the victories
+            if len(score) == 4:
+                winners.append(score[0])
+                scoresAll.append(score.tolist())
+
+            #Update the number of rounds
+            if game > len(rounds)-1:
+                rounds.append(0)
+            rounds[game] = roundNumber
+
+            #Update the total and wrong actions
+            if game > len(totalActionsAll[player])-1:
+                totalActionsAll[player].append(0)
+                correctActionsAll[player].append(0)
+
+
+            totalActionsAll[player][game] += totalActionsThisPLayer
+            correctActionsAll[player][game] += totalActionsThisPLayer-wrongActionsThisPlayer
+
+            #ActionComplete
+
+            thisPlayerAction = action[player]
+            if len(thisPlayerAction) == 2:
+                actionComplete = thisPlayerAction[0]
+            else:
+                actionComplete = (thisPlayerAction, [0])
+
+            if game > len(playersActionComplete[player])-1:
+                playersActionComplete[player].append([])
+
+            playersActionComplete[player][game].append(actionComplete)
+
+            #Rewards
+            if game > len(rewardsAll[player]) - 1:
+                rewardsAll[player].append([])
+
+            rewardsAll[player][game].append(reward)
+
+            #Qvalues
+            if game > len(qValuesAll[player]) - 1:
+                qValuesAll[player].append([])
+
+            qValuesAll[player][game].append(qValues)
+
+            #Losses
+            if game > len(lossesAll[player]) - 1:
+                lossesAll[player].append([])
+
+            if actionType == actionFinish and len(loss) > 0:
+                lossesAll[player][game].append(loss)
+
+
+    if specificGame == -1:
+        specificGame = game
+
+    if plots["Experiment_Winners"] in plotsToGenerate:
+        print ("Plotting:" + str(plots["Experiment_Winners"]))
+        plotWinners(len(agentsNames), winners, specificGame, agentsNames, saveDirectory)
+
+    if plots["Experiment_Rounds"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_Rounds"]))
+        plotRounds(rounds, game, saveDirectory)
+
+    if plots["Experiment_FinishingPosition"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_FinishingPosition"]))
+        plotFinishPositions(agentsNames, scoresAll, winners, specificGame, saveDirectory)
+
+    if plots["Experiment_ActionsBehavior"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_ActionsBehavior"]))
+        plotActionBehavior(agentsNames, playersActionComplete, specificGame, saveDirectory)
+
+    if plots["Experiment_Reward"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_Reward"]))
+        plotRewardsAll(agentsNames, rewardsAll, specificGame, saveDirectory)
+
+    if plots["Experiment_CorrectActions"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_CorrectActions"]))
+        plotCorrectActions(agentsNames, correctActionsAll, totalActionsAll, specificGame, saveDirectory)
+
+    if plots["Experiment_QValues"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_QValues"]))
+        plotQValues(agentsNames, qValuesAll, specificGame, saveDirectory)
+    #
+    if plots["Experiment_Losses"] in plotsToGenerate:
+        print("Plotting:" + str(plots["Experiment_Losses"]))
+        plotLosses(agentsNames, lossesAll, specificGame, "Player", saveDirectory)
+
+
+    # print ("Winners:" + str(winners))
+    # print("Rounds:" + str(rounds))
+    # print("Scores:" + str(scoresAll))
+    # print ("Total actions:" + str(totalActionsAll))
+    # print ("Total Correct actions:" + str(correctActionsAll))
+    # print("Losses:" + str(len(lossesAll[0])))
+    # print("Losses:" + str(len(lossesAll[1])))
+
 
 class PlotManager():
 
@@ -1183,110 +1455,123 @@ class PlotManager():
         self._plotsDirectory = plotDirectory
 
 
-    def generateSingleGame(self, plotsToGenerate, env,players, gameRound):
+    def generateAllPlots(self, plotsToGenerate, dataset, gameRound, intrinsicDataset=""):
+        generateSingleGamePlotsFromDataset(plots, dataset, gameRound, self._plotsDirectory)
+        generateExperimentPlotsFromDataset(plotsToGenerate, dataset, saveDirectory=self._plotsDirectory)
 
-        if len(plotsToGenerate) >= 1:
-            if plotsToGenerate[0] == plots["all"]:
-                plotsToGenerate = []
-                for  i in plots.keys() :
-                    plotsToGenerate.append(plots[i])
+        if not intrinsicDataset == "":
+            intrinsicDataset = intrinsicDataset+"/"+"IntrinsicDataset.pkl"
+            generateIntrinsicPlotsFromDataset(plotsToGenerate,intrinsicDataset, saveDirectory=self._plotsDirectory)
 
-            agentNames = []
-            for index, p in enumerate(players):
-                agentNames.append(p.name+"_"+str(index))
-
-            if plots["OneGame_NumberOfActions"] in plotsToGenerate:
-                plotNumberOfActions(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
-
-            if plots["OneGame_DiscardBehavior"] in plotsToGenerate:
-                plotDiscardBehavior(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
-
-            if plots["OneGame_Timeline"] in plotsToGenerate:
-                plotTimeLine(agentNames, env.playerActionsTimeLine, gameRound, self.plotsDirectory)
-
-    def generateExperimentPlots(self, plotsToGenerate, env, players, gameRound):
-
-        if len(plotsToGenerate) >= 1:
-            if plotsToGenerate[0] == plots["all"]:
-                plotsToGenerate = []
-                for  i in plots.keys():
-                    plotsToGenerate.append(plots[i])
-
-
-            agentNames = []
-            moodReadings = []
-            moodNeurons = []
-            selfProbabilities = []
-            selfProbabilitiesNames = []
-            correctActions = []
-            totalActions = []
-            qvalues = []
-            losses = []
-            lossesPModel = []
-            meanQValues = []
-
-            selfReward = []
-            selfRewardAvg = []
-
-            for index, p in enumerate(players):
-                agentNames.append(p.name+"_"+str(index))
-                correctActions.append(p.totalCorrectAction)
-                totalActions.append(p.totalAction)
-                qvalues.append(p.QValues)
-                losses.append(p.losses)
-                meanQValues.append(p.MeanQValuesPerGame)
-                selfReward.append(p.selfReward)
-                selfRewardAvg.append(p.meanReward)
-                if not p.intrinsic == None:
-                    selfProbabilities.append(p.intrinsic.probabilities)
-                    moodReadings.append(p.intrinsic.moodReadings)
-                    selfProbabilitiesNames.append(p.intrinsic.selfConfidenceType)
-                    moodNeurons.append(p.intrinsic.moodNeurons)
-                    if not p.intrinsic.pModel == None:
-                        lossesPModel.append(p.intrinsic.pModel.losses)
-
-            if plots["Experiment_Winners"] in plotsToGenerate:
-                plotWinners(len(agentNames), env.winners, gameRound, agentNames, self._plotsDirectory)
-
-            if plots["Experiment_Rounds"] in plotsToGenerate:
-                plotRounds(env.allRounds, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_FinishingPosition"] in plotsToGenerate:
-                plotFinishPositions(agentNames, env.allScores, env.winners, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_ActionsBehavior"] in plotsToGenerate:
-                plotActionBehavior(agentNames, env.playerActionsCompleteAllGames, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_Mood"] in plotsToGenerate:
-                plotMood(agentNames, moodReadings, gameRound,  self._plotsDirectory)
-
-            if plots["Experiment_MoodNeurons"] in plotsToGenerate:
-                plotMoodNeurons(agentNames, moodNeurons, moodReadings, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_SelfProbabilitySuccess"] in plotsToGenerate:
-                plotSelfProbabilitySuccess(agentNames, selfProbabilities, gameRound, self._plotsDirectory, name=selfProbabilitiesNames)
-
-            if plots["Experiment_Reward"] in plotsToGenerate:
-                plotRewardsAll(agentNames, env.allRewards, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_CorrectActions"] in plotsToGenerate:
-                plotCorrectActions(agentNames, env.allWrongActions, totalActions, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_WrongActions"] in plotsToGenerate:
-                plotWrongActions( agentNames, env.allWrongActions, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_QValues"] in plotsToGenerate:
-                plotQValues( agentNames, qvalues, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_Losses"] in plotsToGenerate:
-                plotLosses(agentNames, losses, gameRound, "Player", self._plotsDirectory)
-                plotLosses(agentNames, lossesPModel, gameRound, "PModel", self._plotsDirectory)
-
-            if plots["Experiment_MeanQValues"] in plotsToGenerate:
-                plotMeanQValuesGames( agentNames, meanQValues, gameRound, self._plotsDirectory)
-
-            if plots["Experiment_SelfReward"] in plotsToGenerate:
-                plotSelfRewardsAll(agentNames, selfRewardAvg, selfReward, gameRound, self._plotsDirectory)
-
+    # def generateSingleGame(self, plotsToGenerate, dataset, gameRound):
+    #
+    #
+    #     generateSingleGamePlotsFromDataset(plots,dataset,gameRound,self._plotsDirectory)
+    #     # if len(plotsToGenerate) >= 1:
+    #     #     if plotsToGenerate[0] == plots["all"]:
+    #     #         plotsToGenerate = []
+    #     #         for  i in plots.keys() :
+    #     #             plotsToGenerate.append(plots[i])
+    #     #
+    #     #     agentNames = []
+    #     #     for index, p in enumerate(players):
+    #     #         agentNames.append(p.name+"_"+str(index))
+    #     #
+    #     #     if plots["OneGame_NumberOfActions"] in plotsToGenerate:
+    #     #         plotNumberOfActions(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
+    #     #
+    #     #     if plots["OneGame_DiscardBehavior"] in plotsToGenerate:
+    #     #         plotDiscardBehavior(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
+    #     #
+    #     #     if plots["OneGame_Timeline"] in plotsToGenerate:
+    #     #         plotTimeLine(agentNames, env.playerActionsTimeLine, gameRound, self.plotsDirectory)
+    #
+    # def generateExperimentPlots(self, plotsToGenerate, dataset, gameRound):
+    #
+    #     generateExperimentPlotsFromDataset(plotsToGenerate,dataset,saveDirectory=self._plotsDirectory)
+    #
+    #
+    #     # if len(plotsToGenerate) >= 1:
+    #     #     if plotsToGenerate[0] == plots["all"]:
+    #     #         plotsToGenerate = []
+    #     #         for  i in plots.keys():
+    #     #             plotsToGenerate.append(plots[i])
+    #     #
+    #     #     agentNames = []
+    #     #     moodReadings = []
+    #     #     moodNeurons = []
+    #     #     selfProbabilities = []
+    #     #     selfProbabilitiesNames = []
+    #     #     correctActions = []
+    #     #     totalActions = []
+    #     #     qvalues = []
+    #     #     losses = []
+    #     #     lossesPModel = []
+    #     #     meanQValues = []
+    #     #
+    #     #     selfReward = []
+    #     #     selfRewardAvg = []
+    #     #
+    #     #     for index, p in enumerate(players):
+    #     #         agentNames.append(p.name+"_"+str(index))
+    #     #         correctActions.append(p.totalCorrectAction)
+    #     #         totalActions.append(p.totalAction)
+    #     #         qvalues.append(p.QValues)
+    #     #         losses.append(p.losses)
+    #     #         meanQValues.append(p.MeanQValuesPerGame)
+    #     #         selfReward.append(p.selfReward)
+    #     #         selfRewardAvg.append(p.meanReward)
+    #     #         if not p.intrinsic == None:
+    #     #             selfProbabilities.append(p.intrinsic.probabilities)
+    #     #             moodReadings.append(p.intrinsic.moodReadings)
+    #     #             selfProbabilitiesNames.append(p.intrinsic.selfConfidenceType)
+    #     #             moodNeurons.append(p.intrinsic.moodNeurons)
+    #     #             if not p.intrinsic.pModel == None:
+    #     #                 lossesPModel.append(p.intrinsic.pModel.losses)
+    #     #
+    #     #     if plots["Experiment_Winners"] in plotsToGenerate:
+    #     #         plotWinners(len(agentNames), env.winners, gameRound, agentNames, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_Rounds"] in plotsToGenerate:
+    #     #         plotRounds(env.allRounds, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_FinishingPosition"] in plotsToGenerate:
+    #     #         plotFinishPositions(agentNames, env.allScores, env.winners, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_ActionsBehavior"] in plotsToGenerate:
+    #     #         plotActionBehavior(agentNames, env.playerActionsCompleteAllGames, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_Mood"] in plotsToGenerate:
+    #     #         plotMood(agentNames, moodReadings, gameRound,  self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_MoodNeurons"] in plotsToGenerate:
+    #     #         plotMoodNeurons(agentNames, moodNeurons, moodReadings, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_SelfProbabilitySuccess"] in plotsToGenerate:
+    #     #         plotSelfProbabilitySuccess(agentNames, selfProbabilities, gameRound, self._plotsDirectory, name=selfProbabilitiesNames)
+    #     #
+    #     #     if plots["Experiment_Reward"] in plotsToGenerate:
+    #     #         plotRewardsAll(agentNames, env.allRewards, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_CorrectActions"] in plotsToGenerate:
+    #     #         plotCorrectActions(agentNames, env.allWrongActions, totalActions, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_WrongActions"] in plotsToGenerate:
+    #     #         plotWrongActions( agentNames, env.allWrongActions, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_QValues"] in plotsToGenerate:
+    #     #         plotQValues( agentNames, qvalues, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_Losses"] in plotsToGenerate:
+    #     #         plotLosses(agentNames, losses, gameRound, "Player", self._plotsDirectory)
+    #     #         plotLosses(agentNames, lossesPModel, gameRound, "PModel", self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_MeanQValues"] in plotsToGenerate:
+    #     #         plotMeanQValuesGames( agentNames, meanQValues, gameRound, self._plotsDirectory)
+    #     #
+    #     #     if plots["Experiment_SelfReward"] in plotsToGenerate:
+    #     #         plotSelfRewardsAll(agentNames, selfRewardAvg, selfReward, gameRound, self._plotsDirectory)
+    #
+    #
 
 

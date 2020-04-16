@@ -1,4 +1,4 @@
-/IntrinsicAgent/
+/MoodyFramework/IntrinsicAgent/
 /IRLAgents/
 /NEURIPS2020_AIRL_SaveDemonstrations.py
 /NEURIPS2020_AIRLTesting.py
@@ -7,3 +7,4 @@
 /NEURIPS2020_DQLvsRandom_Training.py
 /Experiments_Publications/EPIROB2020/
 /Experiments_SelfPlay/
+/MoodyFramework/

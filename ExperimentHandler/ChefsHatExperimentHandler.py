@@ -1,13 +1,10 @@
 import gym
 import numpy
 
-from ChefsHatEnv.ChefsHatEnv import ChefsHatEnv
-
 from KEF import ExperimentManager
 
 from KEF import DataSetManager
 
-from IntrinsicAgent import GenerateMoodFromDataset
 
 
 def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, saveExperimentsIn="", loadModel=[], agentParams=[], rewardFunction ="", plots=[]):
@@ -337,9 +334,11 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 qvalueModels.append(p.actor)
                 intrinsicMoods.append(p.intrinsic)
 
-        GenerateMoodFromDataset.generateMoodFromDataset(intrinsicModels=intrinsicMoods,
-                                                        dataset=experimentManager.dataSetManager.currentDataSetFile,
-                                                        qModels=qvalueModels,saveDirectory=experimentManager.dataSetManager.dataSetDirectory)
+        if len(intrinsicMoods) >0:
+            from MoodyFramework.IntrinsicAgent import GenerateMoodFromDataset
+            GenerateMoodFromDataset.generateMoodFromDataset(intrinsicModels=intrinsicMoods,
+                                                            dataset=experimentManager.dataSetManager.currentDataSetFile,
+                                                            qModels=qvalueModels, saveDirectory=experimentManager.dataSetManager.dataSetDirectory)
 
         experimentManager.plotManager.generateAllPlots(plots, experimentManager.dataSetManager.currentDataSetFile, game, intrinsicDataset=experimentManager.dataSetManager.dataSetDirectory)
 

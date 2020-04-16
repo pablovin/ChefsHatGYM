@@ -118,7 +118,7 @@ The plots are created based on a saved dataset. Currently the following plots ar
 - "Experiment_QValues" - Q-values for each action of each player in a sereis of games.
 - "Experiment_Losses" - Training loss evolution of each training agent in a series of games.
 
-### Running experiments 
+##### Running experiments 
 
 Currently, the environment implements the following experiments and examples:
  - run_General_Experiment.py - Run an experiment composed of four agents and a series of games.

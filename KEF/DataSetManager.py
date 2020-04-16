@@ -113,7 +113,6 @@ class DataSetManager:
         self.dataFrame = pd.DataFrame(columns = columns)
 
 
-
     def startNewGame(self, gameNumber, agentsNames):
 
         self.addDataFrame(gameNumber=gameNumber, agentNames=agentsNames)
@@ -123,7 +122,6 @@ class DataSetManager:
 
         actionType = actionDeal
 
-
         self.addDataFrame(actionType=actionType, playersHand=playersHand, gameNumber=game)
 
 
@@ -131,7 +129,6 @@ class DataSetManager:
     def doActionPizzaReady(self, roundNumber, board, playersHand, roles, score, playersStatus, game):
 
         actionType = actionPizzaReady
-
 
         self.addDataFrame(actionType=actionType, playersHand=playersHand, score=score,
                                       roundNumber=roundNumber, board=board,
@@ -145,7 +142,6 @@ class DataSetManager:
         actionCards = ""
         actionType = action[0]
         actionCards = action[1]
-
 
         self.addDataFrame(gameNumber=game, roundNumber=roundNumber, player=player,
                                       actionType=actionType, playersHand=playersHand,

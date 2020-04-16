@@ -158,10 +158,6 @@ def plotTotalActions(names, totalActionsAll, iteraction, plotDirectory):
         ax.set_xlabel('Games')
         ax.set_ylabel('Actions')
 
-        # plt.yticks(numpy.arange(0, 16, 1))
-        # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
-
-        # plt.ylim(0, 16)
         plt.xlim(0, len(dataY))
         plt.grid()
         ax.plot(dataY, actions)

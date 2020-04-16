@@ -18,9 +18,13 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
     experimentName = "Player_" + str(len(playersAgents)) + "_Cards_" + str(numMaxCards) + "_games_" + str(numGames) + "TrainingAgents_" + str(playersNames) + "_Reward_" + str(rewardFunction.rewardName)+"_"+experimentDescriptor
 
-    experimentManager = ExperimentManager.ExperimentManager(saveExperimentsIn,
-                                                            experimentName,
-                                                            verbose=True)
+    modelDirectory = ""
+    if isLogging or createDataset:
+        experimentManager = ExperimentManager.ExperimentManager(saveExperimentsIn,
+                                                                experimentName,
+                                                                verbose=True)
+        modelDirectory = experimentManager.modelDirectory
+
     #Logging
     if isLogging:
         logger = experimentManager.logManager
@@ -170,7 +174,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
 
                         players[thisPlayer].train((state, action, reward, newState, done,
-                                                 experimentManager.modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
+                                                 modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
 
 
 
@@ -264,7 +268,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
         unique, counts = numpy.unique(env.winners, return_counts=True)
         winners = dict(zip(unique, counts))
-        print( "Game " + str(game) + " - Victories:" +str(winners) )
+        # print( "Game " + str(game) + " - Victories:" +str(winners) )
 
         metrics.append(metricsPerGame)
 
@@ -282,9 +286,11 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
                 break
 
 
+    if isLogging or createDataset:
+     experimentManager.metricManager.saveMetricPlayer(metrics)
 
-    experimentManager.metricManager.saveMetricPlayer(metrics)
     returns = []
+
     returns.append(env.allRounds) #total rounds per game
     returns.append(env.startGameFinishingPosition) #starting finishing position
 
@@ -336,6 +342,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
         playerReturn.append(averageRewards) #rewards
         playerReturn.append(env.allWrongActions[i])  # wrong actions
         playerReturn.append(players[i].lastModel)
+        playerReturn.append(players[i].totalAction) # total actions per game
 
         QValues = players[i].QValues
         playerReturn.append(QValues)
@@ -343,7 +350,14 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
         returns.append(playerReturn)
 
 
-    experimentManager.dataSetManager.saveFile()
+    #Total actions per player
+    #Total points per player
+    returns.append(gamePoints) #Total score
+    returns.append(game)#Total games
+
+
+    if createDataset:
+        experimentManager.dataSetManager.saveFile()
 
     if createDataset and isPlotting:
         if isLogging:

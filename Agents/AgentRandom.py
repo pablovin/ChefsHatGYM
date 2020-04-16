@@ -21,6 +21,9 @@ class AgentRandom(IAgent.IAgent):
 
         self.totalCorrectAction.append(0)
 
+        self.totalAction = []
+        self.totalActionPerGame = 0
+
     def startAgent(self, params):
 
         numMaxCards , cardsPlayer, numActions, loadModel, params  = params
@@ -70,6 +73,8 @@ class AgentRandom(IAgent.IAgent):
         a = numpy.zeros(self.outputSize)
         a[aIndex] = 1
 
+        self.totalActionPerGame = self.totalActionPerGame + 1
+
         return a
 
 
@@ -81,5 +86,10 @@ class AgentRandom(IAgent.IAgent):
         pass
 
     def train(self, params):
-        pass
+
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer, score = params
+        if done:
+            self.totalAction.append(self.totalActionPerGame)
+            self.totalActionPerGame = 0
+
 

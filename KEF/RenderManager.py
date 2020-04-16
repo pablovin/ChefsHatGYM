@@ -554,9 +554,9 @@ class RenderManager():
 
         return originalImage
 
-    def renderGameStatus(self, gameLog, intrinsicData=None, gamesToRender=[], createVideo=False):
+    def renderGameStatus(self, dataSet, intrinsicData=None, gamesToRender=[], createVideo=False):
 
-        thisGameDirectory = self._renderDirectory + "/" + gameLog.split("/")[-1].split(".")[0]
+        thisGameDirectory = self._renderDirectory + "/" + dataSet.split("/")[-1].split(".")[0]
 
         renderIntrinsicInfo = False
         if not intrinsicData == None:
@@ -589,7 +589,7 @@ class RenderManager():
         player3LastAction = ""
         player4LastAction = ""
 
-        readFile = pd.read_pickle(gameLog)
+        readFile = pd.read_pickle(dataSet)
 
         moodCounter = 0
         agentsNames = []

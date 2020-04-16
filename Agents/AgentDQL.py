@@ -21,13 +21,6 @@ class AgentDQL(IAgent.IAgent):
     actor = None
     numMaxCards = 0
     numCardsPerPlayer = 0
-    trainingEpoches = 0
-    decayFactor = 0.99
-    eps = 0.25
-    actionsTaken = []
-
-    trainingStep = 0
-    targetUpdateFrequency = 50
 
     outputSize = 0
 
@@ -70,7 +63,7 @@ class AgentDQL(IAgent.IAgent):
         self.currentCorrectAction = 0
 
         self.totalCorrectAction = []
-        losses = []
+        self.losses = []
 
 
     def startAgent(self, params=[]):
@@ -86,44 +79,13 @@ class AgentDQL(IAgent.IAgent):
 
         else:
 
-            #    space = hp.choice('a',
-            #           [
-            #               (hp.choice("layers", [1, 2, 3, 4]), hp.choice("hiddenUnits", [8, 32, 64, 256]),
-            #                hp.choice("Qsize", [500, 1000 , 2500, 5000]),
-            #                hp.choice("batchSize", [16, 64, 128, 256, 512]),
-            #                hp.choice("TargetUpdateFunction", [16, 64, 128, 256, 512]),
-            #               )
-            #           ])
-
-            #Best Hyperopt:{'Qsize': 1000, 'TargetUpdateFunction': 256, 'a': 0, 'batchSize': 256, 'hiddenUnits': 256, 'layers': 3}
-            #(3, 256, 1000, 256, 256)
-
-            # BEst: (1, 256, 128, 0.5217984836612634)
-            # Best: {'a': 0, 'batchSize': 2, 'hiddenUnits': 3, 'layers': 0, 'tau': 0.5217984836612634}
-            # avg
-            # best
-            # error: 0.9378571428571428
-
             self.hiddenLayers = 1
             self.hiddenUnits = 256
             self.batchSize = 128
             self.tau = 0.52  # target network update rate
 
 
-
-            # #My initial estimation
-            # self.hiddenLayers = 1
-            # self.hiddenUnits = 256
-            # self.batchSize = 256
-            # self.tau = 0.1  # target network update rate
-
-
-            # QSize = 1000
-            # self.targetUpdateFrequency = 100
-
         self.gamma = 0.95  # discount rate
-        # self.gamma = 0.1  # discount rate
-        # self.gamma = 0.1  # epirobTesting
         self.loss = "mse"
 
         self.epsilon_min = 0.1
@@ -170,7 +132,6 @@ class AgentDQL(IAgent.IAgent):
 
           self.targetNetwork.compile(loss=self.loss, optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
 
-          # self.successNetwork.compile(loss=self.loss, optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
 
     def buildSimpleModel(self):
 
@@ -179,7 +140,7 @@ class AgentDQL(IAgent.IAgent):
 
         def model():
             inputSize = self.numCardsPerPlayer + self.numMaxCards
-            inputLayer = Input(shape=(28,),
+            inputLayer = Input(shape=(inputSize,),
                                name="State")  # 5 cards in the player's hand + maximum 4 cards in current board
 
             # dense = Dense(self.hiddenLayers, activation="relu", name="dense_0")(inputLayer)
@@ -243,30 +204,6 @@ class AgentDQL(IAgent.IAgent):
             possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
-            #
-            # self.actor.summary()
-            # qvalues = self.QValueReader.predict([stateVector, possibleActionsVector])[0]
-
-
-            # nonzeros = numpy.nonzero(a)
-            # nonzeros = numpy.array(numpy.where(numpy.array(a) >= 0.1))[0].tolist()
-            # nonzerosA = numpy.copy(a[nonzeros,])
-            # while len(nonzerosA) <3:
-            #     nonzerosA = numpy.append(nonzerosA, 0)
-
-            # def softmax(x):
-            #     """Compute softmax values for each sets of scores in x."""
-            #     e_x = numpy.exp(x - numpy.max(x))
-            #     return e_x / e_x.sum(axis=0)  # only difference
-            # # aSort = numpy.sort(a)
-            # # aSortShort = aSort
-            # softMaxA = numpy.array(softmax(a))
-            # argSoftMax = numpy.argmax(softMaxA)
-            # print ("AIndex: "  + str(aIndex) + "("+str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax])+")")
-
-
-            # if not self.intrinsic == None:
-            #     self.intrinsic.doSelfAction(a, params)
 
             #Update QValues
             self.QValues.append(a)
@@ -292,8 +229,6 @@ class AgentDQL(IAgent.IAgent):
             tgt_W[i] = self.tau * W[i] + (1 - self.tau) * tgt_W[i]
         self.targetNetwork.set_weights(tgt_W)
 
-        #
-        # self.actor.set_weights(self.actor.get_weights())
 
 
     def updateModel(self, savedNetwork, game, thisPlayer):
@@ -382,18 +317,6 @@ class AgentDQL(IAgent.IAgent):
             if not self.intrinsic == None:
                 self.intrinsic.trainPModel(params)
 
-            #memorize
-
-            # state = numpy.expand_dims(numpy.array(state), 0)
-            # next_state = numpy.expand_dims(numpy.array(next_state), 0)
-            # possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
-
-
-
-            #
-            # self.memory.append((state, action, reward, next_state, done, possibleActions))
-
-            # if self.memory.size() > self.batchSize:
             if self.memory.size() > self.batchSize and done:
                 self.updateModel(savedNetwork, game, thisPlayer)
                 self.updateTargetNetwork()

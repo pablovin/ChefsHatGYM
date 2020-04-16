@@ -61,8 +61,13 @@ agents implementations:
  - Advantage Actor-Critic Agent (more info: https://arxiv.org/abs/2004.04000)
  - Proximal Policy Optmization Agent (more info: https://arxiv.org/abs/2004.04000)
  
- ### Implemented Plugins
+ ### Plugins
  
+  ![Plots Example](images/MoodPlotsExample.png)
+  
+ - Moody Framework ( https://github.com/pablovin/MoodyFramework)
+   - A plugin that endowes each agent with an intrinsic state which is impacted by the agent's
+  own actions. 
 
 ### Simulation Data Structure
 

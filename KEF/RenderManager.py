@@ -8,32 +8,32 @@ import subprocess
 
 import numpy
 import os
+import pandas as pd
 
-from KEF import PlotManager
-
-
+from KEF.PlotManager import generateIntrinsicPlotsFromDataset, plots
 
 from KEF import DataSetManager
 
+
 class RenderManager():
-
     fps = 10
-    imageSize = (2160,3840, 3)
+    imageSize = (2160, 3840, 3)
 
-    playField =""
-    playingFieldDirectory = "images/playingField.png"
+    playField = ""
+    playingFieldDirectory = "playingField.png"
 
     currentGameDirectory = ""
     currentFrameNumber = 0
 
     cards = ""
-    cardsDirectory = "images/deck"
+    cardsDirectory = "deck/"
 
-    actionCardsDirectory = "images/actionCards/"
-    passCard =""
+    actionCardsDirectory = "actionCards/"
+    passCard = ""
     roleCards = []
 
     saveVideoDirectory = ""
+    resourcesFolder = ""
 
     blackCard = ""
 
@@ -41,10 +41,12 @@ class RenderManager():
     def renderDirectory(self):
         return self._renderDirectory
 
-    def __init__(self, saveVideoDirectory, fps=1):
+    def __init__(self, saveVideoDirectory, resourcesFolder, fps=1):
 
-        self._renderDirectory = "renderTMP/"
-        self.saveVideoDirectory  = saveVideoDirectory
+        self.resourcesFolder = resourcesFolder
+        self._renderDirectory = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/renderTest/renderTMP/"
+        self.renderMoodDirectory = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/renderTest/renderTMPMood/"
+        self.saveVideoDirectory = saveVideoDirectory
 
         if os.path.exists(self.renderDirectory):
             shutil.rmtree(self.renderDirectory)
@@ -55,22 +57,19 @@ class RenderManager():
 
         self.getImages()
 
-
     def writeHeader(self, originalImage, message, detailedMessage=[]):
-
 
         images = []
         image = copy.copy(originalImage)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
-        yPosition = int((image.shape[0] - self.playField.shape[0]) / 2) +800
+        yPosition = int((image.shape[0] - self.playField.shape[0]) / 2) + 800
         xPosition = int((image.shape[1] - self.playField.shape[1]) / 2) - 800
-        baseposition = (yPosition,xPosition)
+        baseposition = (yPosition, xPosition)
 
         cv2.putText(image, message, baseposition, font, 2, (255, 255, 255), 8, cv2.LINE_AA)
 
-
-        if len(detailedMessage)>0:
+        if len(detailedMessage) > 0:
 
             yPosition = int((image.shape[0] - self.playField.shape[0]) / 2) + 500
             xPosition = int((image.shape[1] - self.playField.shape[1]) / 2) + 800
@@ -78,11 +77,9 @@ class RenderManager():
             for i in range(len(detailedMessage)):
                 baseposition = (yPosition, xPosition)
                 cv2.putText(image, detailedMessage[i], baseposition, font, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                xPosition = xPosition+40
+                xPosition = xPosition + 40
 
         return image
-
-
 
     def getImagesSeconds(self, image, seconds):
 
@@ -90,8 +87,7 @@ class RenderManager():
 
         frames = []
 
-        for i in range (totalFrames):
-
+        for i in range(totalFrames):
             # image = numpy.array(image).astype(numpy.uint8)
             # image = cv2.cvtColor(numpy.array(image), cv2.COLOR_BGR2RGB)
             frames.append(image)
@@ -99,50 +95,58 @@ class RenderManager():
         return frames
 
     def getImages(self):
-
         if self.playField == "":
-            self.playField = numpy.array(cv2.imread(self.playingFieldDirectory))
+            self.playField = numpy.array(cv2.imread(self.resourcesFolder + "/" + self.playingFieldDirectory))
 
         if self.cards == "":
 
             self.cards = {}
 
-            cardImages = os.listdir(self.cardsDirectory)
+            cardImages = os.listdir(self.resourcesFolder + "/" + self.cardsDirectory)
             cardImages.sort(key=lambda f: int(f.split(".")[0]))
             cardNumber = 1
             for card in cardImages:
-                self.cards[cardNumber] = cv2.resize(numpy.array(cv2.imread(self.cardsDirectory+"/"+card)), (141,195))
-                cardNumber = cardNumber+1
+                # self.cards[cardNumber] = cv2.resize(numpy.array(cv2.imread(self.resourcesFolder+"/"+self.cardsDirectory+"/"+card)), (141,195))
+                self.cards[cardNumber] = cv2.resize(
+                    numpy.array(cv2.imread(self.resourcesFolder + "/" + self.cardsDirectory + "/" + card)), (70, 90))
+                cardNumber = cardNumber + 1
             # print ("Size:", self.playField.shape)
 
-        #Pass Card
-        self.passCard = numpy.array(cv2.resize(cv2.imread(self.actionCardsDirectory+"/pass.png"), (176,243)))
+        # Pass Card
+        self.passCard = numpy.array(
+            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/pass.png"), (176, 243)))
 
-        self.roleCards.append(cv2.resize(cv2.imread(self.actionCardsDirectory + "/dishwasher.png"), (176, 243)))
-        self.roleCards.append(cv2.resize(cv2.imread(self.actionCardsDirectory + "/wait.png"), (176, 243)))
-        self.roleCards.append(cv2.resize(cv2.imread(self.actionCardsDirectory + "/souschef.png"), (176, 243)))
-        self.roleCards.append(cv2.resize(cv2.imread(self.actionCardsDirectory+"/chef.png"), (176 ,243)))
+        self.roleCards.append(
+            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/dishwasher.png"),
+                       (176, 243)))
+        self.roleCards.append(
+            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/wait.png"), (176, 243)))
+        self.roleCards.append(
+            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/souschef.png"),
+                       (176, 243)))
+        self.roleCards.append(
+            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/chef.png"), (176, 243)))
 
-        self.blackCard = cv2.resize(numpy.array(cv2.imread(self.actionCardsDirectory + "/cardBlack.png")), (141,195))
-
+        self.blackCard = cv2.resize(
+            numpy.array(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/cardBlack.png")),
+            (70, 90))
 
         # self.playField = numpy.array(cv2.resize(self.playField,(1920, 1080)))
 
-    def drawPlayers(self, playerHands, originalImage):
+    def drawPlayers(self, playerHands, originalImage, agentsNames):
 
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         images = []
-        #Player 1
+        # Player 1
 
-        basePosition = (50,50)
-        cv2.putText(originalImage, "Player 1", basePosition, font, 2, (255, 255, 255), 2, cv2.LINE_AA)
+        basePosition = (50, 50)
+        cv2.putText(originalImage, "Player:" + agentsNames[0], basePosition, font, 2, (255, 255, 255), 2, cv2.LINE_AA)
         basePosition = (5, 5)
         yPosition = basePosition[0]
         xPosition = basePosition[1]
 
-
-        #player1 cards
+        # player1 cards
 
         for i in range(len(playerHands[0])):
             if playerHands[0][i] == 0:
@@ -150,7 +154,7 @@ class RenderManager():
             else:
                 card = self.cards[playerHands[0][i]]
 
-            if i % 5 == 0:
+            if i % 9 == 0:
                 yPosition = yPosition + card.shape[0] + 10
                 xPosition = basePosition[1]
             else:
@@ -161,13 +165,15 @@ class RenderManager():
             # for img in self.getImagesSeconds(originalImage, 1):
             #     images.append(img)
 
+        # player 2
+        if len(playerHands) > 1:
+            basePosition = (
+            int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, 50)
+            cv2.putText(originalImage, "Player " + agentsNames[1], basePosition, font, 2, (255, 255, 255), 2,
+                        cv2.LINE_AA)
 
-        #player 2
-        if len(playerHands)>1:
-            basePosition = (int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, 50)
-            cv2.putText(originalImage, "Player 2" , basePosition, font, 2, (255, 255, 255), 2, cv2.LINE_AA)
-
-            basePosition = (int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, 5)
+            basePosition = (
+            int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, 5)
 
             yPosition = basePosition[1]
             xPosition = basePosition[0]
@@ -181,7 +187,7 @@ class RenderManager():
                 else:
                     card = self.cards[playerHands[1][i]]
 
-                if i % 5 == 0:
+                if i % 10 == 0:
                     yPosition = yPosition + card.shape[0] + 10
                     xPosition = basePosition[0]
                 else:
@@ -198,18 +204,18 @@ class RenderManager():
 
                 # for img in self.getImagesSeconds(originalImage, 1):
                 #     images.append(img)
-                #originalImage[0:0 + card.shape[0], 0:0 + card.shape[1]] = card
-
+                # originalImage[0:0 + card.shape[0], 0:0 + card.shape[1]] = card
 
         # player 3
-        if len(playerHands)>2:
-            basePosition = (50, int(originalImage.shape[1] - ( self.playField.shape[1]*1.3 )))
-            cv2.putText(originalImage, "Player 3" , basePosition, font, 2, (255, 255, 255), 2, cv2.LINE_AA)
+        if len(playerHands) > 2:
+            basePosition = (50, int(originalImage.shape[1] - (self.playField.shape[1] * 1.3)))
+            cv2.putText(originalImage, "Player " + agentsNames[2], basePosition, font, 2, (255, 255, 255), 2,
+                        cv2.LINE_AA)
 
             # basePosition = (5, int(originalImage.shape[1] - (self.playField.shape[1] * 1.125)))
             basePosition = (5, int(originalImage.shape[1] - (self.playField.shape[1] * 1.125)))
 
-            yPosition = basePosition[1]-500
+            yPosition = basePosition[1] - 400
             xPosition = basePosition[0]
             # player 3 cards
             for i in range(len(playerHands[2])):
@@ -219,7 +225,7 @@ class RenderManager():
                 else:
                     card = self.cards[playerHands[2][i]]
 
-                if i % 5 == 0:
+                if i % 10 == 0:
                     yPosition = yPosition + card.shape[0] + 10
                     xPosition = basePosition[0]
                 else:
@@ -237,17 +243,17 @@ class RenderManager():
                 #     images.append(img)
                 # originalImage[0:0 + card.shape[0], 0:0 + card.shape[1]] = card
 
-
-
         # player 4
-        if len(playerHands)>3:
-            basePosition = (int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, int(originalImage.shape[1] - ( self.playField.shape[1]*1.3 )))
-            cv2.putText(originalImage, "Player 4" , basePosition, font, 2, (255, 255, 255), 2, cv2.LINE_AA)
+        if len(playerHands) > 3:
+            basePosition = (int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100,
+                            int(originalImage.shape[1] - (self.playField.shape[1] * 1.3)))
+            cv2.putText(originalImage, "Player " + agentsNames[3], basePosition, font, 2, (255, 255, 255), 2,
+                        cv2.LINE_AA)
 
+            basePosition = (int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100,
+                            int(originalImage.shape[1] - (self.playField.shape[1] * 1.125)))
 
-            basePosition = (int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, int(originalImage.shape[1] - (self.playField.shape[1] * 1.125)))
-
-            yPosition = basePosition[1] - 500
+            yPosition = basePosition[1] - 400
             xPosition = basePosition[0]
             # player 3 cards
             for i in range(len(playerHands[3])):
@@ -257,7 +263,7 @@ class RenderManager():
                 else:
                     card = self.cards[playerHands[3][i]]
 
-                if i % 5 == 0:
+                if i % 10 == 0:
                     yPosition = yPosition + card.shape[0] + 10
                     xPosition = basePosition[0]
                 else:
@@ -280,12 +286,12 @@ class RenderManager():
 
         return originalImage
 
-
     def drawPlayField(self, image):
 
-        yPosition = int((image.shape[0]  - self.playField.shape[0])/2) - 200
-        xPosition = int((image.shape[1]  - self.playField.shape[1])/2) - 50
-        image[yPosition:yPosition+self.playField.shape[0], xPosition:xPosition+self.playField.shape[1]] = self.playField
+        yPosition = int((image.shape[0] - self.playField.shape[0]) / 2) - 200
+        xPosition = int((image.shape[1] - self.playField.shape[1]) / 2) - 50
+        image[yPosition:yPosition + self.playField.shape[0],
+        xPosition:xPosition + self.playField.shape[1]] = self.playField
 
         return image
 
@@ -300,69 +306,69 @@ class RenderManager():
                 card = cv2.resize(card, (176, 243))
                 if currentBoardPlace < 3:
                     yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 120
-                    xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 840 + (currentBoardPlace*225)
+                    xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 840 + (
+                                currentBoardPlace * 225)
 
-                elif currentBoardPlace >=3 and currentBoardPlace < 8:
+                elif currentBoardPlace >= 3 and currentBoardPlace < 8:
 
                     yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 420
                     xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1070 + ((
-                                currentBoardPlace-5) * 225)
+                                                                                                              currentBoardPlace - 5) * 225)
 
                 elif currentBoardPlace >= 8:
 
                     yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 720
                     xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 840 + ((
-                                                                                                              currentBoardPlace - 8) * 225)
+                                                                                                             currentBoardPlace - 8) * 225)
 
                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-
-
-            currentBoardPlace = currentBoardPlace+1
+            currentBoardPlace = currentBoardPlace + 1
 
         return originalImage
 
     def drawRoleCards(self, originalImage, roles):
-        #Dishwasher role
+        # Dishwasher role
         # roles = roles[1:-1].split(",")
 
-        #Player 1
-        for i in range (4):
+        # Player 1
+        for i in range(4):
 
             card = self.roleCards[i]
 
             if int(roles[i]) == 0:
                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 45 - 200
-                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 390 -50
-                originalImage[yPosition:yPosition + self.roleCards[0].shape[0], xPosition:xPosition + self.roleCards[0].shape[1]] = card
+                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 390 - 50
+                originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
+                xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
             if int(roles[i]) == 1:
                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 45 - 200
-                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1850 -50
+                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1850 - 50
                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
             if int(roles[i]) == 2:
                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 1210 - 200
-                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 390 -50
+                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 390 - 50
                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
             if int(roles[i]) == 3:
                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 1210 - 200
-                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1850 -50
+                xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1850 - 50
                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
-
 
         return originalImage
 
     def drawFinishingPosition(self, originalImage, playerStatus, score):
 
-        playerStatus = playerStatus.split("_")
+        # playerStatus = playerStatus.split("_")
 
-        if playerStatus[0] == DataSetManager.actionFinish:
+        # print ("Player status:" + str(playerStatus))
+        if playerStatus[0][0] == DataSetManager.actionFinish:
             if int(score[0]) == 0:
                 card = self.roleCards[3]
             elif int(score[1]) == 0:
@@ -372,7 +378,7 @@ class RenderManager():
             elif int(score[3]) == 0:
                 card = self.roleCards[0]
 
-            card = numpy.array(cv2.resize(card,(518, 719)))
+            card = numpy.array(cv2.resize(card, (518, 719)))
             basePosition = (100, 100)
             yPosition = basePosition[0]
             xPosition = basePosition[1]
@@ -380,7 +386,7 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-        if playerStatus[1] == DataSetManager.actionFinish:
+        if playerStatus[1][0] == DataSetManager.actionFinish:
             if int(score[0]) == 1:
                 card = self.roleCards[3]
             elif int(score[1]) == 1:
@@ -390,7 +396,7 @@ class RenderManager():
             elif int(score[3]) == 1:
                 card = self.roleCards[0]
 
-            card = numpy.array(cv2.resize(card,(518, 719)))
+            card = numpy.array(cv2.resize(card, (518, 719)))
 
             basePosition = (100, 3048)
 
@@ -400,7 +406,7 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-        if playerStatus[2] == DataSetManager.actionFinish:
+        if playerStatus[2][0] == DataSetManager.actionFinish:
             if int(score[0]) == 2:
                 card = self.roleCards[3]
             elif int(score[1]) == 2:
@@ -410,7 +416,7 @@ class RenderManager():
             elif int(score[3]) == 2:
                 card = self.roleCards[0]
 
-            card = numpy.array(cv2.resize(card,(518, 719)))
+            card = numpy.array(cv2.resize(card, (518, 719)))
 
             basePosition = (1200, 100)
 
@@ -420,7 +426,7 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-        if playerStatus[3] == DataSetManager.actionFinish:
+        if playerStatus[3][0] == DataSetManager.actionFinish:
             if int(score[0]) == 3:
                 card = self.roleCards[3]
             elif int(score[1]) == 3:
@@ -430,7 +436,7 @@ class RenderManager():
             elif int(score[3]) == 3:
                 card = self.roleCards[0]
 
-            card = numpy.array(cv2.resize(card,(518, 719)))
+            card = numpy.array(cv2.resize(card, (518, 719)))
 
             # basePosition = (50 + int(originalImage.shape[0] - (self.playField.shape[0] / 2) + self.playField.shape[0]) + 100, 50 + int(originalImage.shape[1] - ( self.playField.shape[1]*1.3 )))
 
@@ -442,132 +448,128 @@ class RenderManager():
             originalImage[yPosition:yPosition + card.shape[0],
             xPosition:xPosition + card.shape[1]] = card
 
-
         return originalImage
 
+    def drawPassCard(self, originalImage, playerCurrentStatus):
+        # Dishwasher role
 
-    def drawPassCard(self, originalImage, playerStatus, playerCurrentStatus):
-        #Dishwasher role
+        # playerStatus =  playerStatus.split("_")
 
-        playerStatus =  playerStatus.split("_")
-
+        # print ("Player status:" + str(playerStatus[0]))
+        # print ("Pass in player status:" + str(DataSetManager.actionPass in playerStatus[0]))
+        # print ("-")
         card = self.passCard
-
-        if playerStatus[0] == DataSetManager.actionPass and playerCurrentStatus[0]==DataSetManager.actionPass:
+        # print ("Player status:" + str(playerStatus))
+        # if (DataSetManager.actionPass in playerStatus[0] and not lastTurnPizza) or (DataSetManager.actionPass in playerStatus[0] and lastTurnPizza and player==0):
+        if (DataSetManager.actionPass == playerCurrentStatus[0]):
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 120
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 620
 
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-        if playerStatus[1] == DataSetManager.actionPass and playerCurrentStatus[1]==DataSetManager.actionPass:
+        if (DataSetManager.actionPass == playerCurrentStatus[1]):
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 120
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1510
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-        if playerStatus[2] == DataSetManager.actionPass and playerCurrentStatus[2]==DataSetManager.actionPass:
+        if (DataSetManager.actionPass == playerCurrentStatus[2]):
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 720
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 620
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
 
-        if playerStatus[3] == DataSetManager.actionPass and  playerCurrentStatus[3]==DataSetManager.actionPass:
+        # print ("PlayerStatus3:"  + str( playerStatus[3]) + " - " + str(DataSetManager.actionPass in playerStatus[3]))
+        if (DataSetManager.actionPass == playerCurrentStatus[3]):
             yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 720
             xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1510
             originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
             xPosition:xPosition + self.roleCards[0].shape[1]] = card
-
-#
-# " ['', ('Discard: ', [10, 10, 10, 12, 12]), '', ''] "
-#         #Player 1
-#         for i in range (4):
-#             card = self.roleCards[i]
-#
-#             if int(roles[i]) == 0:
-#                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 45
-#                 xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 390
-#                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0], xPosition:xPosition + self.roleCards[0].shape[1]] = card
-#
-#             if int(roles[i]) == 1:
-#                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 45
-#                 xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1850
-#                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
-#                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
-#
-#             if int(roles[i]) == 2:
-#                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 1210
-#                 xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 390
-#                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
-#                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
-#
-#             if int(roles[i]) == 3:
-#                 yPosition = int((originalImage.shape[0] - self.playField.shape[0]) / 2) + 1210
-#                 xPosition = int((originalImage.shape[1] - self.playField.shape[1]) / 2) + 1850
-#                 originalImage[yPosition:yPosition + self.roleCards[0].shape[0],
-#                 xPosition:xPosition + self.roleCards[0].shape[1]] = card
-
 
         return originalImage
 
     def saveImages(self, image, seconds):
 
-
         images = self.getImagesSeconds(image, seconds)
 
         for i in images:
             cv2.imwrite(self.currentGameDirectory + "/" + str(self.currentFrameNumber) + ".png", i)
-            self.currentFrameNumber = self.currentFrameNumber+1
+            self.currentFrameNumber = self.currentFrameNumber + 1
 
+    def createVideo(self, gamesToRender):
 
-    def createVideo(self):
-
-        command = "ffmpeg -i "+str(self.currentGameDirectory)+"/%d.png -framerate 1 -pix_fmt yuv420p -r "+str(self.fps)+" -vcodec libx264 -acodec aac "+str(self.saveVideoDirectory)+"video.mp4"
+        gameToRender = str(gamesToRender).replace("[", "_").replace(" ", "_").replace(",", "_").replace("]", "_")
+        command = "ffmpeg -i " + str(self.currentGameDirectory) + "/%d.png -framerate 1 -pix_fmt yuv420p -r " + str(
+            self.fps) + " -vcodec libx264 -acodec aac " + str(self.saveVideoDirectory) + "_Game_" + str(
+            gameToRender) + "_video.mp4"
 
         subprocess.call(command, shell=True)
 
         shutil.rmtree(self.currentGameDirectory)
 
+    def getMoodPlots(self, intrinsicDataset, gameNumber, currentLine, originalImage):
 
+        if os.path.exists(self.renderMoodDirectory):
+            shutil.rmtree(self.renderMoodDirectory)
 
-    def createGameTimeLine(self, gameLog):
+        os.mkdir(self.renderMoodDirectory)
 
-        playerActions = []
+        plot = plots["Experiment_MoodNeurons"]
+        generateIntrinsicPlotsFromDataset(plot, intrinsicDataset, gameNumber=gameNumber, specificLine=currentLine,
+                                          saveDirectory=self.renderMoodDirectory)
 
-        playerActions.append([]) #player 1 actions
-        playerActions.append([]) #player 2 actions
-        playerActions.append([]) #player 3 actions
-        playerActions.append([]) #player 4 actions
+        selfMoodDirectory = self.renderMoodDirectory + "/MoodNeurons_Players/Self"
+        listSelfMood = os.listdir(selfMoodDirectory)
 
-        with open(gameLog, mode='r') as csv_file:
-            csv_reader = csv.DictReader(csv_file)
-            lineCounter = 0
-            for row in csv_reader:
-                actionType = row["Action Type"]
-                player = row["Player"]
+        xPosition = 0
+        yPosition = 0
 
-                if not player =="":
-                    playerActions[int(player)].append(actionType)
+        font = cv2.FONT_HERSHEY_SIMPLEX
 
-        plotManager = PlotManager.PlotManager(self.saveVideoDirectory)
-        plotManager.plotTimeLine(playerActions, 4)
-        # self.plotTimeLine(playerActions,4)
+        for moodImg in listSelfMood:
+            img = cv2.imread(selfMoodDirectory + "/" + moodImg)
+            playerNumber = int(moodImg.split("(")[1][0])
 
+            if playerNumber == 0:
+                xPosition = 0
+                yPosition = 500
 
+            if playerNumber == 1:
+                xPosition = 3000
+                yPosition = 500
 
+            if playerNumber == 2:
+                xPosition = 0
+                yPosition = 1600
 
+            if playerNumber == 3:
+                xPosition = 3000
+                yPosition = 1600
 
+            baseposition = (xPosition + 250, yPosition - 50)
+            cv2.putText(originalImage, "Mood", baseposition, font, 2, (255, 255, 255), 2, cv2.LINE_AA)
+            originalImage[yPosition:yPosition + img.shape[0],
+            xPosition:xPosition + img.shape[1]] = img
 
+        return originalImage
 
-    def renderGameStatus(self, gameLog, createVideo=False):
+    def renderGameStatus(self, gameLog, intrinsicData=None, gamesToRender=[], createVideo=False):
 
-        thisGameDirectory = self._renderDirectory + "/"+gameLog.split("/")[-1].split(".")[0]
+        thisGameDirectory = self._renderDirectory + "/" + gameLog.split("/")[-1].split(".")[0]
+
+        renderIntrinsicInfo = False
+        if not intrinsicData == None:
+            renderIntrinsicInfo = True
+            # self.imageSize = (self.imageSize[0] + 400, self.imageSize[1] + 400, 3)
+
         if not os.path.exists(thisGameDirectory):
             os.mkdir(thisGameDirectory)
 
         self.currentGameDirectory = thisGameDirectory
 
-        #Read the gamelog
+        # gameToRender = gameToRender-1
+        # Read the gamelog
 
         images = []
         self.currentFrameNumber = 0
@@ -587,112 +589,142 @@ class RenderManager():
         player3LastAction = ""
         player4LastAction = ""
 
-        with open(gameLog, mode='r') as csv_file:
-            csv_reader = csv.DictReader(csv_file)
-            # line_count = 0
+        readFile = pd.read_pickle(gameLog)
 
-            for row in csv_reader:
-                lineCounter = lineCounter + 1
-                # if lineCounter>200:
-                # if line_count == 0:
-                #     line_count += 1
+        moodCounter = 0
+        agentsNames = []
+        previousHand = []
+        previousBoard = []
+        previousPlayerStatus = ["","","",""]
+        lastTurnPizza = False
+        pizzaLastRoud = 0
+        for lineCounter, row in readFile.iterrows():
+            # if moodCounter < 10:
+            print("Processing line:" + str(lineCounter))
+            actionType = row["Action Type"]
+            gameNumber = row["Game Number"]
 
-                actionType = row["Action Type"]
+            if len(agentsNames) == 0:
+                agentsNames = row["Agent Names"]
+
+            # print ("Game Number :" + str(gameNumber) + " - Render: " + str(gameToRender))
+            if not actionType == "" and gameNumber in gamesToRender:
                 playerHand = row["Player Hand"]
                 board = row["Board"]
                 cardsAction = row["Cards Action"]
                 wrongAction = row["Wrong Actions"]
                 reward = row["Reward"]
-                score = row["Score"]
+                score = row["Scores"]
                 roles = row["Roles"]
                 rounds = row["Round Number"]
                 player = row["Player"]
                 playerStatus = row["Players Status"]
 
-                #post-processin
-                if not playerHand == "":
-                    hands = playerHand.split("_")
-                    playerHand = []
-                    for hand in hands:
-                        handAuxiliary = hand[1:-1].split(",")
-                        currentHand = []
-                        for a in handAuxiliary:
-                            currentHand.append(int(a))
-                        hand = numpy.array(currentHand)
-                        playerHand.append(hand)
+                if score == "":
+                    score = []
+                if not player == "":
+                    player = int(player)
 
-                if not board == "":
-                    board = board[1:-1].split(",")
+                if not rounds == "":
+                    rounds = int(rounds) + 1
 
-                if not roles =="":
-                    roles = roles[1:-1].split(",")
+                if player== 0:
+                   player1LastAction = actionType
+                if player ==1:
+                    player2LastAction = actionType
+                if player == 2:
+                    player3LastAction = actionType
+                if player == 3:
+                    player4LastAction = actionType
 
-                if not score =="":
-                    score = score[1:-1].split(",")
-
-                if not player=="":
-                    player = int(player)+1
-
-                if not rounds=="":
-                    rounds = int(rounds)+1
-
-                #Always draw these
-
+                # Always draw these
                 originalImage = numpy.zeros(self.imageSize)
                 originalImage = self.drawPlayField(originalImage)
 
-                originalImage = self.drawPlayers(playerHand, originalImage)
+                #Finishing Position
+                if not actionType == DataSetManager.actionChangeRole and len(score) > 0:
+                    originalImage = self.drawFinishingPosition(originalImage, playerStatus, score)
+
+
+                # Draw the mood if possible
+                if (
+                        actionType == DataSetManager.actionPass or actionType == DataSetManager.actionDiscard or actionType == DataSetManager.actionFinish) and renderIntrinsicInfo:
+                    originalImage = self.getMoodPlots(intrinsicData, gameNumber, moodCounter, originalImage)
+                    moodCounter = moodCounter + 1
+
 
                 if not roles == "":
                     originalImage = self.drawRoleCards(originalImage, roles)
 
-                if not board =="":
-                    originalImage = self.drawBoard(originalImage,board)
+                if not player == "" and len(previousHand) > 0:
+                    originalImage = self.drawPlayers(previousHand, originalImage, agentsNames)
 
-                if not playerStatus == "":
-                    originalImage = self.drawPassCard(originalImage, playerStatus, (player1LastAction, player2LastAction, player3LastAction, player4LastAction))
+                    header = "Round: " + str(rounds) + " - Turn: Player " + str(agentsNames[player])
+                    originalImage = self.writeHeader(originalImage, header)
+                    if not previousBoard == "":
+                        originalImage = self.drawBoard(originalImage, previousBoard)
 
-                if not actionType == DataSetManager.actionChangeRole and  len(score) > 0 and not score[0]=="":
-                    originalImage = self.drawFinishingPosition(originalImage,playerStatus,score)
+                    if len(previousPlayerStatus) > 0:
+                        originalImage = self.drawPassCard(originalImage,previousPlayerStatus)
 
-                #IF action is to deal cards
+                    self.saveImages(originalImage, 2)
+
+                previousHand = playerHand
+                previousBoard = board
+                previousPlayerStatus = (
+                    player1LastAction, player2LastAction, player3LastAction, player4LastAction)
+                originalImage = self.drawPlayers(playerHand, originalImage, agentsNames)
+
+                if not board == "":
+                    originalImage = self.drawBoard(originalImage, board)
+
+                if len(playerStatus) > 0:
+                    if lastTurnPizza and pizzaLastRoud < rounds:
+                        lastTurnPizza = False
+                    originalImage = self.drawPassCard(originalImage, (
+                    player1LastAction, player2LastAction, player3LastAction, player4LastAction))
+
+                # IF action is to deal cards
+                # print ("Action type:" + str(actionType))
                 if actionType == DataSetManager.actionDeal:
                     originalImage = self.writeHeader(originalImage, "Dealing cards!")
 
                 elif actionType == DataSetManager.actionChangeRole:
 
-                    actionCards = cardsAction.split("_")
+                    actionCards = cardsAction
                     message = []
 
                     if not actionCards[0] == "":
-                        message.append("- Player :" + str(actionCards[1]) + " declared " + str(
+                        message.append("- Player :" + str(agentsNames[actionCards[1]]) + " declared " + str(
                             actionCards[0]) + "!")
 
                     if actionCards[0] == "FoodFight":
                         message.append("New roles updated!")
 
-                    message.append("- Dishwasher: Player " + str(int(roles[3]) + 1))
-                    message.append("- Waiter: Player" + str(int(roles[2]) + 1))
-                    message.append("- Souschef: Player" + str(int(roles[1]) + 1))
-                    message.append("- Chef: Player" + str(int(roles[0]) + 1))
+                    message.append("- Dishwasher: Player " + str(agentsNames[int(roles[3])]))
+                    message.append("- Waiter: Player" + str(agentsNames[int(roles[2])]))
+                    message.append("- Souschef: Player" + str(agentsNames[int(roles[1])]))
+                    message.append("- Chef: Player" + str(agentsNames[int(roles[0])]))
 
-                    if actionCards[0] == "" or actionCards[0] == "FoodFight" :
+                    if actionCards[0] == "" or actionCards[0] == "FoodFight":
                         message.append("")
                         message.append("Cards Exchanged!")
-                        message.append("Dishwasher gave " + str(actionCards[2] +" - received "+ str(actionCards[3])))
-                        message.append("Waiter gave " + str(actionCards[3] +" - received "+ str(actionCards[2])))
-                        message.append("Souschef gave " + str(actionCards[4] + " - received " + str(actionCards[1])))
-                        message.append("Chef gave " + str(actionCards[5] + " - received " + str(actionCards[0])))
+                        message.append(
+                            "Dishwasher gave " + str(actionCards[2]) + " - received " + str(actionCards[3]))
+                        message.append("Waiter gave " + str(actionCards[3]) + " - received " + str(actionCards[2]))
+                        message.append(
+                            "Souschef gave " + str(actionCards[4]) + " - received " + str(actionCards[1]))
+                        message.append("Chef gave " + str(actionCards[5]) + " - received " + str(actionCards[0]))
 
-
-                    originalImage = self.writeHeader(originalImage, "Exchanging roles and cards!", detailedMessage=message)
+                    originalImage = self.writeHeader(originalImage, "Exchanging roles and cards!",
+                                                     detailedMessage=message)
 
                 elif actionType == DataSetManager.actionDiscard:
 
-                    header = "Round: " + str(rounds) + " - Turn: Player " + str(player)
+                    header = "Round: " + str(rounds) + " - Turn: Player " + str(agentsNames[player])
 
-                    message= []
-                    message.append("Player " + str(player) + " Discarded: " + str(cardsAction))
+                    message = []
+                    message.append("Player " + str(agentsNames[player]) + " Discarded: " + str(cardsAction))
                     message.append("Reward: " + str(reward))
                     message.append("Wrong actions: " + str(wrongAction))
 
@@ -701,19 +733,19 @@ class RenderManager():
 
                 elif actionType == DataSetManager.actionPass:
 
-                    if int(player) == 1:
+                    if int(player) == 0:
                         player1LastAction = DataSetManager.actionPass
-                    elif int(player) == 2:
+                    elif int(player) == 1:
                         player2LastAction = DataSetManager.actionPass
-                    elif int(player) == 3:
+                    elif int(player) == 2:
                         player3LastAction = DataSetManager.actionPass
-                    elif int(player) == 4:
+                    elif int(player) == 3:
                         player4LastAction = DataSetManager.actionPass
 
-                    header = "Round: " + str(rounds) + " - Turn: Player " + str(player)
+                    header = "Round: " + str(rounds) + " - Turn: Player " + str(agentsNames[player])
 
                     message = []
-                    message.append("Player " + str(player) + " Passed!")
+                    message.append("Player " + str(agentsNames[player]) + " Passed!")
                     message.append("Reward: " + str(reward))
                     message.append("Wrong actions: " + str(wrongAction))
 
@@ -722,10 +754,10 @@ class RenderManager():
 
                 elif actionType == DataSetManager.actionFinish:
 
-                    header = "Round: " + str(rounds) + " - Turn: Player " + str(player)
+                    header = "Round: " + str(rounds) + " - Turn: Player " + str(agentsNames[player])
 
                     message = []
-                    message.append("Player " + str(player) + " Finished!!")
+                    message.append("Player " + str(agentsNames[player]) + " Finished!!")
 
                     originalImage = self.writeHeader(originalImage, header,
                                                      detailedMessage=message)
@@ -739,28 +771,16 @@ class RenderManager():
                     player3LastAction = ""
                     player4LastAction = ""
 
+                    lastTurnPizza = True
+                    pizzaLastRoud = rounds
+                    print ("Clear PlayerActions!")
 
-                self.saveImages(originalImage, 5)
+                self.saveImages(originalImage, 3)
 
-                # if lineCounter == 10:
-                #     break
-
-                print ("Line:" + str(lineCounter))
-                #
-
-                # elif actionType == DataSetManager.actionPass:
-                #
-                    # self.createVideo(thisGameDirectory, images)
-                    # frameNumber = self.saveImages(images, thisGameDirectory, frameNumber)
+                # print ("Line:" + str(lineCounter))
+            # lineCounter = lineCounter + 1
+            # if lineCounter > 30:
+            #     break
 
         if createVideo:
-            self.createVideo()
-
-
-# dataSet = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/Gym_Experiments/Player_4_Cards_11_games_2TrainAgents_['RANDOM', 'RANDOM', 'RANDOM', 'RANDOM']_Joker_Trial_QL_2020-02-29_16:30:17.444821/Datasets/Game_1.csv"
-#
-# render = RenderManager("/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning/testRender/")
-# render.renderGameStatus(dataSet)
-#
-
-
+            self.createVideo(gamesToRender)

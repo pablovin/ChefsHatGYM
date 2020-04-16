@@ -118,8 +118,6 @@ The plots are created based on a saved dataset. Currently the following plots ar
 - "Experiment_QValues" - Q-values for each action of each player in a sereis of games.
 - "Experiment_Losses" - Training loss evolution of each training agent in a series of games.
 
-
-
 ### Running experiments 
 
 Currently, the environment implements the following experiments and examples:
@@ -128,8 +126,8 @@ Currently, the environment implements the following experiments and examples:
  - Experiments_Media/run_CreatePlotFromDataset.py  - Generate  plots from collected datasets.
  - Experiments_Optmization folder contains examples on how to run an agent optmization based on Hyperopt.
  - Experiments_Publications folder contains the following implementations:
-    - IROS_2020: Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020) The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents. arXiv preprint arXiv:2003.05861. (https://arxiv.org/abs/2003.05861)
- 
+    - (Submitted) IROS_2020: Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020) The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents. arXiv preprint arXiv:2003.05861. (https://arxiv.org/abs/2003.05861)
+    - (Submitted) ICPR2020: Barros, P., Tanevska, A., & Sciutti, A. (2020). Learning from Learners: Adapting Reinforcement Learning Agents to be Competitive in a Card Game. arXiv preprint arXiv:2004.04000.
  
  ##### Videos
  

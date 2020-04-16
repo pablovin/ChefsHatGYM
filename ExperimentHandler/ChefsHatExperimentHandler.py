@@ -5,9 +5,10 @@ from KEF import ExperimentManager
 
 from KEF import DataSetManager
 
+from ChefsHatEnv import ChefsHatEnv
 
 
-def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, saveExperimentsIn="", loadModel=[], agentParams=[], rewardFunction ="", plots=[]):
+def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDescriptor="",isLogging=True,createDataset=True, isPlotting=True, saveExperimentsIn="", loadModel=[], agentParams=[], rewardFunction ="", plots=[]):
 
     numMaxCards = 11
 
@@ -60,6 +61,17 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
             experimentManager.dataSetManager.startNewExperiment()
 
 
+
+    #Collect game points
+    gamePoints = []
+
+    for i in range(len(players)):
+        gamePoints.append(0)
+
+    #Check stopping condition is points or numGames
+    if numGames == -1:
+        numGames = 1000
+
     #start the experiment
     for game in range(numGames):
 
@@ -100,7 +112,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 logger.write("- Souschef Player:" + str(env.currentRoles[1] + 1))
                 logger.write("- Chef Player:" + str(env.currentRoles[0] + 1))
 
-
                 if env.currentSpecialAction == "" or env.currentSpecialAction == "FoodFight" :
 
                     logger.newLogSession("Changing cards!")
@@ -127,7 +138,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
                 wrongActions = 0
                 totalActions = 0
-
 
 
                 if not env.hasPlayerFinished(thisPlayer):
@@ -185,7 +195,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                             playersStatus.append(env.lastActionPlayers[i])
 
                         # print ("Player " + str(thisPlayer) + " - Wrong: " + str(wrongActions) + " - Total:" + str(totalActions))
-                        print ("Player: " + str(thisPlayer) + " - Round:" + str(env.rounds))
+                        # print ("Player: " + str(thisPlayer) + " - Round:" + str(env.rounds))
                         experimentManager.dataSetManager.doActionAction(game, thisPlayer, env.rounds,
                                                                         env.lastActionPlayers[thisPlayer], env.board,
                                                                         wrongActions, reward,
@@ -209,7 +219,7 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                     logger.newLogSession("Pizza ready!!!")
 
                 if createDataset:
-                    print ("Pizza!")
+                    # print ("Pizza!")
                     experimentManager.dataSetManager.doActionPizzaReady(env.rounds,
                                                                     env.board, env.playersHand, roles,
                                                                     env.score, playersStatus, game)
@@ -218,7 +228,6 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
 
         if isLogging:
             logger.write("Game finished:" + str(gameFinished))
-
 
         #saving the metrics
         for p in range(len(playersAgents)):
@@ -258,6 +267,20 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
         print( "Game " + str(game) + " - Victories:" +str(winners) )
 
         metrics.append(metricsPerGame)
+
+        #Points attribution
+        winningPlayerPoint = 0
+        for positionIndex in range(len(players)):
+            positionPlayer = env.allScores[-1].index(positionIndex)
+            points = 3 - positionPlayer
+            gamePoints[positionIndex] += points
+            if gamePoints[positionIndex] > winningPlayerPoint:
+                winningPlayerPoint = gamePoints[positionIndex]
+
+        if maximumScore > -1:
+            if winningPlayerPoint >= maximumScore:
+                break
+
 
 
     experimentManager.metricManager.saveMetricPlayer(metrics)
@@ -334,13 +357,15 @@ def runExperiment(numGames=10, playersAgents=[], experimentDescriptor="",isLoggi
                 qvalueModels.append(p.actor)
                 intrinsicMoods.append(p.intrinsic)
 
+        intrinsicDataset = ""
         if len(intrinsicMoods) >0:
             from MoodyFramework.Mood.Intrinsic import GenerateMoodFromDataset
             GenerateMoodFromDataset.generateMoodFromDataset(intrinsicModels=intrinsicMoods,
                                                             dataset=experimentManager.dataSetManager.currentDataSetFile,
                                                             qModels=qvalueModels, saveDirectory=experimentManager.dataSetManager.dataSetDirectory)
+            intrinsicDataset = experimentManager.dataSetManager.dataSetDirectory
 
-        experimentManager.plotManager.generateAllPlots(plots, experimentManager.dataSetManager.currentDataSetFile, game, intrinsicDataset=experimentManager.dataSetManager.dataSetDirectory)
+        experimentManager.plotManager.generateAllPlots(plots, experimentManager.dataSetManager.currentDataSetFile, game, intrinsicDataset=intrinsicDataset)
 
     return returns
 

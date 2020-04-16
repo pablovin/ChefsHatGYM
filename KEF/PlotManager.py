@@ -11,7 +11,7 @@ import os
 import csv
 
 from KEF import DataSetManager
-from KEF.DataSetManager import actionFinish
+from KEF.DataSetManager import actionFinish, actionPass, actionDiscard
 
 from matplotlib.collections import PolyCollection
 
@@ -20,6 +20,8 @@ plots = {
     "all": "all",
     "Experiment_Winners":"expWin",
     "Experiment_Rounds":"expRound",
+    "Experiment_Points":"expPoints",
+    "Experiment_TotalActions":"expTotalActionsActions",
     "Experiment_FinishingPosition":"expFinish",
     "Experiment_ActionsBehavior":"expActionBeh",
     "Experiment_Mood":"expMood",
@@ -109,6 +111,70 @@ def plotRounds(allRounds, iteraction, plotDirectory):
 
     plt.clf()
 
+def plotPoints(names, pointsAll, iteraction, plotDirectory):
+
+    # Plot winning history all players
+    for i in range(len(names)):
+
+        points = pointsAll[i]
+
+        dataY = range(len(points))
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        ax.set_xlabel('Games')
+        ax.set_ylabel('Points')
+
+        plt.yticks(numpy.arange(0, 16, 1))
+        # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
+
+        plt.ylim(0, 16)
+        plt.xlim(0, len(dataY))
+        plt.grid()
+        ax.plot(dataY, points)
+
+        directory = plotDirectory  + "/Points_Players/"
+
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+
+        plt.savefig(directory + "/Points_player_"+str(names[i])+"("+str(i)+")"+"_iteration_"+str(iteraction)+".png")
+
+        fig.clf()
+
+def plotTotalActions(names, totalActionsAll, iteraction, plotDirectory):
+
+    # Plot winning history all players
+    for i in range(len(names)):
+
+        actions = totalActionsAll[i]
+
+        dataY = range(len(actions))
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        ax.set_xlabel('Games')
+        ax.set_ylabel('Actions')
+
+        # plt.yticks(numpy.arange(0, 16, 1))
+        # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
+
+        # plt.ylim(0, 16)
+        plt.xlim(0, len(dataY))
+        plt.grid()
+        ax.plot(dataY, actions)
+
+        directory = plotDirectory  + "/TotalActions_Players/"
+
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+
+        plt.savefig(directory + "/TotalActions_player_"+str(names[i])+"("+str(i)+")"+"_iteration_"+str(iteraction)+".png")
+
+        fig.clf()
+
 def plotFinishPositions(names, scoresAll, winners, iteraction, plotDirectory):
 
     # fig = plt.figure()
@@ -173,11 +239,8 @@ def plotActionBehavior(names, actions, iteraction, plotsDirectory):
         if len(actions[i]) > largest:
             largest = len(actions[i])
 
-
-
     # Plot discard plot for all players
     for i in range(len(names)):
-
 
         allPasses = []
         allDiscards = []
@@ -1297,10 +1360,15 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
     meanQValuesAll = []
     rewardsAll = []
 
+    pointsAll = []
+
     #auxiliary variables
     currentGameTotalActions = []
     currentGameWrongActions = []
     for a in range(4):
+
+        pointsAll.append([])
+
         playersActionComplete.append([])
         playersActionComplete[a].append([])
 
@@ -1360,9 +1428,9 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
                 totalActionsAll[player].append(0)
                 correctActionsAll[player].append(0)
 
-
-            totalActionsAll[player][game] += totalActionsThisPLayer
-            correctActionsAll[player][game] += totalActionsThisPLayer-wrongActionsThisPlayer
+            if actionType == actionFinish or actionType == actionPass or actionType == actionDiscard:
+                totalActionsAll[player][game] += totalActionsThisPLayer
+                correctActionsAll[player][game] += totalActionsThisPLayer-wrongActionsThisPlayer
 
             #ActionComplete
 
@@ -1396,9 +1464,28 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
             if actionType == actionFinish and len(loss) > 0:
                 lossesAll[player][game].append(loss)
 
+            #Points attribution
+            if actionType == actionFinish:
+                positionPlayer = score.tolist().index(player)
+                points = 3 - positionPlayer
+                if len(pointsAll[player]) > 0:
+                    summedPoints = pointsAll[player][-1] + points
+                else:
+                    summedPoints = points
+                pointsAll[player].append(summedPoints)
+
 
     if specificGame == -1:
         specificGame = game
+
+
+    if plots["Experiment_Points"] in plotsToGenerate:
+        print ("Plotting:" + str(plots["Experiment_Points"]))
+        plotPoints(agentsNames, pointsAll, specificGame, saveDirectory)
+
+    if plots["Experiment_TotalActions"] in plotsToGenerate:
+        print ("Plotting:" + str(plots["Experiment_TotalActions"]))
+        plotTotalActions(agentsNames, totalActionsAll, specificGame, saveDirectory)
 
     if plots["Experiment_Winners"] in plotsToGenerate:
         print ("Plotting:" + str(plots["Experiment_Winners"]))

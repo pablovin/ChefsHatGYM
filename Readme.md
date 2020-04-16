@@ -63,7 +63,7 @@ agents implementations:
  
  ### Plugins
  
-  ![Plots Example](images/MoodPlotsExample.png)
+  ![Plots Example](gitImages/MoodPlotsExample.png)
   
  - Moody Framework ( https://github.com/pablovin/MoodyFramework)
    - A plugin that endowes each agent with an intrinsic state which is impacted by the agent's
@@ -140,7 +140,7 @@ Currently, the environment implements the following experiments and examples:
  The video can be used to evaluate a specific behavior, or just to illustrate how the agents play the game.
  The following link directs to a video example:
  
- [![Watch the video](Examples/exampleSimulator.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
+ [![Watch the video](gitImages/simulationExample.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
  
 
  ## Use and distribution policy

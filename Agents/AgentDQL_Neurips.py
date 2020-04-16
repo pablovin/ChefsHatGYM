@@ -43,15 +43,26 @@ class AgentDQL(IAgent.IAgent):
     totalActionPerGame = 0
 
     losses = []
-    Probability = []
 
     SelectedActions = []
 
+    intrinsic = None
 
     def __init__(self, params=[]):
         self.training = params[0]
         self.initialEpsilon = params[1]
-        self.name = "DQL"
+
+        if len(params) > 2:
+            agentName = "_"+params[2]
+        else:
+            agentName = ""
+
+        if len(params) > 3:
+            self.intrinsic = params[3]
+        else:
+            self.intrinsic = None
+
+        self.name = "DQL"+agentName
 
         self.totalAction = []
         self.totalActionPerGame = 0
@@ -111,6 +122,7 @@ class AgentDQL(IAgent.IAgent):
             # self.targetUpdateFrequency = 100
 
         self.gamma = 0.95  # discount rate
+        # self.gamma = 0.1  # discount rate
         # self.gamma = 0.1  # epirobTesting
         self.loss = "mse"
 
@@ -132,6 +144,7 @@ class AgentDQL(IAgent.IAgent):
         QSize = 20000
         self.memory = MemoryBuffer.MemoryBuffer(QSize, self.prioritized_experience_replay)
 
+        # self.learning_rate = 0.01
         self.learning_rate = 0.001
 
         if loadModel == "":
@@ -143,9 +156,10 @@ class AgentDQL(IAgent.IAgent):
 
         self.QValues = []
 
-        self.Probability = []
-
         self.SelectedActions = []
+
+        self.MeanQValuesPerGame = []
+        self.currentGameQValues = []
 
 
     def buildModel(self):
@@ -180,7 +194,7 @@ class AgentDQL(IAgent.IAgent):
 
             if (self.dueling):
                 # Have the network estimate the Advantage function as an intermediate layer
-                dense = Dense(self.outputSize + 1, activation='linear', name="duelingNetwork")(dense)
+                dense = Dense(self.outputSize + 1, activation='relu', name="duelingNetwork")(dense)
                 dense = Lambda(lambda i: K.expand_dims(i[:, 0], -1) + i[:, 1:] - K.mean(i[:, 1:], keepdims=True),
                            output_shape=(self.outputSize,))(dense)
 
@@ -196,30 +210,20 @@ class AgentDQL(IAgent.IAgent):
 
             return Model([inputLayer, possibleActions], output)
 
-
-
         self.online_network = model()
         self.targetNetwork =  model()
         self.loadQValueReader()
         # self.successNetwork = Model([inputLayer, possibleActions], probOutput)
 
 
-    def calculateProbabilityOfSuccess(self, QValue):
-        theta = 0.0
-        maxreward = 1
-        probability = (1-theta) * (1/2*numpy.log10(QValue/maxreward)+1)
-
-        if probability <= 0:
-            probability = 0
-        if probability >= 1:
-            probability =1
-
-        return probability
-
-
     def loadQValueReader(self):
         softmaxLayer = self.online_network.get_layer(index=-2)
         self.QValueReader = Model(self.online_network.inputs, softmaxLayer.output)
+
+
+
+    def observeOponentAction(self, params):
+        self.intrinsic.observeOponentAction(params, self.online_network)
 
     def getAction(self, params):
 
@@ -228,7 +232,6 @@ class AgentDQL(IAgent.IAgent):
 
         possibleActions2 = copy.copy(possibleActionsOriginal)
 
-
         if numpy.random.rand() <= self.epsilon:
             itemindex = numpy.array(numpy.where(numpy.array(possibleActions2) == 1))[0].tolist()
             random.shuffle(itemindex)
@@ -236,44 +239,23 @@ class AgentDQL(IAgent.IAgent):
             a = numpy.zeros(self.outputSize)
             a[aIndex] = 1
 
+            self.currentGameQValues.append(0)
+
         else:
 
             possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
             a = self.online_network.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
-            #
-            # self.online_network.summary()
-            qvalues = self.QValueReader.predict([stateVector, possibleActionsVector])[0]
 
-            # nonzeros = numpy.nonzero(qvalues)
-            nonzeros = numpy.array(numpy.where(numpy.array(qvalues))>= 0.1)[0].tolist()
-            nonzerosA = numpy.copy(a[nonzeros,])
+            if not self.intrinsic == None:
+                self.intrinsic.doSelfAction(a, params)
 
-            while len(nonzerosA) < 10:
-                nonzerosA = numpy.append(nonzerosA, 0)
-
-            def softmax(x):
-                """Compute softmax values for each sets of scores in x."""
-                e_x = numpy.exp(x - numpy.max(x))
-                return e_x / e_x.sum(axis=0)  # only difference
-
-            # aSort = numpy.sort(a)
-            # aSortShort = aSort
-            softMaxA = numpy.array(softmax(nonzerosA))
-            argSoftMax = numpy.argmax(softMaxA)
-            # print ("AIndex: "  + str(aIndex) + "("+str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax])+")")
-
-            self.QValues.append(softMaxA)
-
-            self.Probability.append(self.calculateProbabilityOfSuccess(qvalues[aIndex]))
-
-            # self.SelectedActions.append(aIndex)
-
-            # self.QValues.append(a)
+            #Update QValues
+            self.QValues.append(a)
+            self.currentGameQValues.append(numpy.sum(a))
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
-
 
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
@@ -327,10 +309,6 @@ class AgentDQL(IAgent.IAgent):
         history = self.online_network.fit([s,possibleActions] , q, verbose=False)
         self.losses.append(history.history['loss'])
 
-        #Update the decay
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
-
         if (game + 1) % 1000 == 0:
             self.online_network.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.lastModel = savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5"
@@ -357,16 +335,32 @@ class AgentDQL(IAgent.IAgent):
 
     def train(self, params=[]):
 
-        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer = params
+        state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer, score = params
 
         if done:
             self.totalCorrectAction.append(self.currentCorrectAction)
             self.totalAction.append(self.totalActionPerGame)
 
+            meanQValueThisGame = numpy.average(self.currentGameQValues)
+
+            self.MeanQValuesPerGame.append(meanQValueThisGame)
+            self.currentGameQValues = []
+
             self.currentCorrectAction = 0
             self.totalActionPerGame = 0
 
+
+            if not self.intrinsic == None:
+                if len(score) >= 1:
+                    if thisPlayer in score:
+                        self.intrinsic.doEndOfGame(score, thisPlayer, params)
+
+
         if self.training:
+
+            if not self.intrinsic == None:
+                self.intrinsic.trainPModel(params)
+
             #memorize
             action = numpy.argmax(action)
             # state = numpy.expand_dims(numpy.array(state), 0)
@@ -378,9 +372,15 @@ class AgentDQL(IAgent.IAgent):
             #
             # self.memory.append((state, action, reward, next_state, done, possibleActions))
 
+            # if self.memory.size() > self.batchSize:
             if self.memory.size() > self.batchSize and done:
                 self.updateModel(savedNetwork, game, thisPlayer)
                 self.updateTargetNetwork()
+
+                # Update the decay
+                if self.epsilon > self.epsilon_min:
+                    self.epsilon *= self.epsilon_decay
+
 
 
 

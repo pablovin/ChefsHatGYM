@@ -3,7 +3,7 @@ import numpy
 import copy
 
 from collections import deque
-from keras.layers import Input, Dense, Flatten, Concatenate, Lambda, Multiply
+from keras.layers import Input, Dense, Flatten, Concatenate, Lambda, Multiply, LeakyReLU, BatchNormalization
 import keras.backend as K
 
 from keras.models import Model
@@ -15,7 +15,7 @@ from Agents import MemoryBuffer
 
 import random
 
-class AgentDQL(IAgent.IAgent):
+class AgentAIRL(IAgent.IAgent):
 
     name=""
     actor = None
@@ -48,6 +48,12 @@ class AgentDQL(IAgent.IAgent):
 
     intrinsic = None
 
+    demonstrations = None
+
+    selfReward = []
+    currentReward = []
+    meanReward = []
+
     def __init__(self, params=[]):
         self.training = params[0]
         self.initialEpsilon = params[1]
@@ -62,6 +68,11 @@ class AgentDQL(IAgent.IAgent):
         else:
             self.intrinsic = None
 
+        if len(params) > 4:
+            self.demonstrations = params[4]
+        else:
+            self.demonstrations = None
+
         self.name = "DQL"+agentName
 
         self.totalAction = []
@@ -71,6 +82,10 @@ class AgentDQL(IAgent.IAgent):
 
         self.totalCorrectAction = []
         losses = []
+        self.selfReward = []
+        self.currentReward = []
+        self.meanReward = []
+
 
 
     def startAgent(self, params=[]):
@@ -86,51 +101,17 @@ class AgentDQL(IAgent.IAgent):
 
         else:
 
-            #    space = hp.choice('a',
-            #           [
-            #               (hp.choice("layers", [1, 2, 3, 4]), hp.choice("hiddenUnits", [8, 32, 64, 256]),
-            #                hp.choice("Qsize", [500, 1000 , 2500, 5000]),
-            #                hp.choice("batchSize", [16, 64, 128, 256, 512]),
-            #                hp.choice("TargetUpdateFunction", [16, 64, 128, 256, 512]),
-            #               )
-            #           ])
-
-            #Best Hyperopt:{'Qsize': 1000, 'TargetUpdateFunction': 256, 'a': 0, 'batchSize': 256, 'hiddenUnits': 256, 'layers': 3}
-            #(3, 256, 1000, 256, 256)
-
-            # BEst: (1, 256, 128, 0.5217984836612634)
-            # Best: {'a': 0, 'batchSize': 2, 'hiddenUnits': 3, 'layers': 0, 'tau': 0.5217984836612634}
-            # avg
-            # best
-            # error: 0.9378571428571428
-
             self.hiddenLayers = 1
             self.hiddenUnits = 256
             self.batchSize = 128
             self.tau = 0.52  # target network update rate
 
-
-
-            # #My initial estimation
-            # self.hiddenLayers = 1
-            # self.hiddenUnits = 256
-            # self.batchSize = 256
-            # self.tau = 0.1  # target network update rate
-
-
-            # QSize = 1000
-            # self.targetUpdateFrequency = 100
-
         self.gamma = 0.95  # discount rate
-        # self.gamma = 0.1  # discount rate
-        # self.gamma = 0.1  # epirobTesting
         self.loss = "mse"
 
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.990
 
-
-        # self.tau = 0.1 #target network update rate
 
         if self.training:
             self.epsilon = self.initialEpsilon  # exploration rate while training
@@ -162,14 +143,42 @@ class AgentDQL(IAgent.IAgent):
         self.currentGameQValues = []
 
 
+
+
     def buildModel(self):
 
           self.buildSimpleModel()
+          self.compileModels()
 
+    def compileModels(self):
           self.actor.compile(loss=self.loss, optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
 
           self.targetNetwork.compile(loss=self.loss, optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
 
+          self.rewardNetwork.compile(loss="binary_crossentropy", optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
+
+
+          # self.getOptmizer()
+          # self.rewardNetworkcompile(loss='binary_crossentropy',
+          #         optimizer=Adam(lr=self.learning_rate),
+          #         metrics=['accuracy'])
+
+          space = Input(shape=(28,))
+          possibleAction = Input(shape=(200,))
+          inputSelfReward = Input(shape=(228,))
+
+          self.actor.trainable = False
+          action = self.actor([space, possibleAction])
+
+          concat = Concatenate()([space,action])
+
+          self.combined = Model([space,possibleAction], self.rewardNetwork(concat))
+          self.combinedDemonstrator = Model([inputSelfReward], self.rewardNetwork(inputSelfReward))
+
+
+          self.combined.compile(loss='binary_crossentropy', optimizer=Adam(lr=self.learning_rate))
+          self.combinedDemonstrator.compile(loss='binary_crossentropy', optimizer=Adam(lr=self.learning_rate))
+          #
           # self.successNetwork.compile(loss=self.loss, optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
 
     def buildSimpleModel(self):
@@ -177,7 +186,7 @@ class AgentDQL(IAgent.IAgent):
         """ Build Deep Q-Network
                """
 
-        def model():
+        def modelQValue():
             inputSize = self.numCardsPerPlayer + self.numMaxCards
             inputLayer = Input(shape=(28,),
                                name="State")  # 5 cards in the player's hand + maximum 4 cards in current board
@@ -190,13 +199,16 @@ class AgentDQL(IAgent.IAgent):
                 else:
                   previous = dense
 
-                dense = Dense(self.hiddenUnits * (i + 1), name="Dense" + str(i), activation="relu")(previous)
+                dense = Dense(self.hiddenUnits * (i + 1), name="Dense" + str(i))(previous)
+                dense = LeakyReLU()(dense)
 
             if (self.dueling):
                 # Have the network estimate the Advantage function as an intermediate layer
-                dense = Dense(self.outputSize + 1, activation='linear', name="duelingNetwork")(dense)
+                dense = Dense(self.outputSize + 1,  name="duelingNetwork")(dense)
+                dense = LeakyReLU()(dense)
                 dense = Lambda(lambda i: K.expand_dims(i[:, 0], -1) + i[:, 1:] - K.mean(i[:, 1:], keepdims=True),
                            output_shape=(self.outputSize,))(dense)
+
 
 
             possibleActions = Input(shape=(self.outputSize,),
@@ -210,10 +222,65 @@ class AgentDQL(IAgent.IAgent):
 
             return Model([inputLayer, possibleActions], output)
 
-        self.actor = model()
-        self.targetNetwork =  model()
+        def modelReward():
+            inputSize = self.numCardsPerPlayer + self.numMaxCards
+            inputLayer = Input(shape=(228,),
+                               name="RewardInput")  # 5 cards in the player's hand + maximum 4 cards in current board
+
+            dense = Dense(256, name="Dense" + str(0))(inputLayer)
+            dense = LeakyReLU()(dense)
+            # dense = Dense(256, name="Dense" + str(1), activation="relu")(dense)
+
+
+            dense = Dense(1, activation='tanh')(dense)
+
+            # probOutput =  Dense(self.outputSize, activation='softmax')(dense)
+
+            return Model([inputLayer], dense)
+
+        self.actor = modelQValue()
+        self.targetNetwork =  modelQValue()
+        self.rewardNetwork = modelReward()
+
         self.loadQValueReader()
-        # self.successNetwork = Model([inputLayer, possibleActions], probOutput)
+
+    def getOptmizer(self):
+
+        adamOptmizer = Adam(lr=self.learning_rate)
+
+        state = K.placeholder(shape=(None, 28))
+        nextState = K.placeholder(shape=(None, 28))
+        actionProb =  K.placeholder(shape=(None, 200))
+
+        state_d = K.placeholder(shape=(None, 28))
+        nextState_d = K.placeholder(shape=(None, 28))
+        actionProb_d =  K.placeholder(shape=(None, 200))
+
+        gamma =  K.variable(self.gamma)
+
+        stateValues = K.function([self.actor.input], self.actor.output)
+        rewardValue = K.function([self.rewardNetwork.input], self.rewardNetwork.output)
+
+        reward = rewardValue(state)
+        stateValue = stateValues(state)
+        nextStateValue = stateValue(nextState)
+
+        reward_d = rewardValue(state_d)
+        stateValue_d = stateValues(state_d)
+        nextStateValue_d = stateValue(nextState_d)
+
+        logits = reward + gamma * nextStateValue - stateValue - actionProb
+        logits_d = reward_d+gamma*nextStateValue_d - stateValue_d - actionProb_d
+
+        loss = K.mean(K.softplus(-(logits))) + K.mean(K.softplus((logits_d)))
+
+        updatesOnline = adamOptmizer.get_updates(self.actor.trainable_weights, [], loss)
+        updatesReward = adamOptmizer.get_updates(self.rewardNetwork.trainable_weights, [], loss)
+
+        self.updateOnline = K.function([state, nextState, actionProb, state_d,nextState_d,actionProb_d], loss, updates=updatesOnline)
+        self.updateReward = K.function([state, nextState, actionProb, state_d, nextState_d, actionProb_d], loss,
+                                       updates=updatesReward)
+
 
 
     def loadQValueReader(self):
@@ -221,13 +288,14 @@ class AgentDQL(IAgent.IAgent):
         self.QValueReader = Model(self.actor.inputs, softmaxLayer.output)
 
 
+
     def observeOponentAction(self, params):
         self.intrinsic.observeOponentAction(params, self.actor)
 
     def getAction(self, params):
 
-        stateVector, possibleActionsOriginal = params
-        stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
+        state, possibleActionsOriginal = params
+        stateVector = numpy.expand_dims(numpy.array(state), 0)
 
         possibleActions2 = copy.copy(possibleActionsOriginal)
 
@@ -243,26 +311,6 @@ class AgentDQL(IAgent.IAgent):
             possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
-            #
-            # self.actor.summary()
-            # qvalues = self.QValueReader.predict([stateVector, possibleActionsVector])[0]
-
-
-            # nonzeros = numpy.nonzero(a)
-            # nonzeros = numpy.array(numpy.where(numpy.array(a) >= 0.1))[0].tolist()
-            # nonzerosA = numpy.copy(a[nonzeros,])
-            # while len(nonzerosA) <3:
-            #     nonzerosA = numpy.append(nonzerosA, 0)
-
-            # def softmax(x):
-            #     """Compute softmax values for each sets of scores in x."""
-            #     e_x = numpy.exp(x - numpy.max(x))
-            #     return e_x / e_x.sum(axis=0)  # only difference
-            # # aSort = numpy.sort(a)
-            # # aSortShort = aSort
-            # softMaxA = numpy.array(softmax(a))
-            # argSoftMax = numpy.argmax(softMaxA)
-            # print ("AIndex: "  + str(aIndex) + "("+str(a[aIndex]) + " - SoftmaxA: " + str(softMaxA[argSoftMax])+")")
 
 
             # if not self.intrinsic == None:
@@ -275,13 +323,23 @@ class AgentDQL(IAgent.IAgent):
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
 
+        rewardShape = numpy.concatenate([state,a])
+        rewardShape = numpy.expand_dims(numpy.array(rewardShape), 0)
+        reward = self.rewardNetwork.predict([rewardShape])[0][0]
+        self.currentReward.append(reward)
+        self.selfReward.append(reward)
+
         self.totalActionPerGame = self.totalActionPerGame + 1
         return a
 
     def loadModel(self, model):
-        self.actor  = load_model(model)
-        self.targetNetwork = load_model(model)
+
+        onlineModel,rewardModel = model
+        self.rewardNetwork = load_model(rewardModel)
+        self.actor  = load_model(onlineModel)
+        self.targetNetwork = load_model(onlineModel)
         self.loadQValueReader()
+        self.compileModels()
 
 
     def updateTargetNetwork(self):
@@ -303,7 +361,70 @@ class AgentDQL(IAgent.IAgent):
         # Sample experience from memory buffer (optionally with PER)
         s, a, r, d, new_s, possibleActions, newPossibleActions, idx = self.memory.sample_batch(self.batchSize)
 
+
+        batchIndex = numpy.array(range(len(self.demonstrations[0])))
+        random.shuffle(batchIndex)
+        batchIndex = batchIndex[0:self.batchSize]
+
+        d_s = self.demonstrations[0][batchIndex]
+        d_a = self.demonstrations[1][batchIndex]
+        d_r = self.demonstrations[2][batchIndex]
+        d_d = self.demonstrations[3][batchIndex]
+        d_new_s = self.demonstrations[4][batchIndex]
+        d_possibleActions = self.demonstrations[5][batchIndex]
+        d_newPossibleActions = self.demonstrations[6][batchIndex]
+        # d_idx = self.demonstrations[7][batchIndex]
+
+        # d_s, d_a, d_r, d_d, d_new_s, d_possibleActions, d_newPossibleActions, d_idx = self.demonstrations[0:7,batchIndex]
+        #
+        # lossOnline = self.updateOnline([s, new_s, a, d_s,d_new_s,d_a])
+        # lossReward = self.updateReward([s, new_s, a, d_s,d_new_s,d_a])
+        #
+        # self.losses.append([numpy.mean(lossOnline), numpy.mean(lossReward)])
+        #
+        # if (game + 1) % 1000 == 0:
+        #     self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
+        #     self.lastModel = savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5"
+        #
+        #
+        # print (" -- E:" + str(self.epsilon) + " - Lp:" + str(numpy.mean(lossOnline)) + " - Lr" + str(numpy.mean(lossReward)))
+
+
+        """
+        Policy network generate trajectories
+        """
+
+        self.actor.trainable = False
+
+        #Train on real data
+        lossReward1 = self.combined.train_on_batch([s,possibleActions], numpy.ones(self.batchSize))
+
+        #Train on demonstrator data
+        d_action = numpy.zeros((self.batchSize,200))
+        for x in range(self.batchSize):
+            d_action[x][d_a[x]] = 1
+
+        featureInput = numpy.concatenate([d_s,d_action], axis=1)
+
+        lossReward2 = self.combinedDemonstrator.train_on_batch([featureInput], numpy.zeros(self.batchSize))
+
+        lossReward = 0.5*(lossReward1+lossReward2)
+
+        #
+        #
+        # """
+        # Obtain policy network outputs of current batch
+        # """
+        #
         # Apply Bellman Equation on batch samples to train our DDQN
+
+        action = numpy.zeros((self.batchSize,200))
+        for x in range(self.batchSize):
+            action[x][a[x]] = 1
+
+        featureInput = numpy.concatenate([s,action], axis=1)
+
+        new_r = self.rewardNetwork.predict([featureInput])
         q = self.actor.predict([s, possibleActions])
         next_q = self.actor.predict([new_s, newPossibleActions])
         q_targ = self.targetNetwork.predict([new_s, newPossibleActions])
@@ -311,29 +432,31 @@ class AgentDQL(IAgent.IAgent):
         # self.successNetwork.compile(loss=self.loss, optimizer=Adam(lr=self.learning_rate), metrics=["mse"])
 
         for i in range(s.shape[0]):
-            old_q = q[i, a[i]]
             if d[i]:
-                q[i, a[i]] = r[i]
+                q[i, a[i]] = new_r[i]
             else:
                 next_best_action = numpy.argmax(next_q[i, :])
-                q[i, a[i]] = r[i] + self.gamma * q_targ[i, next_best_action]
+                q[i, a[i]] = new_r[i] + self.gamma * q_targ[i, next_best_action]
 
 
-            if (self.prioritized_experience_replay):
-                # Update PER Sum Tree
-                self.memory.update(idx[i], abs(old_q - q[i, a[i]]))
-
-
-        # Train on batch
-        history = self.actor.fit([s,possibleActions] , q, verbose=False)
-        self.losses.append(history.history['loss'])
+        # # Train on policy batch with new reward
+        self.actor.trainable = True
+        lossPolicy = self.actor.train_on_batch([s, possibleActions], q)[0]
+        # lossReward2 = self.rewardNetwork.train_on_batch([d_s], numpy.ones(self.batchSize))
+        #
+        # lossPolicy = 0.5*(lossPolicy1+lossPolicy2)
+        # lossReward = 0.5*(lossReward1+lossReward2)
+        self.losses.append([lossPolicy,lossReward])
 
         if (game + 1) % 1000 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
+            self.rewardNetwork.save(
+                savedNetwork + "/reward_iteration_" + str(game) + "_Player_" + str(thisPlayer) + ".hd5")
             self.lastModel = savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5"
 
 
-        print (" -- Epsilon:" + str(self.epsilon) + " - Loss:" + str(history.history['loss']))
+        print (" -- E:" + str(self.epsilon) + " - Lp:" + str(lossPolicy) + " - Lr" + str(lossReward))
+
 
 
     def memorize(self, state, action, reward, next_state, done, possibleActions, newPossibleActions):
@@ -355,11 +478,14 @@ class AgentDQL(IAgent.IAgent):
     def train(self, params=[]):
 
         state, action, reward, next_state, done, savedNetwork, game, possibleActions, newPossibleActions, thisPlayer, score = params
-        action = numpy.argmax(action)
-        self.memorize(state, action, reward, next_state, done, possibleActions, newPossibleActions)
-
 
         if done:
+
+            meanRewardTHisGame = numpy.average(self.currentReward)
+            self.meanReward.append(meanRewardTHisGame)
+            self.currentReward = []
+
+
             self.totalCorrectAction.append(self.currentCorrectAction)
             self.totalAction.append(self.totalActionPerGame)
 
@@ -383,12 +509,12 @@ class AgentDQL(IAgent.IAgent):
                 self.intrinsic.trainPModel(params)
 
             #memorize
-
+            action = numpy.argmax(action)
             # state = numpy.expand_dims(numpy.array(state), 0)
             # next_state = numpy.expand_dims(numpy.array(next_state), 0)
             # possibleActions = numpy.expand_dims(numpy.array(possibleActions), 0)
 
-
+            self.memorize(state, action, reward, next_state, done, possibleActions, newPossibleActions)
 
             #
             # self.memory.append((state, action, reward, next_state, done, possibleActions))

@@ -336,8 +336,8 @@ class AgentPPO(IAgent.IAgent):
             self.QValues.append(a)
             self.currentGameQValues.append(numpy.sum(a))
 
-            if not self.intrinsic == None:
-                self.intrinsic.doSelfAction(a, params)
+            # if not self.intrinsic == None:
+            #     self.intrinsic.doSelfAction(a, params)
 
             if possibleActionsOriginal[aIndex] == 1:
                 self.currentCorrectAction = self.currentCorrectAction + 1
@@ -491,10 +491,10 @@ class AgentPPO(IAgent.IAgent):
             self.MeanQValuesPerGame.append(meanQValueThisGame)
             self.currentGameQValues = []
 
-            if not self.intrinsic == None:
-                if len(score) >= 1:
-                    if thisPlayer in score:
-                        self.intrinsic.doEndOfGame(score, thisPlayer, params)
+            # if not self.intrinsic == None:
+            #     if len(score) >= 1:
+            #         if thisPlayer in score:
+            #             self.intrinsic.doEndOfGame(score, thisPlayer, params)
 
         if self.training:
             # print ("train")

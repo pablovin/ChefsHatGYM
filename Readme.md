@@ -129,18 +129,13 @@ Currently, the environment implements the following experiments and examples:
     - (Submitted) IROS_2020: Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020) The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents. arXiv preprint arXiv:2003.05861. (https://arxiv.org/abs/2003.05861)
     - (Submitted) ICPR2020: Barros, P., Tanevska, A., & Sciutti, A. (2020). Learning from Learners: Adapting Reinforcement Learning Agents to be Competitive in a Card Game. arXiv preprint arXiv:2004.04000.
  
- ##### Videos
+ ### Videos
  
  The simulator has a specific funcionality that reads a given dataset and generates an entire video of that gameplay.
  The video can be used to evaluate a specific behavior, or just to illustrate how the agents play the game.
  The following link directs to a video example:
  [![Watch the video](Examples/exampleSimulator.png)](https://www.youtube.com/embed/rxp3Xx4De7k)
  
-
-## Examples
-
-The Examples folder contains the datasets and generated videos of two conditions: Running all four agents as random agents, and running all four agents as learning agents.
-
 
  ## Use and distribution policy
 
@@ -157,6 +152,7 @@ All the examples in this repository are distributed under a Non-Comercial licens
 
 - Barros, P., Sciutti, A., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2020) The Chef's Hat Simulation Environment for Reinforcement-Learning-Based Agents. arXiv preprint arXiv:2003.05861.
 
+- Barros, P., Tanevska, A., & Sciutti, A. (2020). Learning from Learners: Adapting Reinforcement Learning Agents to be Competitive in a Card Game. arXiv preprint arXiv:2004.04000.
 ## Contact
 
 Pablo Barros - pablo.alvesdebarros@iit.it

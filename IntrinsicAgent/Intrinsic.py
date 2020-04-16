@@ -67,12 +67,18 @@ class Intrinsic():
 
     def phenomenologicalConfidence(self, qValue, actionIndex=0):
 
-        # actionNumber = self.actionNumber[actionIndex]
-        # rewardModulator = -actionNumber*0.01
+        actionNumber = self.actionNumber[actionIndex]
+        # qValue = numpy.absolute(qValue)
+        rewardModulator = actionNumber*0.01
+        maxreward = 1 - 1*rewardModulator
+        maxreward = 1
         theta = 0.0
-        maxreward = 0.1
+        # maxreward = 0.1
         probability = (1 - theta) * (1 / 2 * numpy.log10(qValue / maxreward) + 1)
 
+        probability =  numpy.tanh(probability)
+
+        # print ("Q-value:" + str(qValue) + " - Reward:" + str(maxreward)  + " - Probability:" + str(probability))
         if probability <= 0:
             probability = 0
         if probability >= 1:
@@ -114,81 +120,78 @@ class Intrinsic():
         return possibleConfidences
 
 
-
     def observeOponentAction(self, params, QModel):
-        action, actionType, board, boardAfter,possibleActions, cardsInHand, thisPlayer, myIndex, done, score = params
 
+        if self.isUsingOponentMood:
+            action, actionType, board, boardAfter,possibleActions, cardsInHand, thisPlayer, myIndex, done, score = params
 
-        #organize mood networks based on the person sitting on my right
-        if thisPlayer > myIndex:
-            moodIndex = thisPlayer-1
-        else:
-            moodIndex = thisPlayer
-
-        # if myIndex == 2:
-        #     print ("Me: " + str(myIndex))
-        #     print ("Observed player: " + str(thisPlayer))
-        #     print ("Mood index:" + str(moodIndex))
-        moodIndex = moodIndex+1 #my oponents
-
-
-
-
-        action = numpy.argmax(action)
-
-        possibleActions = copy.copy(possibleActions)
-
-        board = board
-        boardAfter = boardAfter
-
-        partialHand = numpy.nonzero(boardAfter)
-        partialHand = numpy.copy(boardAfter[partialHand,])[0]
-        cardsDiscarded = 17- cardsInHand
-
-        partialHand = numpy.append(partialHand, numpy.zeros(cardsDiscarded))
-
-        partialConfidences = self.obtainPartialConfidences(action, partialHand, board, possibleActions,QModel, moodIndex)
-
-        self.actionNumber[moodIndex] = self.actionNumber[moodIndex] + 1
-
-        self.probabilities[moodIndex].append(numpy.average(partialConfidences))
-
-        newPartialConfidences = []
-        for confidence in partialConfidences:
-            newPartialConfidences.append(confidence*0.1)
-
-        partialConfidences = newPartialConfidences
-
-
-        for confidence in partialConfidences:
-            self.adaptMood(confidence,moodIndex=moodIndex)
-
-        self.readMood(moodIndex=moodIndex)
-
-        if done:
-            playerPosition = score.index(thisPlayer)
-
-            if playerPosition == 0:
-                confidence = 1
+            #organize mood networks so the first network is always refereing to P1
+            if thisPlayer > myIndex:
+                moodIndex = thisPlayer-1
             else:
-                confidence = 0
+                moodIndex = thisPlayer
 
-            self.actionNumber[moodIndex] = 0
+            moodIndex = moodIndex+1 #my oponents
 
-            partialConfidences = [confidence, confidence, confidence, confidence, confidence, confidence, confidence,
-                                  confidence, confidence, confidence]
+            action = numpy.argmax(action)
+
+            possibleActions = copy.copy(possibleActions)
+
+            board = board
+            boardAfter = boardAfter
+
+            partialHand = numpy.array(numpy.nonzero(boardAfter)).flatten()
+
+            partialHand = numpy.copy(boardAfter[partialHand,])[0]
+            cardsDiscarded = 17- cardsInHand
+
+            partialHand = numpy.append(partialHand, numpy.zeros(cardsDiscarded))
+
+            partialConfidences = self.obtainPartialConfidences(action, partialHand, board, possibleActions,QModel, moodIndex)
+
+
+            self.actionNumber[moodIndex] = self.actionNumber[moodIndex] + 1
+
+            self.probabilities[moodIndex].append(numpy.average(partialConfidences))
+
+            avgConfidence = numpy.average(partialConfidences)
+
+            newPartialConfidences = []
+            for confidence in partialConfidences:
+                newPartialConfidences.append(confidence*0.1)
+
+            partialConfidences = newPartialConfidences
 
             for confidence in partialConfidences:
                 self.adaptMood(confidence,moodIndex=moodIndex)
 
-            self.readMood(moodIndex=moodIndex)
+            moodReading, neurons = self.readMood(moodIndex=moodIndex)
 
+            if done:
+                playerPosition = score.index(thisPlayer)
+
+                if playerPosition == 0:
+                    confidence = 1
+                else:
+                    confidence = 0
+
+                self.actionNumber[moodIndex] = 0
+
+                partialConfidences = [confidence, confidence, confidence, confidence, confidence, confidence, confidence,
+                                      confidence, confidence, confidence]
+
+                for confidence in partialConfidences:
+                    self.adaptMood(confidence,moodIndex=moodIndex)
+
+                moodReading, neurons = self.readMood(moodIndex=moodIndex)
+
+            return avgConfidence, moodReading, neurons
+        else:
+            return -1, -1, -1
 
     def doSelfAction(self, qValue, params):
 
-
         nonZeroActions = numpy.nonzero(qValue)[0]
-
 
         if self.selfConfidenceType == CONFIDENCE_PHENOMENOLOGICAL:
             probabilities = []
@@ -209,7 +212,10 @@ class Intrinsic():
         if self.isUsingSelfMood:
             confidence = probability*0.1
             self.adaptMood(confidence, moodIndex=0)
-            self.readMood(moodIndex=0)
+            moodReading, neurons = self.readMood(moodIndex=0)
+
+
+            return probability, moodReading, neurons
 
 
     def adaptMood(self, confidence, moodIndex, saveDirectory=""):
@@ -227,7 +233,7 @@ class Intrinsic():
         self.moods[moodIndex].trainAGWR(numpy.array(probs), numberOfEpochs, insertionThreshold, learningRateBMU, learningRateNeighbors)
 
 
-    def doEndOfGame(self, score, thisPlayer, params):
+    def doEndOfGame(self, score, thisPlayer):
 
         playerPosition = score.index(thisPlayer)
 
@@ -243,7 +249,10 @@ class Intrinsic():
         if self.isUsingSelfMood:
             for a in range(10):
                 self.adaptMood(confidence, moodIndex=0)
-            self.readMood(moodIndex=0)
+            moodReading, neurons = self.readMood(moodIndex=0)
+
+            return self.probabilities[0][-1], moodReading,neurons
+
 
     def readMood(self, moodIndex):
 
@@ -258,10 +267,12 @@ class Intrinsic():
         # if probmood > 1:
         #     probmood = 1
 
-        self.moodNeurons[moodIndex].append((neuronWeights, neuronAge))
+
+        self.moodNeurons[moodIndex].append((neuronWeights.tolist(), neuronAge.tolist()))
         self.moodReadings[moodIndex].append(probmood)
 
-        return probmood
+        return probmood, (neuronWeights.tolist(), neuronAge.tolist())
+
 
 
     #PModel functions

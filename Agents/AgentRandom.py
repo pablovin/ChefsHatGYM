@@ -77,8 +77,6 @@ class AgentRandom(IAgent.IAgent):
 
         return a
 
-
-
     def loadModel(self, params):
         pass
 

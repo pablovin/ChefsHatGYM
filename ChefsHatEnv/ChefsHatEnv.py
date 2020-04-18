@@ -249,8 +249,6 @@ class ChefsHatEnv(gym.Env):
         if not foodFight or not specialAction:
             self.changeRoles(foodFight)
 
-
-
     # Establishes who starts the game randomly
     playerTurn = numpy.array(range(self.numberPlayers))
     random.shuffle(playerTurn)

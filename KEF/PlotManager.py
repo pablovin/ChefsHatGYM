@@ -364,10 +364,8 @@ def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory)
 
                         plotName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
                             i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
-                            names[index]) + ")" + ")_iteration_" + str(
+                            names[index]) + ")" +"("+ str(index)+ ")_iteration_" + str(
                             iteraction) + ".png"
-
-
 
 
                     if not os.path.exists(directory):
@@ -376,23 +374,28 @@ def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory)
 
                     thisPlayerNeurons = moodNeuronReadings
 
-                    neuronsX = []
+                    neuronsPleasureX = []
+                    neuronsArousalX = []
                     neuronsY = []
                     neuronsAge = []
 
                     for indexA, action in enumerate(thisPlayerNeurons):
-                        neuronsAction = []
+
                         for n in action[0]:
-                            neuronsX.append(n[0])
+                            neuronsArousalX.append(n[0])
+                            neuronsPleasureX.append(n[1])
                             neuronsY.append(indexA)
-                            neuronsAction.append(n[0])
+
 
                         for n in action[1]:
                             neuronsAge.append(n)
 
-                    neuronsX = numpy.tanh(numpy.array(neuronsX).flatten())
-                    averageNeuron = moodReading[i][index]
-                    dataYAverageNeuron = range(len(averageNeuron))
+                    # neuronsPleasureX = numpy.tanh(numpy.array(neuronsPleasureX).flatten())
+                    # neuronsArousalX = numpy.tanh(numpy.array(neuronsArousalX).flatten())
+
+                    averageNeuronA = numpy.array(moodReading[i][index])[:, 0]
+                    averageNeuronP = numpy.array(moodReading[i][index])[:, 1]
+                    dataYAverageNeuron = range(len(averageNeuronA))
 
 
                     fig = plt.figure()
@@ -410,12 +413,17 @@ def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory)
                     plt.ylim(-0.1, 1.1)
                     # plt.xlim(0, range(len(dataY)))
                     plt.grid()
-
-                    for nindex,neuron in enumerate(neuronsX):
+                    #
+                    for nindex,neuron in enumerate(neuronsPleasureX):
                         alpha = neuronsAge[nindex]
-                        ax.scatter(neuronsY[nindex], neuron, alpha = alpha, c="red")
+                        ax.scatter(neuronsY[nindex], neuronsArousalX[nindex], alpha = alpha, c="red")
 
-                    ax.plot(dataYAverageNeuron,averageNeuron,label="Avg Mood")
+                        alpha = neuronsAge[nindex]
+                        ax.scatter(neuronsY[nindex], neuronsPleasureX[nindex], alpha = alpha, c="red")
+
+                    ax.plot(dataYAverageNeuron,averageNeuronA,label="Avg Arousal", c="blue")
+                    ax.plot(dataYAverageNeuron, averageNeuronP, label="Avg Pleasure", c="green")
+                    # ax.plot(dataYAverageNeuron, neuronsAge, label="Avg Dominance", c="red")
 
                     # with open(csvName, mode='w') as employee_file:
                     #     employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -461,16 +469,16 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
                     else:
                         directory = plotsDirectory + "/Mood_Players/Oponents/"
 
-                        plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                        directory + "/Mood_Players" + str(names[i]) + "(" + str(
                             i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
-                            names[index]) + ")" + ")_iteration_" + str(
+                            names[index]) + ")" + "(" + str(index) + ")_iteration_" + str(
                             iteraction) + ".png"
 
 
                     if not os.path.exists(directory):
                         os.mkdir(directory)
 
-                    reward = moodReadings
+                    reward = numpy.array(moodReadings)
                     dataY = range(len(reward))
                     # input("here")
 
@@ -486,7 +494,9 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
                     plt.ylim(-0.1, 1.1)
                     # plt.xlim(0, range(len(dataY)))
                     plt.grid()
-                    ax.plot(dataY, reward)
+                    ax.plot(dataY, reward[:,0], label="Arousal", c="blue")
+                    ax.plot(dataY, reward[:, 1], label="Pleasure", c="green")
+                    plt.legend()
 
                     plt.savefig(plotName)
 
@@ -758,7 +768,7 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
             fig, axs = plt.subplots(1, 1)
             axs.plot(dataY, selectedQValues)
 
-            # plt.ylim(0, 1)
+            plt.ylim(0, 1)
 
             plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_BestQValue.png")
 
@@ -768,7 +778,7 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
             fig, axs = plt.subplots(1, 1)
             axs.plot(dataY, summedQValues)
 
-            # plt.ylim(0, 1)
+            plt.ylim(0, 1)
 
             plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_SummedQValue.png")
 
@@ -778,7 +788,7 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
             fig, axs = plt.subplots(1, 1)
             axs.plot(dataY, averagedQValues)
 
-            # plt.ylim(0, 1)
+            plt.ylim(0, 1)
 
             plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_AvgQValue.png")
 
@@ -1249,13 +1259,13 @@ def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNum
                     if P4Prob > -1:
                      probabilitiesAll[3][player].append(P4Prob)
 
-                    if P1Mood > -1:
+                    if P1Mood[0] > -1:
                         moodReadingsAll[0][player].append(P1Mood)
-                    if P2Mood > -1:
+                    if P2Mood[0] > -1:
                         moodReadingsAll[1][player].append(P2Mood)
-                    if P3Mood > -1:
+                    if P3Mood[0] > -1:
                       moodReadingsAll[2][player].append(P3Mood)
-                    if P4Mood > -1:
+                    if P4Mood[0] > -1:
                      moodReadingsAll[3][player].append(P4Mood)
 
                     if isinstance(P1Neurons, tuple):

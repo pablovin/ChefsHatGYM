@@ -318,6 +318,7 @@ class AgentPPO(IAgent.IAgent):
             #     possibleActions2[199] = 0
 
             possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
+
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
 

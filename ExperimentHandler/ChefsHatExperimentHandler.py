@@ -74,7 +74,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
     #Check stopping condition is points or numGames
     if numGames == -1:
-        numGames = 1000
+        numGames = 500000
 
     #start the experiment
     for game in range(numGames):
@@ -176,8 +176,6 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
                         players[thisPlayer].train((state, action, reward, newState, done,
                                                  modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
 
-
-
                     if isLogging:
                         logger.write(" ---  Reward: " + str(reward))
                         logger.write(" ---  Correct actions: " + str(totalActions-wrongActions) + "/" + str(totalActions))
@@ -185,10 +183,10 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
 
                     if createDataset:
-                        if len(players[thisPlayer].QValues) >= 1:
-                            qvalues = players[thisPlayer].QValues[-1]
-                        else:
-                            qvalues = []
+                        # if len(players[thisPlayer].QValues) >= 1:
+                        #     qvalues = players[thisPlayer].QValues[-1]
+                        # else:
+                        #     qvalues = []
                         if len(players[thisPlayer].losses) >= 1:
                             loss = players[thisPlayer].losses[-1]
                         else:
@@ -205,7 +203,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
                                                                         wrongActions, reward,
                                                                         env.playersHand, roles,
                                                                         env.score, playersStatus,
-                                                                        qvalues, loss, totalActions,validAction)
+                                                                        action, loss, totalActions,validAction)
 
                 env.nextPlayer()
                 if isLogging:
@@ -268,7 +266,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
         unique, counts = numpy.unique(env.winners, return_counts=True)
         winners = dict(zip(unique, counts))
-        # print( "Game " + str(game) + " - Victories:" +str(winners) )
+        print( "Game " + str(game) + " - Victories:" +str(winners) )
 
         metrics.append(metricsPerGame)
 

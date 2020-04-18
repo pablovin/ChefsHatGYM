@@ -257,7 +257,8 @@ class AgentA2C(IAgent.IAgent):
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
         possibleActions2 = copy.copy(possibleActionsOriginal)
-        possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
+
+
 
         if numpy.random.rand() <= self.epsilon:
 
@@ -270,6 +271,10 @@ class AgentA2C(IAgent.IAgent):
             self.currentGameQValues.append(0)
 
         else:
+            # if numpy.sum(possibleActions2) > 1:
+            #     possibleActions2[199] = 0
+
+            possibleActionsVector = numpy.expand_dims(numpy.array(possibleActions2), 0)
             a = self.actor.predict([stateVector, possibleActionsVector])[0]
             aIndex = numpy.argmax(a)
 

@@ -160,7 +160,7 @@ class ChefsHatEnv(gym.Env):
       for a in range(i):
         self.cards.append(self.maxCardNumber - a)
 
-    #add joker dards
+    #add joker cards
     self.cards.append(self.maxCardNumber+1) # add a joker card
     self.cards.append(self.maxCardNumber + 1) # add a joker card
 
@@ -347,34 +347,11 @@ class ChefsHatEnv(gym.Env):
 
       cardDescription = ""
       for cardNumber in range (self.maxCardNumber):
-          possibleAction = 0
-          # print ("Card Number:", cardNumber+1)
-          # # print("cardNumber:", cardNumber + 1)
-          # #
-          # print("- Player:", player)
-          # print("- Hand:", currentPlayerHand)
-          # print("- Current board:", currentBoard)
-          # print("- Highest card on board:", highestCardOnBoard)
-          # print("-Card lower than the ones in the board:", cardNumber + 1 < highestCardOnBoard)
-          # print("-Card present in the player hand:", cardNumber + 1 in self.playersHand[player])
-
-          # if this card is present in the hand and it is lower than the cards in the board
           for cardQuantity in range(cardNumber+1):
-
 
               # if cardQuantity == 0:
               #       print (len(possibleActions))
               if (cardNumber + 1 < highestCardOnBoard ) and cardNumber + 1 in self.playersHand[player]:
-
-              #verify if the quantity of the card in the hand is allowed to be put down
-
-                  # if the amount of cards in board and in the hand are the same or more than cardNumber quantity
-                  # print("-- Card quantity:", cardQuantity+1)
-                  # print("-- Amount of cards in hand:", currentPlayerHand[cardNumber + 1])
-                  # print("-- Amount of cards in board:", currentBoard[highestCardOnBoard])
-                  # print("-- Can I discard this qunatity:", currentPlayerHand[cardNumber + 1] >= cardQuantity+1)
-                  # print("-- Is it the same or more than in the board:", currentBoard[
-                  #     highestCardOnBoard] <= cardQuantity + 1)
 
                   if currentPlayerHand[cardNumber + 1] >= cardQuantity + 1 and (currentBoard[
                       highestCardOnBoard] + jokerQuantityBoard) <= cardQuantity + 1: # taking into consideration the amount of jokers in the board
@@ -387,25 +364,22 @@ class ChefsHatEnv(gym.Env):
                              possibleActions.append(1)
                          else:
                              possibleActions.append(0)
-                             # highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J0")
+
                       else:
-                          # print("----- Added here!")
+
                           possibleActions.append(1)
-                          # highLevelActions.append("C" + str(cardNumber+1) + ";Q" + str(cardQuantity+1) + ";J0")
+
                   else:
 
                           possibleActions.append(0)
-                          # highLevelActions.append("C" + str(cardNumber+1) + ";Q" + str(cardQuantity+1) + ";J0")
-
               else:
                   possibleActions.append(0)
-                  # highLevelActions.append("C" + str(cardNumber+1) + ";Q" + str(cardQuantity+1) + ";J0")
+
 
               highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J0")
               highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J1")
               highLevelActions.append("C" + str(cardNumber + 1) + ";Q" + str(cardQuantity + 1) + ";J2")
               # if cardNumber
-
 
 
               # add the joker possibilities
@@ -432,7 +406,6 @@ class ChefsHatEnv(gym.Env):
                          possibleActions.append(0) # I cannot discard one joker
 
 
-
                      if jokerQuantity == 2:
                         #for two joker
                         if currentPlayerHand[cardNumber + 1] >= cardQuantity -1 and (currentBoard[
@@ -455,16 +428,11 @@ class ChefsHatEnv(gym.Env):
                      else:
                         possibleActions.append(0) # I cannot discard two jokers
 
-                  # elif highestCardOnBoard == self.maxCardNumber: # if I do not have the card in the hand
-                  #       possibleActions.append(1)
-                  #       possibleActions.append(0)
 
                   else:  # there is no joker in the hand
                       possibleActions.append(0) # I cannot discard one joker
 
                       possibleActions.append(0) # I cannot discard two joker
-
-
 
 
               else:
@@ -473,12 +441,6 @@ class ChefsHatEnv(gym.Env):
                   possibleActions.append(0)  # I cannot discard two joker
 
 
-
-      # print ("Possible actions:", possibleActions)
-      # input("here")
-
-      #Joker actions
-      # verify how many jokers the player has at hand
       highLevelActions.append("C0;Q0;J1")
       if self.maxCardNumber+1 in self.playersHand[player]: # there is a joker in the hand
           if firstAction:

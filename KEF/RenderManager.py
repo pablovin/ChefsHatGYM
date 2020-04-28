@@ -147,14 +147,13 @@ class RenderManager():
         xPosition = basePosition[1]
 
         # player1 cards
-
         for i in range(len(playerHands[0])):
             if playerHands[0][i] == 0:
                 card = self.blackCard
             else:
                 card = self.cards[playerHands[0][i]]
 
-            if i % 9 == 0:
+            if i % 10 == 0:
                 yPosition = yPosition + card.shape[0] + 10
                 xPosition = basePosition[1]
             else:

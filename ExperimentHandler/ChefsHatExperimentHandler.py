@@ -64,8 +64,6 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
         if createDataset:
             experimentManager.dataSetManager.startNewExperiment()
 
-
-
     #Collect game points
     gamePoints = []
 

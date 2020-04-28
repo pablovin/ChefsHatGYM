@@ -77,9 +77,9 @@ class DataSetManager:
         self._actions = []
 
 
-    def addDataFrame(self, gameNumber ="", roundNumber ="", player="", actionType="", playersHand="", board="",
+    def addDataFrame(self, gameNumber ="", roundNumber ="", player="", actionType="", playersHand=[], board=[],
                      cardsAction="", reward="", qvalues="", loss="", wrongActions="", totalActions="",
-                     score="", roles="", playersStatus=[], agentNames="", possibleActions=[]):
+                     score=[], roles="", playersStatus=[], agentNames="", possibleActions=[]):
 
         #Guarantee is a copy
 
@@ -98,7 +98,6 @@ class DataSetManager:
 
         self.dataFrame.loc[-1] = dataframe
         self.dataFrame.index = self.dataFrame.index + 1
-
 
 
     def startNewExperiment(self):

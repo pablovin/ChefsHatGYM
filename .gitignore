@@ -1,4 +1,4 @@
-/IRLAgents/
+/Adaptive_Agents/
 /NEURIPS2020_AIRL_SaveDemonstrations.py
 /NEURIPS2020_AIRLTesting.py
 /NEURIPS2020_AIRLTraining.py
@@ -8,3 +8,4 @@
 /Experiments_SelfPlay/
 /MoodyFramework/
 /DjangoServer/
+/Adaptive_Agents/

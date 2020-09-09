@@ -216,6 +216,8 @@ class AgentDQL(IAgent.IAgent):
         return a
 
     def loadModel(self, model):
+
+        print ("loading:" + str(model))
         self.actor  = load_model(model)
         self.targetNetwork = load_model(model)
         self.loadQValueReader()
@@ -263,7 +265,7 @@ class AgentDQL(IAgent.IAgent):
         history = self.actor.fit([s,possibleActions] , q, verbose=False)
         self.losses.append(history.history['loss'])
 
-        if (game + 1) % 1000 == 0:
+        if (game + 1) % 5 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.lastModel = savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5"
 

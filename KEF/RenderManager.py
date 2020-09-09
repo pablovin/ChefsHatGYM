@@ -507,6 +507,7 @@ class RenderManager():
 
         shutil.rmtree(self.currentGameDirectory)
 
+
     def getMoodPlots(self, intrinsicDataset, gameNumber, currentLine, originalImage):
 
         if os.path.exists(self.renderMoodDirectory):
@@ -619,8 +620,7 @@ class RenderManager():
                 player = row["Player"]
                 playerStatus = row["Players Status"]
 
-                if score == "":
-                    score = []
+
                 if not player == "":
                     player = int(player)
 
@@ -651,7 +651,6 @@ class RenderManager():
                     originalImage = self.getMoodPlots(intrinsicData, gameNumber, moodCounter, originalImage)
                     moodCounter = moodCounter + 1
 
-
                 if not roles == "":
                     originalImage = self.drawRoleCards(originalImage, roles)
 
@@ -660,7 +659,7 @@ class RenderManager():
 
                     header = "Round: " + str(rounds) + " - Turn: Player " + str(agentsNames[player])
                     originalImage = self.writeHeader(originalImage, header)
-                    if not previousBoard == "":
+                    if not previousBoard == []:
                         originalImage = self.drawBoard(originalImage, previousBoard)
 
                     if len(previousPlayerStatus) > 0:
@@ -674,7 +673,7 @@ class RenderManager():
                     player1LastAction, player2LastAction, player3LastAction, player4LastAction)
                 originalImage = self.drawPlayers(playerHand, originalImage, agentsNames)
 
-                if not board == "":
+                if not board == []:
                     originalImage = self.drawBoard(originalImage, board)
 
                 if len(playerStatus) > 0:

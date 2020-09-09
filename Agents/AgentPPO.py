@@ -459,7 +459,7 @@ class AgentPPO(IAgent.IAgent):
             self.epsilon *= self.epsilon_decay
 
         #save model
-        if (game + 1) % 1000 == 0:
+        if (game + 1) % 100 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.critic.save(savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5", savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")

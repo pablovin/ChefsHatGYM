@@ -140,8 +140,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
                 wrongActions = 0
                 totalActions = 0
-
-
+                reward = 0
                 if not env.hasPlayerFinished(thisPlayer):
                     validActionPlayer = False
 
@@ -153,7 +152,7 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
                         #get an action
                         validAction = env.getPossibleActions(thisPlayer)
-                        action = players[thisPlayer].getAction((state, validAction))
+                        action = players[thisPlayer].getAction((state, validAction, reward))
 
                         newState, reward, validActionPlayer = env.step(action)
                         newPossibleActions =  env.getPossibleActions(thisPlayer)
@@ -170,9 +169,8 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
 
                         totalActions = totalActions+1
 
-
-                        players[thisPlayer].train((state, action, reward, newState, done,
-                                                 modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
+                        # players[thisPlayer].train((state, action, reward, newState, done,
+                        #                          modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
 
                     if isLogging:
                         logger.write(" ---  Reward: " + str(reward))
@@ -225,7 +223,9 @@ def runExperiment(numGames=-1, maximumScore=-1, playersAgents=[], experimentDesc
                                                                     env.score, playersStatus, game)
             gameFinished = env.hasGameFinished()
 
-
+        for a in range(4):
+            players[a].train((state, action, reward, newState, done,
+                                       modelDirectory, game, validAction, newPossibleActions, thisPlayer, env.score))
         if isLogging:
             logger.write("Game finished:" + str(gameFinished))
 

@@ -15,6 +15,7 @@ import keras.backend as K
 
 from keras.models import load_model
 
+
 import tensorflow.compat.v1 as tfc
 
 import random
@@ -258,8 +259,6 @@ class AgentA2C(IAgent.IAgent):
 
         possibleActions2 = copy.copy(possibleActionsOriginal)
 
-
-
         if numpy.random.rand() <= self.epsilon:
 
             itemindex = numpy.array(numpy.where(numpy.array(possibleActions2) == 1))[0].tolist()
@@ -404,7 +403,7 @@ class AgentA2C(IAgent.IAgent):
             self.epsilon *= self.epsilon_decay
 
         #save model
-        if (game + 1) % 1000 == 0:
+        if (game + 1) % 100 == 0:
             self.actor.save(savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.critic.save(savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")
             self.lastModel = (savedNetwork + "/actor_iteration_" + str(game) + "_Player_"+str(thisPlayer)+".hd5", savedNetwork + "/critic_iteration_"  + str(game) + "_Player_"+str(thisPlayer)+".hd5")

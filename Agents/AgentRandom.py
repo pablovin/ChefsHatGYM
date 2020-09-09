@@ -15,9 +15,10 @@ class AgentRandom(IAgent.IAgent):
     lastModel = ""
 
 
-    def __init__(self, name):
+    def __init__(self, type, name="RANDOM"):
 
-        self.name = name
+        self.type = type
+        self.name = "RANDOM"+name
 
         self.totalCorrectAction.append(0)
 
@@ -31,8 +32,6 @@ class AgentRandom(IAgent.IAgent):
         self.numMaxCards = numMaxCards
         self.outputSize = numActions # all the possible ways to play cards plus the pass action
 
-
-
         self.losses = []
 
         self.QValues = []
@@ -45,13 +44,13 @@ class AgentRandom(IAgent.IAgent):
 
     def getAction(self, params):
 
-        state, possibleActions2 = params
+        state, possibleActions2, reward = params
         possibleActions = copy.copy(possibleActions2)
 
-        if self.name == DUMMY_RANDOM:
+        if self.type == DUMMY_RANDOM:
             possibleActions = possibleActions
 
-        if self.name == DUMMY_DISCARDONECARD:
+        if self.type == DUMMY_DISCARDONECARD:
             # print ("here")
             originalPossibleAction = copy.copy(possibleActions2)
             positionsWithOneCard = [0, 3, 9, 18, 30, 45, 63, 84, 108, 135, 165]

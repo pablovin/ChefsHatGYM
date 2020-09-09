@@ -11,9 +11,10 @@ import os
 import csv
 
 from KEF import DataSetManager
-from KEF.DataSetManager import actionFinish, actionPass, actionDiscard
+from KEF.DataSetManager import actionFinish, actionPass, actionDiscard, actionDeal, actionPizzaReady
 
 from matplotlib.collections import PolyCollection
+import matplotlib.patches as mpatches
 
 
 plots = {
@@ -24,9 +25,13 @@ plots = {
     "Experiment_TotalActions":"expTotalActionsActions",
     "Experiment_FinishingPosition":"expFinish",
     "Experiment_ActionsBehavior":"expActionBeh",
+
     "Experiment_Mood":"expMood",
     "Experiment_MoodNeurons": "expNeuronsMood",
     "Experiment_SelfProbabilitySuccess":"expSelfProb",
+    "Experiment_MoodFaces": "expFacesMood",
+    "Experiment_TimeLimeMood": "timelineMood",
+
     "Experiment_Reward": "expReward",
     "Experiment_SelfReward": "expSelfReward",
     "Experiment_CorrectActions":"expCorrect",
@@ -93,10 +98,10 @@ def plotRounds(allRounds, iteraction, plotDirectory):
     # ax.text(1, 1, "TotalWin:"+str(totalWins), style='italic',
     #          bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
 
-    plt.yticks(numpy.arange(0, numpy.max(allRounds) + 1, 5))
+    plt.yticks(numpy.arange(0, numpy.max(allRounds) + 2, 5))
     # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
 
-    plt.ylim(0, numpy.max(allRounds))
+    plt.ylim(0, numpy.max(allRounds)+2)
     plt.xlim(0, len(dataY))
 
     plt.grid()
@@ -126,10 +131,10 @@ def plotPoints(names, pointsAll, iteraction, plotDirectory):
         ax.set_xlabel('Games')
         ax.set_ylabel('Points')
 
-        plt.yticks(numpy.arange(0, 16, 1))
+        plt.yticks(numpy.arange(0, 20, 1))
         # plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
 
-        plt.ylim(0, 16)
+        plt.ylim(0, 20)
         plt.xlim(0, len(dataY))
         plt.grid()
         ax.plot(dataY, points)
@@ -336,6 +341,176 @@ def plotActionBehavior(names, actions, iteraction, plotsDirectory):
 
         fig.clf()
 
+def plotTimeLineMood(names, moodNeurons, moodReading, iteraction, playersAction, totalActions, totalColors, arousalValenceInput, selfExpectation, plotsDirectory):
+
+
+
+    # ax[0].invert_yaxis()
+    # ax[0].xaxis.set_visible(False)
+    # ax[0].set_xlim(0, len(moodReading[0]))
+    #
+    # for indexPlayer, player in enumerate(names):
+    #     player1Actions = totalActions[indexPlayer]
+    #     player1Colors = totalColors[indexPlayer]
+    #     data = numpy.array(player1Actions)
+    #     data_cum = data.cumsum(axis=0)
+    #
+    #     for i, (colname, color) in enumerate(zip(player1Actions, player1Colors)):
+    #         widths = data[i]
+    #         starts = data_cum[i] - widths
+    #
+    #         ax[0].barh(list([player]), widths, left=starts, height=1,
+    #                    label=colname, color=color)
+    #
+    # fig.set_size_inches(21.0, 10.5)
+    # fig.tight_layout(pad=1.0)
+    #
+    # green = mpatches.Patch(color='green', label='Discard')
+    # blue = mpatches.Patch(color='blue', label='Pass')
+    # orange = mpatches.Patch(color='orange', label='Pizza')
+    # red = mpatches.Patch(color='red', label='Finish')
+    # ax[0].legend(handles=[green, blue, orange, red])
+    #
+
+    for i in range(len(names)):
+        moodReading = numpy.array(moodReading)
+        # print ("Name:"  + str(names[i]) + " - "+str(moodReading[0]))
+        if len(moodReading[i]) > 0:
+
+            directory = plotsDirectory + "/TimeLine_MoodNeurons_Players/"
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+            plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
+                i) + ")" + "_iteration_" + str(iteraction) + ".png"
+
+            thisPlayerNeurons = moodNeurons[i]
+            moodReading = numpy.array(moodReading)
+            neuronsPleasureX = []
+            neuronsArousalX = []
+            neuronsY = []
+            neuronsAge = []
+
+            for indexA, action in enumerate(thisPlayerNeurons):
+
+                for n in action[0]:
+                    neuronsArousalX.append(n[0])
+                    neuronsPleasureX.append(n[1])
+                    neuronsY.append(indexA)
+
+                for n in action[1]:
+                    neuronsAge.append(n)
+
+
+            averageNeuronA = numpy.array(moodReading[i])[:, 0]
+            averageNeuronP = numpy.array(moodReading[i])[:, 1]
+            dataYAverageNeuron = range(len(averageNeuronA))
+
+
+            cmap = plt.cm.rainbow
+            norm = matplotlib.colors.Normalize(vmin=0, vmax=1)
+            fig, ax = plt.subplots(3, 1)
+            ax[0].set_xlabel('Actions')
+            ax[0].set_ylabel('Self Expectation')
+            ax[0].set_yticks(numpy.arange(0, 1.1, 0.1))
+            ax[0].set_xlim(0, len(thisPlayerNeurons))
+            ax[0].set_ylim(-0.1, 1.1)
+            ax[0].grid()
+
+
+            ax[1].set_yticks(numpy.arange(0, 1.1, 0.1))
+            ax[1].set_xlim(0, len(thisPlayerNeurons))
+            ax[1].set_ylim(-0.1, 1.1)
+            ax[1].set_xticks([], [])
+            ax[1].set_ylabel('Arousal')
+            ax[1].grid()
+
+            # ax[1].set_xlabel('Actions')
+            ax[2].set_ylabel('Valence')
+            ax[2].set_yticks(numpy.arange(0, 1.1, 0.1))
+            ax[2].set_ylim(-0.1, 1.1)
+            ax[2].set_xlim(0, len(thisPlayerNeurons))
+            ax[2].grid()
+
+
+
+            # for nindex,neuron in enumerate(neuronsPleasureX):
+            #     alpha = neuronsAge[nindex]
+            #     ax[0].scatter(neuronsY[nindex], neuronsArousalX[nindex],  c="red")
+            #
+            #     alpha = neuronsAge[nindex]
+            #     ax[1].scatter(neuronsY[nindex], neuronsPleasureX[nindex],  c="red")
+
+            ax[1].plot(dataYAverageNeuron,averageNeuronA,label="Avg Value", c="red")
+            ax[2].plot(dataYAverageNeuron, averageNeuronP, label="Avg Value", c="red")
+
+            print("Size plot: " + str(len(averageNeuronA)))
+
+            for actionIndex in range(len(totalActions[i])):
+                if totalColors[i][actionIndex] == "red":
+                    ax[1].axvline(x=actionIndex, c="red", alpha=0.1, linestyle='dashed')
+                    ax[2].axvline(x=actionIndex, c="red", alpha=0.1, linestyle='dashed')
+
+                # if playersAction[i][actionIndex] == DataSetManager.actionPizzaReady:
+                #     ax[1].axvline(x=actionIndex, c="green", linestyle='dashed')
+                #     ax[0].axvline(x=actionIndex, c="green", linestyle='dashed')
+                #
+
+            avThisPlayer = numpy.array(arousalValenceInput[i])
+
+            # green = mpatches.Patch(color='green', label='Discard')
+            # blue = mpatches.Patch(color='blue', label='Pass')
+            # orange = mpatches.Patch(color='orange', label='Pizza')
+            # red = mpatches.Patch(color='red', label='Finish')
+            # ax[0].legend(handles=[green, blue, orange, red])
+
+            color = ["green", "blue", "red", "orange"]
+            labels = ["Ev1_Action", "Ev2_Pizza", "Ev3_Finish", "Ev4_LongTerm"]
+            markers = [".","^","X","."]
+            sizes = [200, 200, 200, 200]
+
+            for a in range(len(avThisPlayer)):
+                thisEvent = numpy.array(avThisPlayer[a])
+                # print("This event:" + str(thisEvent))
+                # print("Len This event:" + str(len(thisEvent)))
+                if len(thisEvent) > 0:
+                    thisEventY = []
+                    thisEventArousal = []
+                    thisEventValence = []
+                    for values in thisEvent:
+                        thisEventY.append([values[0]])
+                        av = values[1]
+                        thisEventArousal.append(av[0])
+                        thisEventValence.append(av[1])
+
+                    ax[1].scatter(thisEventY, thisEventArousal, c=color[a], label=labels[a], marker=markers[a], s=sizes[a])
+                    ax[2].scatter(thisEventY, thisEventValence, c=color[a], label=labels[a], marker=markers[a], s=sizes[a])
+
+                    # centerValue = numpy.full((len(thisEventY)), 0.5)
+                    # ax[0].scatter(thisEventY, centerValue, c=color[a], label=labels[a], marker=markers[a],
+                    #               s=sizes[a])
+            #     print("Y:" + str(len(thisEventY)))
+            #     print("Arousal:" + str(len(thisEventArousal)))
+            #     print("Valence:" + str(len(thisEventValence)))
+            #     print("-")
+            # input("here")
+
+            ax[0].plot(range(len(selfExpectation[i])), selfExpectation[i], label="Avg Value", c="red")
+
+
+            ax[2].legend( loc = 'upper center', bbox_to_anchor = (0.5, -0.05),
+            fancybox = True, shadow = True, ncol = 5)
+
+            fig.set_size_inches(21.0, 10.5)
+            fig.tight_layout(pad=1.0)
+            # plt.legend()
+            # print ("Saving:" + str(plotName))
+            plt.savefig(plotName)
+            # print("Plotting!")
+            ax[0].cla()
+            ax[1].cla()
+            fig.clf()
+            # input("next!")
+
 def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory):
 
     for i in range(len(names)):
@@ -367,10 +542,8 @@ def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory)
                             names[index]) + ")" +"("+ str(index)+ ")_iteration_" + str(
                             iteraction) + ".png"
 
-
                     if not os.path.exists(directory):
                         os.mkdir(directory)
-
 
                     thisPlayerNeurons = moodNeuronReadings
 
@@ -881,6 +1054,7 @@ def plotNumberOfActions(names, actions, gameNumber, plotsDirectory):
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
 
+
     largest = 0
     for i in range(len(names)):
         if len(actions[i]) > largest:
@@ -991,11 +1165,7 @@ def plotDiscardBehavior( names, actions, gameNumber, plotsDirectory):
             # print("Score:", scoresAll)
             totalWins = 0
             for a in range(len(actions[i])):
-
-                if actions[i][a][1][0] == 0:
-                    result = 0
-                else:
-                  result = len(actions[i][a][1])
+                result = len(actions[i][a][1])
                 currentPlayerActions.append(result)
 
 
@@ -1209,16 +1379,38 @@ def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNum
     probabilitiesAll = []
     moodNeuronsAll = []
 
+    playerAction = []
+
+    moodReadingsPerAgent = []
+    moodNeuronsPerAgent = []
+
+    totalActions = []
+    totalColors = []
+
+    arousalValenceInput = []
+
+    selfExpectations = []
     #Each player
     for a in range(4):
         moodReadingsAll.append([])
         probabilitiesAll.append([])
         moodNeuronsAll.append([])
+        playerAction.append([])
+
+        moodReadingsPerAgent.append([])
+        moodNeuronsPerAgent.append([])
+
+        totalActions.append([])
+        totalColors.append([])
+        arousalValenceInput.append([])
+
+        selfExpectations.append([])
 
         for i in range(4):
             moodReadingsAll[a].append([])
             probabilitiesAll[a].append([])
             moodNeuronsAll[a].append([])
+            arousalValenceInput[a].append([])
 
     agentsNames = []
     currentLine = 0
@@ -1232,7 +1424,38 @@ def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNum
 
             if specificLine == -1 or currentLine <= specificLine:
                 player = row["Player"]
-                if not player == "":
+                action = row["Action Type"]
+                for a in range(4):
+                    if action == actionDiscard:
+                        color = "green"
+                    elif action == actionPass:
+                        color = "blue"
+                    elif action == actionPizzaReady:
+                        color = "orange"
+                    elif action == actionFinish:
+                        color = "red"
+
+                    if player == a:
+                        totalActions[a].append(1)
+                        totalColors[a].append(color)
+                    else:
+                        totalActions[a].append(1)
+                        totalColors[a].append("white")
+
+                if not player == "" :
+
+                    playerAction[player].append(action)
+
+                    avInputP1 = row["P1 AVStimuli"]
+                    avInputP2 = row["P2 AVStimuli"]
+                    avInputP3 = row["P3 AVStimuli"]
+                    avInputP4 = row["P4 AVStimuli"]
+
+                    selfExpP1 = row["P1 Expectation"]
+                    selfExpP2 = row["P2 Expectation"]
+                    selfExpP3 = row["P3 Expectation"]
+                    selfExpP4 = row["P4 Expectation"]
+
                     P1Prob = row["P1 probability"]
                     P2Prob = row["P2 probability"]
                     P3Prob = row["P3 probability"]
@@ -1248,8 +1471,6 @@ def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNum
                     P3Neurons = row["P3 Mood Neuron"]
                     P4Neurons = row["P4 Mood Neuron"]
 
-                    player = row["Player"]
-
                     if P1Prob > -1:
                         probabilitiesAll[0][player].append(P1Prob)
                     if P2Prob > -1:
@@ -1261,26 +1482,69 @@ def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNum
 
                     if P1Mood[0] > -1:
                         moodReadingsAll[0][player].append(P1Mood)
+                        moodReadingsPerAgent[0].append(P1Mood)
                     if P2Mood[0] > -1:
                         moodReadingsAll[1][player].append(P2Mood)
+                        moodReadingsPerAgent[1].append(P2Mood)
                     if P3Mood[0] > -1:
                       moodReadingsAll[2][player].append(P3Mood)
+                      moodReadingsPerAgent[2].append(P3Mood)
                     if P4Mood[0] > -1:
                      moodReadingsAll[3][player].append(P4Mood)
+                     moodReadingsPerAgent[3].append(P4Mood)
 
                     if isinstance(P1Neurons, tuple):
                         moodNeuronsAll[0][player].append(P1Neurons)
+                        moodNeuronsPerAgent[0].append(P1Neurons)
                     if isinstance(P2Neurons, tuple):
                         moodNeuronsAll[1][player].append(P2Neurons)
+                        moodNeuronsPerAgent[1].append(P2Neurons)
                     if isinstance(P3Neurons, tuple):
                       moodNeuronsAll[2][player].append(P3Neurons)
+                      moodNeuronsPerAgent[2].append(P3Neurons)
                     if isinstance(P4Neurons, tuple):
                      moodNeuronsAll[3][player].append(P4Neurons)
+                     moodNeuronsPerAgent[3].append(P4Neurons)
+
+                    # print ("av1:" + str(avInputP1))
+                    # input("here")
+                    for indexAV, av in enumerate(avInputP1):
+                        if not (av[0]==-1):
+                            arousalValenceInput[0][indexAV].append([currentLine,av])
+
+
+                    for indexAV, av in enumerate(avInputP2):
+                        if not (av[0]==-1):
+                            arousalValenceInput[1][indexAV].append([currentLine,av])
+
+                    for indexAV, av in enumerate(avInputP3):
+                        if not (av[0] == -1):
+                            arousalValenceInput[2][indexAV].append([currentLine, av])
+
+                    for indexAV, av in enumerate(avInputP4):
+                        if not (av[0]==-1):
+                            arousalValenceInput[3][indexAV].append([currentLine,av])
+
+                    if selfExpP1 > -1:
+                        selfExpectations[0].append(selfExpP1)
+
+                    if selfExpP2 > -1:
+                        selfExpectations[1].append(selfExpP2)
+
+                    if selfExpP3 > -1:
+                        selfExpectations[2].append(selfExpP3)
+
+                    if selfExpP4 > -1:
+                        selfExpectations[3].append(selfExpP4)
+
             currentLine = currentLine + 1
 
     if specificLine >0:
         gameNumber = str(gameNumber)+"_"+str(specificLine)
 
+
+    # print ("MoodReadings: " + str(numpy.array(moodReadingsPerAgent[0]).shape))
+    # input("Here")
     if plots["Experiment_SelfProbabilitySuccess"] in plotsToGenerate:
         print("Generating:" + str(plots["Experiment_SelfProbabilitySuccess"]))
         plotSelfProbabilitySuccess(agentsNames, probabilitiesAll, gameNumber, saveDirectory, name="Self")
@@ -1293,6 +1557,12 @@ def generateIntrinsicPlotsFromDataset(plotsToGenerate, IntrinsicDataset, gameNum
         print ("Generating:" + str(plots["Experiment_MoodNeurons"]))
         plotMoodNeurons(agentsNames, moodNeuronsAll, moodReadingsAll, gameNumber, saveDirectory)
 
+    if plots["Experiment_MoodFaces"] in plotsToGenerate:
+        print("Generating:" + str(plots["Experiment_MoodNeurons"]))
+
+    if plots["Experiment_TimeLimeMood"] in plotsToGenerate:
+        print ("Generating:" + str(plots["Experiment_TimeLimeMood"]))
+        plotTimeLineMood(agentsNames, moodNeuronsPerAgent, moodReadingsPerAgent, gameNumber, playerAction, totalActions, totalColors, arousalValenceInput, selfExpectations, saveDirectory)
 
 
 def generateSingleGamePlotsFromDataset(plotsToGenerate, dataset, gameNumber, saveDirectory = ""):
@@ -1306,8 +1576,6 @@ def generateSingleGamePlotsFromDataset(plotsToGenerate, dataset, gameNumber, sav
         playersAction.append([])
         playersActionName.append([])
 
-
-
     agentsNames = []
     for lineCounter, row in readFile.iterrows():
         game = row["Game Number"]
@@ -1315,7 +1583,8 @@ def generateSingleGamePlotsFromDataset(plotsToGenerate, dataset, gameNumber, sav
 
         if game == gameNumber:
             if len(agentsNames) == 0:
-                agentsNames = row["Agent Names"]
+                agentNames = str(row["Agent Names"])
+                agentsNames = agentNames.split(",")
 
             player = row["Player"]
             action = row["Players Status"]
@@ -1325,10 +1594,10 @@ def generateSingleGamePlotsFromDataset(plotsToGenerate, dataset, gameNumber, sav
                 # print("action:" + str(thisPlayerAction) + " - Len:" + str(len(thisPlayerAction)))
                 if len(thisPlayerAction) == 2:
                     actionName = thisPlayerAction[0]
-                    actionComplete = thisPlayerAction[0]
+                    actionComplete = thisPlayerAction
                 else:
                     actionName = thisPlayerAction
-                    actionComplete = (thisPlayerAction,[0])
+                    actionComplete = thisPlayerAction
 
                 playersActionName[player].append(actionName)
                 playersAction[player].append(actionComplete)
@@ -1399,13 +1668,25 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
         currentGameTotalActions.append(0)
         currentGameWrongActions.append(0)
 
-
+    currentGame = 0
+    first = True
     for lineCounter, row in readFile.iterrows():
         game = row["Game Number"]
         player = row["Player"]
 
         if len(agentsNames) == 0:
             agentsNames = row["Agent Names"]
+
+        actionType = row["Action Type"]
+        # # Update game
+        # if actionType == actionDeal:
+        #     if first:
+        #         first = False
+        #     else:
+        #         currentGame = currentGame + 1
+        #
+        #
+        # game = currentGame
 
         if not player == "":
 
@@ -1417,7 +1698,6 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
             reward = row["Reward"]
             qValues = row["Qvalues"]
             loss = row["Loss"]
-            actionType = row["Action Type"]
 
             #Update all the victories
             if len(score) == 4:
@@ -1440,11 +1720,12 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
 
             #ActionComplete
 
-            thisPlayerAction = action[player]
-            if len(thisPlayerAction) == 2:
-                actionComplete = thisPlayerAction[0]
-            else:
-                actionComplete = (thisPlayerAction, [0])
+            actionComplete = action[player]
+
+            # if len(thisPlayerAction) == 2:
+            #     actionComplete = thisPlayerAction[0]
+            # else:
+            #     actionComplete = (thisPlayerAction, [0])
 
             if game > len(playersActionComplete[player])-1:
                 playersActionComplete[player].append([])
@@ -1471,7 +1752,13 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
                 lossesAll[player][game].append(loss)
 
             #Points attribution
+
             if actionType == actionFinish:
+                # print ("---")
+                # print ("Game: " + str(game))
+                # print("Player:" + str(player))
+                # print ("Action type:" + str(actionFinish))
+
                 positionPlayer = score.tolist().index(player)
                 points = 3 - positionPlayer
                 if len(pointsAll[player]) > 0:
@@ -1553,116 +1840,3 @@ class PlotManager():
         if not intrinsicDataset == "":
             intrinsicDataset = intrinsicDataset+"/"+"IntrinsicDataset.pkl"
             generateIntrinsicPlotsFromDataset(plotsToGenerate,intrinsicDataset, saveDirectory=self._plotsDirectory)
-
-    # def generateSingleGame(self, plotsToGenerate, dataset, gameRound):
-    #
-    #
-    #     generateSingleGamePlotsFromDataset(plots,dataset,gameRound,self._plotsDirectory)
-    #     # if len(plotsToGenerate) >= 1:
-    #     #     if plotsToGenerate[0] == plots["all"]:
-    #     #         plotsToGenerate = []
-    #     #         for  i in plots.keys() :
-    #     #             plotsToGenerate.append(plots[i])
-    #     #
-    #     #     agentNames = []
-    #     #     for index, p in enumerate(players):
-    #     #         agentNames.append(p.name+"_"+str(index))
-    #     #
-    #     #     if plots["OneGame_NumberOfActions"] in plotsToGenerate:
-    #     #         plotNumberOfActions(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
-    #     #
-    #     #     if plots["OneGame_DiscardBehavior"] in plotsToGenerate:
-    #     #         plotDiscardBehavior(agentNames, env.playerActionsComplete, gameRound, self.plotsDirectory)
-    #     #
-    #     #     if plots["OneGame_Timeline"] in plotsToGenerate:
-    #     #         plotTimeLine(agentNames, env.playerActionsTimeLine, gameRound, self.plotsDirectory)
-    #
-    # def generateExperimentPlots(self, plotsToGenerate, dataset, gameRound):
-    #
-    #     generateExperimentPlotsFromDataset(plotsToGenerate,dataset,saveDirectory=self._plotsDirectory)
-    #
-    #
-    #     # if len(plotsToGenerate) >= 1:
-    #     #     if plotsToGenerate[0] == plots["all"]:
-    #     #         plotsToGenerate = []
-    #     #         for  i in plots.keys():
-    #     #             plotsToGenerate.append(plots[i])
-    #     #
-    #     #     agentNames = []
-    #     #     moodReadings = []
-    #     #     moodNeurons = []
-    #     #     selfProbabilities = []
-    #     #     selfProbabilitiesNames = []
-    #     #     correctActions = []
-    #     #     totalActions = []
-    #     #     qvalues = []
-    #     #     losses = []
-    #     #     lossesPModel = []
-    #     #     meanQValues = []
-    #     #
-    #     #     selfReward = []
-    #     #     selfRewardAvg = []
-    #     #
-    #     #     for index, p in enumerate(players):
-    #     #         agentNames.append(p.name+"_"+str(index))
-    #     #         correctActions.append(p.totalCorrectAction)
-    #     #         totalActions.append(p.totalAction)
-    #     #         qvalues.append(p.QValues)
-    #     #         losses.append(p.losses)
-    #     #         meanQValues.append(p.MeanQValuesPerGame)
-    #     #         selfReward.append(p.selfReward)
-    #     #         selfRewardAvg.append(p.meanReward)
-    #     #         if not p.intrinsic == None:
-    #     #             selfProbabilities.append(p.intrinsic.probabilities)
-    #     #             moodReadings.append(p.intrinsic.moodReadings)
-    #     #             selfProbabilitiesNames.append(p.intrinsic.selfConfidenceType)
-    #     #             moodNeurons.append(p.intrinsic.moodNeurons)
-    #     #             if not p.intrinsic.pModel == None:
-    #     #                 lossesPModel.append(p.intrinsic.pModel.losses)
-    #     #
-    #     #     if plots["Experiment_Winners"] in plotsToGenerate:
-    #     #         plotWinners(len(agentNames), env.winners, gameRound, agentNames, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_Rounds"] in plotsToGenerate:
-    #     #         plotRounds(env.allRounds, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_FinishingPosition"] in plotsToGenerate:
-    #     #         plotFinishPositions(agentNames, env.allScores, env.winners, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_ActionsBehavior"] in plotsToGenerate:
-    #     #         plotActionBehavior(agentNames, env.playerActionsCompleteAllGames, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_Mood"] in plotsToGenerate:
-    #     #         plotMood(agentNames, moodReadings, gameRound,  self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_MoodNeurons"] in plotsToGenerate:
-    #     #         plotMoodNeurons(agentNames, moodNeurons, moodReadings, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_SelfProbabilitySuccess"] in plotsToGenerate:
-    #     #         plotSelfProbabilitySuccess(agentNames, selfProbabilities, gameRound, self._plotsDirectory, name=selfProbabilitiesNames)
-    #     #
-    #     #     if plots["Experiment_Reward"] in plotsToGenerate:
-    #     #         plotRewardsAll(agentNames, env.allRewards, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_CorrectActions"] in plotsToGenerate:
-    #     #         plotCorrectActions(agentNames, env.allWrongActions, totalActions, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_WrongActions"] in plotsToGenerate:
-    #     #         plotWrongActions( agentNames, env.allWrongActions, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_QValues"] in plotsToGenerate:
-    #     #         plotQValues( agentNames, qvalues, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_Losses"] in plotsToGenerate:
-    #     #         plotLosses(agentNames, losses, gameRound, "Player", self._plotsDirectory)
-    #     #         plotLosses(agentNames, lossesPModel, gameRound, "PModel", self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_MeanQValues"] in plotsToGenerate:
-    #     #         plotMeanQValuesGames( agentNames, meanQValues, gameRound, self._plotsDirectory)
-    #     #
-    #     #     if plots["Experiment_SelfReward"] in plotsToGenerate:
-    #     #         plotSelfRewardsAll(agentNames, selfRewardAvg, selfReward, gameRound, self._plotsDirectory)
-    #
-    #
-
-

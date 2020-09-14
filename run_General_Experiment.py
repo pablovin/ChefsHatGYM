@@ -25,7 +25,7 @@ def runModel():
     agent3 = AgentA2C.AgentA2C([False, 1.0, "A2C"])  # training agent
     agent4 = AgentRandom.AgentRandom(AgentRandom.DUMMY_RANDOM)  # training agent
 
-    #Load agents from
+    # Load agents from
     DQLModel = ""
 
     A2cActor = ""
@@ -39,7 +39,7 @@ def runModel():
     loadModelAgent2 = [PPOActor,PPOCritic]
     loadModelAgent4 =""
 
-    loadModel = [loadModelAgent1,loadModelAgent2, loadModelAgent3, loadModelAgent4]
+    loadModel = [loadModelAgent4,loadModelAgent4, loadModelAgent4, loadModelAgent4]
 
     #List of agents
     playersAgents = [agent1, agent2, agent3, agent4]
@@ -48,7 +48,7 @@ def runModel():
     reward = RewardOnlyWinning.RewardOnlyWinning()
 
     #Experimental parameters
-    numGames = 1 # amount of games to be executed
+    numGames = 10 # amount of games to be executed
     experimentDescriptor = "GeneralTraining" #Experiment name
 
     isLogging = False # create a .txt file with the experiment log
@@ -57,7 +57,7 @@ def runModel():
 
     createDataset = True # Create a .pkl dataset of the experiemnt
 
-    saveExperimentsIn = ""  # Directory where the experiment will be saved
+    saveExperimentsIn = "/home/pablo/Documents/Datasets/ChefsHat_ReinforcementLearning"  # Directory where the experiment will be saved
 
     metrics = ChefsHatExperimentHandler.runExperiment(numGames=numGames, playersAgents=playersAgents,experimentDescriptor=experimentDescriptor,isLogging=isLogging,isPlotting=isPlotting, createDataset=createDataset,saveExperimentsIn=saveExperimentsIn, loadModel=loadModel, rewardFunction=reward, plots=plotsToGenerate)
 

@@ -187,7 +187,7 @@ class AgentDQL(IAgent.IAgent):
 
     def getAction(self, params):
 
-        stateVector, possibleActionsOriginal = params
+        stateVector, possibleActionsOriginal, reward = params
         stateVector = numpy.expand_dims(numpy.array(stateVector), 0)
 
         possibleActions2 = copy.copy(possibleActionsOriginal)

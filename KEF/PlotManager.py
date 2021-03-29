@@ -921,9 +921,12 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
         summedQValues = []
         averagedQValues = []
 
-        for a in qValue:
+        fig, axs = plt.subplots(1, 1)
 
+        gameNumber =1
+        for a in qValue:
             valueGame = []
+
             for q in a:
                 if len(q)>1:
                     sortedA = numpy.array(q)
@@ -933,6 +936,18 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
                     valueGame.append(sortedA.sum())
             # print ("Vlaue:" + str(len(valueGame)) + "-avg: " + str(numpy.average(valueGame)))
             averagedQValues.append(numpy.average(valueGame))
+
+            # print("Shape A:" + str(numpy.array(qValue).shape))
+            # input("here")
+
+            axs.plot(range(len(valueGame)), valueGame, label="Game: " + str(gameNumber))
+            gameNumber = gameNumber+1
+
+            plt.ylim(0, 0.5)
+        plt.legend()
+        plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_BestQValues_Agregated.png")
+
+        plt.clf()
 
 
         if len(selectedQValues) > 1:
@@ -1631,6 +1646,7 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
     totalActionsAll = []
     correctActionsAll = []
     qValuesAll = []
+    qValuesPerGame = []
     lossesAll = []
     meanQValuesAll = []
     rewardsAll = []
@@ -1640,8 +1656,11 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
     #auxiliary variables
     currentGameTotalActions = []
     currentGameWrongActions = []
+    currentGameQValues = []
+
     for a in range(4):
 
+        currentGameQValues.append([])
         pointsAll.append([])
 
         playersActionComplete.append([])
@@ -1651,6 +1670,9 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
         rewardsAll[a].append([])
 
         qValuesAll.append([])
+        qValuesAll[a].append([])
+
+        qValuesPerGame.append([])
         qValuesAll[a].append([])
 
         lossesAll.append([])
@@ -1670,6 +1692,9 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
 
     currentGame = 0
     first = True
+
+
+
     for lineCounter, row in readFile.iterrows():
         game = row["Game Number"]
         player = row["Player"]
@@ -1687,6 +1712,7 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
         #
         #
         # game = currentGame
+
 
         if not player == "":
 
@@ -1741,6 +1767,7 @@ def generateExperimentPlotsFromDataset(plotsToGenerate, dataset, specificGame=-1
             #Qvalues
             if game > len(qValuesAll[player]) - 1:
                 qValuesAll[player].append([])
+
 
             qValuesAll[player][game].append(qValues)
 

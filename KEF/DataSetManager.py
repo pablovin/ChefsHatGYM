@@ -79,7 +79,7 @@ class DataSetManager:
 
     def addDataFrame(self, gameNumber ="", roundNumber ="", player="", actionType="", playersHand=[], board=[],
                      cardsAction="", reward="", qvalues="", loss="", wrongActions="", totalActions="",
-                     score=[], roles="", playersStatus=[], agentNames="", possibleActions=[]):
+                     score=[], roles="", playersStatus=[], agentNames="", possibleActions=[], performanceScore = []):
 
         #Guarantee is a copy
 
@@ -94,25 +94,25 @@ class DataSetManager:
 
         date =  str(datetime.datetime.now()).replace(" ", "_")
         dataframe= [date, gameNumber,roundNumber,player,actionType,playersHand,board,possibleActions, cardsAction,reward,qvalues,loss,wrongActions,totalActions,
-                    score,roles,playersStatus,agentNames]
+                    score,roles,playersStatus,agentNames, performanceScore]
 
         self.dataFrame.loc[-1] = dataframe
         self.dataFrame.index = self.dataFrame.index + 1
 
 
-    def startNewExperiment(self):
+    def startNewGame(self):
 
         self._currentDataSetFile = self._dataSetDirectory+"/Dataset.pkl"
 
         columns = ["Time", "Game Number", "Round Number", "Player", "Action Type", "Player Hand",  "Board", "Possible Actions","Cards Action", "Reward",
                    "Qvalues", "Loss", "Wrong Actions", "Total Actions", # Current turn actions
-                     "Scores", "Roles", "Players Status", "Agent Names",  # Game status
+                     "Scores", "Roles", "Players Status", "Agent Names", "Performance Score" # Game status
                          ]
 
         self.dataFrame = pd.DataFrame(columns = columns)
 
 
-    def startNewGame(self, gameNumber, agentsNames):
+    def startNewMatch(self, gameNumber, agentsNames):
 
         self.addDataFrame(gameNumber=gameNumber, agentNames=agentsNames)
 

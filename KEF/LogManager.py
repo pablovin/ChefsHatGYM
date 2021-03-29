@@ -29,7 +29,7 @@ class Logger:
     def verbose(self):
         return self._verbose
 
-    def __init__(self, logDirectory=None, verbose=True):
+    def __init__(self, logDirectory=None, saveLog = True, verbose=True):
 
         # sys.stdout = open(logDirectory+"2.txt",'w')
 
@@ -47,15 +47,19 @@ class Logger:
 
         """
 
-        try:
-            self.isLogDirectoryValid(logDirectory)
-        except:
-            raise Exception("Log file not found!")
 
-        else:
-            self._logDirectory = logDirectory
+        if saveLog:
+            try:
+                self.isLogDirectoryValid(logDirectory)
+            except:
+                raise Exception("Log file not found!")
+
+            else:
+                self._logDirectory = logDirectory
 
         self._verbose = verbose
+
+        self._saveLog = saveLog
 
     def isLogDirectoryValid(self, logDirectory):
         """
@@ -97,8 +101,9 @@ class Logger:
             raise Exception("Log file not found!")
 
         else:
-            logFile.write(str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message) + "\n")
-            logFile.close
+            if self._saveLog:
+                logFile.write(str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message) + "\n")
+                logFile.close
 
             if self._verbose:
                 print(
@@ -123,12 +128,13 @@ class Logger:
             raise Exception("Log file not found! Looked at:", self.logDirectory)
 
         else:
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.write(str(sessionName + "\n"))
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.close
+            if self._saveLog:
+                logFile.write(
+                    "-----------------------------------------------------------------------------------------------------\n")
+                logFile.write(str(sessionName + "\n"))
+                logFile.write(
+                    "-----------------------------------------------------------------------------------------------------\n")
+                logFile.close
 
             if self._verbose:
                 print(
@@ -157,11 +163,12 @@ class Logger:
             raise Exception("Log file not found! Looked at:", self.logDirectory)
 
         else:
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.write(
-                "-----------------------------------------------------------------------------------------------------\n")
-            logFile.close
+            if self._saveLog:
+                logFile.write(
+                    "-----------------------------------------------------------------------------------------------------\n")
+                logFile.write(
+                    "-----------------------------------------------------------------------------------------------------\n")
+                logFile.close
 
             if self._verbose:
                 print(

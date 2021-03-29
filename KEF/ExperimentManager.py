@@ -85,7 +85,7 @@ class ExperimentManager:
         if not os.path.exists(self.baseDirectory + "/" + self.experimentName + "/" + directoryName):
             os.makedirs(self.baseDirectory + "/" + self.experimentName + "/" + directoryName)
 
-    def __init__(self, baseDirectory, experimentName, verbose=True):
+    def __init__(self, baseDirectory, experimentName, verbose=True, saveLog=False):
         """
             Function that creates a new experiment. A new folder structure will be created, with a new log file.
 
@@ -123,7 +123,7 @@ class ExperimentManager:
         """Creating the log folder"""
         self._createFolder("Log")
         self._logManager = LogManager.Logger(self.baseDirectory + "/" + self.experimentName + "/Log/" + "Log.txt",
-                                             verbose)
+                                             verbose=verbose, saveLog=saveLog)
 
         self._metricManager = MetricsManager.MetricsManager(self.baseDirectory + "/" + self.experimentName + "/Log/")
 

@@ -1,26 +1,13 @@
-from Rewards import iReward
-
-class RewardOnlyWinning(iReward.IReward):
-
+class RewardOnlyWinning():
 
     rewardName = "OnlyWinning"
 
-    def getRewardOnlyPass(self, params=[]):
-        return -0.01
+    def getReward(self, action, validAction, possibleActions, score, rounds, isPizza, matchFinished, gameFinished, thisPlayer):
 
-    def getRewardPass(self, params=[]):
-        return -0.01
+        reward = - 0.001
+        if matchFinished:
+            playerPosition = score[thisPlayer]
+            if playerPosition == 0:
+                reward = 1
 
-    def getRewardInvalidAction(self, params=[]):
-        return -1.0
-
-    def getRewardDiscard(self, params=[]):
-        return -0.01
-
-    def getRewardFinish(self, params=[]):
-        position, rounds = params
-
-        if position == 0:
-            return 1  # experiment 3
-        else:
-           return -0.1
+        return reward

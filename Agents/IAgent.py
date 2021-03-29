@@ -1,61 +1,26 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABCMeta, abstractmethod, abstractproperty
-
+from abc import ABCMeta, abstractmethod
 
 class IAgent():
 
     __metaclass__ = ABCMeta
 
-    #Needed atributes
-    MeanQValuesPerGame = []
-
-    currentCorrectAction = 0
-
-    totalCorrectAction = []
-
-    totalAction = []
-    totalActionPerGame = 0
-
-    losses = []
-    QValues = []
-
-    Probability = []
-
-    SelectedActions = []
-
-    ProbabilityLearning = []
-
-    ProbAffMemory = []
-
-    intrinsic = None
-
-    selfReward = []
-    currentReward = []
-    meanReward = []
+    name = ""
 
     @abstractmethod
-    def train(self, params):
+    def train(self,  observation, nextObservation, action, envInfo):
         pass
 
     @abstractmethod
-    def loadModel(self, params):
+    def getAction(self, observations):
         pass
 
     @abstractmethod
-    def getAction(self, params):
+    def __init__(self, name, _):
         pass
 
-    @abstractmethod
-    def buildModel(self):
+    def getReward(self,actionComplete, validAction, possibleActions, score, rounds, isPizzaReady, isMatchOver, gameFinished, thisPlayer):
         pass
-
-    @abstractmethod
-    def startAgent(self, params):
-        pass
-
-    # @abstractmethod
-    # def __init__(self, params):
-    #     pass
 
 

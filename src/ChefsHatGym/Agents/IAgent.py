@@ -20,7 +20,7 @@ class IAgent():
     def __init__(self, name, _):
         pass
 
-    def getReward(self,actionComplete, validAction, possibleActions, score, rounds, isPizzaReady, isMatchOver, gameFinished, thisPlayer):
+    def getReward(self,observationBefore, observationAfter, possibleActions, info):
         pass
 
 

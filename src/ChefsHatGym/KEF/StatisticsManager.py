@@ -15,8 +15,8 @@ import os
 
 import csv
 
-from KEF import DataSetManager
-from KEF.DataSetManager import actionFinish, actionPass, actionDiscard, actionDeal
+from ChefsHatGym.KEF import DataSetManager
+from ChefsHatGym.KEF.DataSetManager import actionFinish, actionPass, actionDiscard, actionDeal
 
 from matplotlib.collections import PolyCollection
 

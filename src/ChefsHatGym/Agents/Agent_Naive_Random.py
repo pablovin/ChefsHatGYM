@@ -1,7 +1,7 @@
 import numpy
-from Agents import IAgent
+from ChefsHatGym.Agents import IAgent
 import random
-from Rewards import RewardOnlyWinning
+from ChefsHatGym.Rewards import RewardOnlyWinning
 
 class AgentNaive_Random(IAgent.IAgent):
 
@@ -26,8 +26,10 @@ class AgentNaive_Random(IAgent.IAgent):
     def train(self, observations, nextobs, action, reward, info):
         pass
 
-    def getReward(self,actionComplete, validAction, possibleActions, score, rounds, isPizzaReady, isMatchOver, gameFinished, thisPlayer):
+    def getReward(self, info):
 
-        return self.reward.getReward(actionComplete, validAction, possibleActions, score, rounds, isPizzaReady, isMatchOver, gameFinished, thisPlayer)
+        thisPlayer = info["thisPlayerPosition"]
+        matchFinished = info["thisPlayerFinished"]
 
+        return self.reward.getReward(thisPlayer, matchFinished)
 

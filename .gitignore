@@ -9,3 +9,6 @@
 /MoodyFramework/
 /DjangoServer/
 /Adaptive_Agents/
+/.idea/
+/build/
+/dist/

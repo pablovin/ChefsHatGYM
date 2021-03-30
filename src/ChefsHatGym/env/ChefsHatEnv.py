@@ -1,13 +1,13 @@
 import gym
 import random
 import numpy
-from KEF import DataSetManager
-from KEF import ExperimentManager
+from ChefsHatGym.KEF import DataSetManager
+from ChefsHatGym.KEF import ExperimentManager
 import copy
 from gym import spaces
 
 GAMETYPE = {"POINTS":"POINTS",
-            "NUMGAMES":"NUMGAMES"}
+            "MATCHES":"MATCHES"}
 
 class ChefsHatEnv(gym.Env):
   metadata = {'render.modes': ['human']}
@@ -63,7 +63,9 @@ class ChefsHatEnv(gym.Env):
         self.experimentManager = None
         self.saveDataset = False
 
-    self.score = [0,0,0,0]  # the last score
+    self.score = [0,0,0,0]  # the score
+    self.performanceScore = [0,0,0,0]  # the performance score
+
     self.board = []  # the current board
 
     self.maxCardNumber = 11  # The highest value of a card in the deck
@@ -243,13 +245,13 @@ class ChefsHatEnv(gym.Env):
       if self.gameType  == GAMETYPE["POINTS"]:
           if self.score[numpy.argmax(self.score)] >= self.stopCriteria:
               gameFinished = True
-      elif self.gameType == GAMETYPE["NUMGAMES"]:
+      elif self.gameType == GAMETYPE["MATCHES"]:
           if self.matches >= self.stopCriteria:
               gameFinished = True
 
 
       if self.experimentManager == None:
-            self.logger.newLogSession("Game Over! Final Score:" + str(self.score))
+            self.logger.newLogSession("Game Over! Final Score:" + str(self.score) + " - Final Performance Score:" + str(self.performanceScore))
 
       return gameFinished
 
@@ -314,9 +316,16 @@ class ChefsHatEnv(gym.Env):
   def step(self, action):
 
     validAction = False
+    isMatchOver = False
+    isPizzaReady = False
+    thisPlayerPosition = -1
+
+
     possibleActions = self.getPossibleActions(self.currentPlayer)
     thisPlayer = copy.copy(self.currentPlayer)
     boardBefore = copy.copy(self.board)
+
+    observationBefore = copy.copy(self.getObservation())
 
     # print ("self.maxInvalidActions:"+str(self.maxInvalidActions))
     # print (" This player:" + str( thisPlayer))
@@ -351,9 +360,13 @@ class ChefsHatEnv(gym.Env):
                 playerFinishingPosition = self.finishingOrder.index(self.currentPlayer)
                 points = self.calculateScore(playerFinishingPosition)
 
-                # print ("Score before:" + str(self.score))
+
                 self.score[self.currentPlayer] += points
-                # print("Score after:" + str(self.score))
+
+                pScore =  points / self.rounds
+                # self.performanceScore[self.currentPlayer] += pScore
+                self.performanceScore[self.currentPlayer] = (self.performanceScore[self.currentPlayer] * (self.matches-1) + pScore)/ self.matches
+                thisPlayerPosition = playerFinishingPosition
 
         # Update the player last action
         self.lastActionPlayers[self.currentPlayer] = actionComplete
@@ -374,8 +387,7 @@ class ChefsHatEnv(gym.Env):
                                                                  self.score, self.lastActionPlayers,
                                                                  action, 0, 0, validAction)
         #Verify if it is end of match
-        isMatchOver = False
-        isPizzaReady = False
+
 
 
 
@@ -396,25 +408,30 @@ class ChefsHatEnv(gym.Env):
             else:
                 self.startNewmatch()
 
-        # print("Score before reward:" + str(self.score))
-        reward = self.rewardFunctions[thisPlayer](actionComplete, validAction, possibleActions, self.score, self.rounds, isPizzaReady, isMatchOver, self.gameFinished, thisPlayer)
-
         if self.gameFinished:
             self.experimentManager.dataSetManager.saveFile()
     else:
         self.playersInvalidActions[thisPlayer]+=1
-        reward = -1
         isMatchOver = False
-
 
     info = {}
     info["validAction"] = validAction
     info["matches"] = self.matches
     info["rounds"] = self.rounds
     info["score"] = self.score
+    info["performanceScore"] = self.performanceScore
     info["thisPlayer"] = thisPlayer
     info["thisPlayerFinished"] = thisPlayer in self.finishingOrder
+    info["isPizzaReady"] = isPizzaReady
 
+    info["obsBefore"] = observationBefore
+    info["obsAfter"] = self.getObservation()
+    info["possibleActions"] = possibleActions
+    info["action"] = action
+
+    info["thisPlayerPosition"] = thisPlayerPosition
+
+    reward = self.rewardFunctions[thisPlayer](info)
 
     return self.getObservation(), reward, isMatchOver, info
         # observation, reward, isMatchOver, {}

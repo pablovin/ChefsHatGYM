@@ -3,10 +3,10 @@
 import os
 import datetime
 
-from KEF import LogManager
-from KEF import PlotManager
-from KEF import DataSetManager
-from KEF import MetricsManager
+from ChefsHatGym.KEF import LogManager
+from ChefsHatGym.KEF import PlotManager
+from ChefsHatGym.KEF import DataSetManager
+from ChefsHatGym.KEF import MetricsManager
 
 
 class ExperimentManager:

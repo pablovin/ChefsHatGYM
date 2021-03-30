@@ -1,16 +1,14 @@
-from Agents import Agent_Naive_Random
+from ChefsHatGym.Agents import Agent_Naive_Random
 
-from Rewards import RewardOnlyWinning
+from ChefsHatGym.Rewards import RewardOnlyWinning
 
-from env import ChefsHatEnv
-
-import os
+from ChefsHatGym.env import ChefsHatEnv
 
 import gym
 
 """Game parameters"""
-gameType = ChefsHatEnv.GAMETYPE["NUMGAMES"]
-gameStopCriteria = 100
+gameType = ChefsHatEnv.GAMETYPE["MATCHES"]
+gameStopCriteria = 10
 rewardFunction = RewardOnlyWinning.RewardOnlyWinning()
 
 """Player Parameters"""
@@ -26,7 +24,7 @@ for r in playersAgents:
     rewards.append(r.getReward)
 
 """Experiment parameters"""
-saveDirectory = "/home/pablo/Documents/Datasets/ChefsHat/ChefsHatGYM"
+saveDirectory = "examples/"
 verbose = False
 saveLog = False
 saveDataset = False
@@ -54,5 +52,9 @@ for a in range(episodes):
             nextobs, reward, isMatchOver, info = env.step(action)
 
         if isMatchOver:
+            print ("-------------")
+            print ("Match:" + str(info["matches"]))
             print ("Score:" + str(info["score"]))
+            print("Performance:" + str(info["performanceScore"]))
+            print("-------------")
 

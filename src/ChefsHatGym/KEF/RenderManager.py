@@ -10,9 +10,9 @@ import numpy
 import os
 import pandas as pd
 
-from KEF.PlotManager import generateIntrinsicPlotsFromDataset, plots
+from ChefsHatGym.KEF.PlotManager import generateIntrinsicPlotsFromDataset, plots
 
-from KEF import DataSetManager
+from ChefsHatGym.KEF import DataSetManager
 
 
 class RenderManager():

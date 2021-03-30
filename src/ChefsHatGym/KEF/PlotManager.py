@@ -10,8 +10,8 @@ import os
 
 import csv
 
-from KEF import DataSetManager
-from KEF.DataSetManager import actionFinish, actionPass, actionDiscard, actionDeal, actionPizzaReady
+from ChefsHatGym.KEF import DataSetManager
+from ChefsHatGym.KEF.DataSetManager import actionFinish, actionPass, actionDiscard, actionDeal, actionPizzaReady
 
 from matplotlib.collections import PolyCollection
 import matplotlib.patches as mpatches

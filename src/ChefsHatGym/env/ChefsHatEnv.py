@@ -422,8 +422,8 @@ class ChefsHatEnv(gym.Env):
     info["thisPlayerFinished"] = thisPlayer in self.finishingOrder
     info["isPizzaReady"] = isPizzaReady
 
-    info["obsBefore"] = observationBefore
-    info["obsAfter"] = self.getObservation()
+    info["boardBefore"] = observationBefore[0:11]
+    info["boardAfter"] = self.getObservation()[0:11]
     info["possibleActions"] = possibleActions
     info["action"] = action
 

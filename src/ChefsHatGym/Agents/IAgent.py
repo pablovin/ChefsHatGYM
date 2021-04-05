@@ -9,7 +9,7 @@ class IAgent():
     name = ""
 
     @abstractmethod
-    def train(self,  observation, nextObservation, action, envInfo):
+    def __init__(self, name, _):
         pass
 
     @abstractmethod
@@ -17,10 +17,17 @@ class IAgent():
         pass
 
     @abstractmethod
-    def __init__(self, name, _):
-        pass
-
     def getReward(self,observationBefore, observationAfter, possibleActions, info):
         pass
 
+    @abstractmethod
+    def observeOthers(self, envInfo):
+        pass
 
+    @abstractmethod
+    def actionUpdate(self,  observation, nextObservation, action, envInfo):
+        pass
+
+    @abstractmethod
+    def matchUpdate(self,  envInfo):
+        pass

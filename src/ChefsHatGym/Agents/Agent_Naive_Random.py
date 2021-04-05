@@ -23,7 +23,13 @@ class AgentNaive_Random(IAgent.IAgent):
 
         return a
 
-    def train(self, observations, nextobs, action, reward, info):
+    def actionUpdate(self, observations, nextobs, action, reward, info):
+        pass
+
+    def observeOthers(self, envInfo):
+        pass
+
+    def matchUpdate(self, envInfo):
         pass
 
     def getReward(self, info):

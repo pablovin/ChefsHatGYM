@@ -105,6 +105,7 @@ class ChefsHatEnv(gym.Env):
         self.experimentManager.dataSetManager.startNewGame()
 
 
+
     self.startNewmatch()  # Initiate all the match parameters
 
 
@@ -388,9 +389,6 @@ class ChefsHatEnv(gym.Env):
                                                                  action, 0, 0, validAction)
         #Verify if it is end of match
 
-
-
-
         if self.makePizza():
             isPizzaReady = True
             self.currentPlayer = self.lastToDiscard
@@ -430,6 +428,8 @@ class ChefsHatEnv(gym.Env):
     info["action"] = action
 
     info["thisPlayerPosition"] = thisPlayerPosition
+
+    info["lastActionPlayers"] = self.lastActionPlayers
 
     reward = self.rewardFunctions[thisPlayer](info)
 

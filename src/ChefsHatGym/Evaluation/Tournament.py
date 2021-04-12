@@ -121,11 +121,11 @@ class Tournament():
             # Observe others
             for p in group:
                 # Observe Others will be called in a thread, that will be killed in 15s
-                self.startThread(p.observeOthers, args=(info))
+                self.startThread(p.observeOthers, args=([info]))
 
             if isMatchOver:
                 for p in group:
-                    self.startThread(p.matchUpdate, args=(info))
+                    self.startThread(p.matchUpdate, args=([info]))
 
         if self.verbose:
             print("-------------")

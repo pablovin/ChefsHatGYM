@@ -1,25 +1,33 @@
-from ChefsHatGym.env import ChefsHatEnv
+from ChefsHatGym.Agents import Agent_Naive_Random
 
 import gym
 import numpy
 import random
-import multiprocessing
-import time
+import math
+import copy
+
 
 
 class Tournament():
 
 
-    def __init__(self, opponents, savingDirectory, verbose=True, threadTime=5):
-        self.opponents = opponents
+    def __init__(self, opponents, savingDirectory, verbose=True, threadTimeOut=5, actionTimeOut=5,  gameType=["POINTS"], gameStopCriteria=15):
         self.savingDirectory = savingDirectory
         self.verbose= verbose
-        self.threadTime = threadTime
+        self.threadTimeOut = threadTimeOut
+        self.actionTimeout = actionTimeOut
+        self.gameType = gameType
+        self.gameStopCriteria = gameStopCriteria
+
+        """Complement the group of agents to be a number pow 2"""
+
+        self.opponents = self.complementGroups(opponents)
+        if self.verbose:
+            print("--- Complementing the opponents with random agents to a total of " + str(len(opponents)) + " agents!")
 
     def runTournament(self):
         """Tournament parameters"""
         saveTournamentDirectory = self.savingDirectory  # Where all the logs will be saved
-        totalAgents = 32  # Has to be a compatible number, i.e 2^X
         agents = self.opponents
 
         groups = [agents[g:g + 4] for g in list(range(len(agents)))[::4]]  # Create groups of 4 players
@@ -65,22 +73,40 @@ class Tournament():
         return first, second, third, fourth
 
 
-    """Starting and killing a Thread"""
 
-    def startThread(self,funtion, args):
-        proc = multiprocessing.Process(target=funtion,
-                                       args=args)
-        proc.start()
+    """Get Random action"""
+    def getRandomAction(self, possibleActions):
+        itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
 
-        killProc = multiprocessing.Process(target=self.killThread,
-                                       args=[proc])
+        random.shuffle(itemindex)
+        aIndex = itemindex[0]
+        a = numpy.zeros(200)
+        a[aIndex] = 1
 
-        killProc.start()
+        return a
 
-    """Kill a thread after self.threadTime seconds"""
-    def killThread(self,proc):
-        time.sleep(self.threadTime)
-        proc.terminate()
+    """Complement the opponents with random agents until we have enough to create two brackets"""
+    def complementGroups(self, group):
+
+
+        difference = float(math.log(len(group),2))
+
+        if difference.is_integer():
+            if len(group) < 8:
+                for n in range(int(8-len(group))):
+                    group.append(Agent_Naive_Random.AgentNaive_Random("Random" + str(n)))
+
+            return group
+        else:
+            intDiff = math.modf(difference)[1]
+
+            newAdditions = int(math.pow(2,intDiff+1) - len(group))
+
+            for n in range(newAdditions):
+                group.append(Agent_Naive_Random.AgentNaive_Random("Random"+str(n)))
+
+        return group
+
 
     """Playing a Game"""
     def playGame(self, group, bracket, round, saveDirectory):
@@ -91,10 +117,11 @@ class Tournament():
         saveLog = True
         saveDataset = True
 
-        gameType = ChefsHatEnv.GAMETYPE["MATCHES"]
-        gameStopCriteria = 1
-
         agentNames = [agent.name for agent in group]
+
+        if self.verbose:
+            print("-------------")
+            print ("--- Opponents:" + str(agentNames))
 
         rewards = []
         for agent in group:
@@ -102,7 +129,7 @@ class Tournament():
 
         """Setup environment"""
         env = gym.make('chefshat-v0') #starting the game Environment
-        env.startExperiment(rewardFunctions=rewards, gameType=gameType, stopCriteria=gameStopCriteria, playerNames=agentNames, logDirectory=saveDirectory, verbose=verbose, saveDataset=saveDataset, saveLog=saveLog)
+        env.startExperiment(rewardFunctions=rewards, gameType=self.gameType, stopCriteria=self.gameStopCriteria, playerNames=agentNames, logDirectory=saveDirectory, verbose=verbose, saveDataset=saveDataset, saveLog=saveLog)
 
         observations = env.reset()
 
@@ -110,41 +137,57 @@ class Tournament():
             currentPlayer = group[env.currentPlayer]
 
             observations = env.getObservation()
-            action = currentPlayer.getAction(observations)
+
+            action = []
+            with currentPlayer.timeout(self.actionTimeout):
+                action = currentPlayer.getAction(observations)
+            if len(action) == 0:
+                action = self.getRandomAction(observations[28:])
 
             info = {"validAction": False}
             while not info["validAction"]:
                 nextobs, reward, isMatchOver, info = env.step(action)
 
             # Training will be called in a thread, that will be killed inself.threadTimes
-            self.startThread(currentPlayer.actionUpdate, args=(observations, nextobs, action, reward, info))
+            # self.runUpdateAction(currentPlayer, args=(observations, nextobs, action, reward, info) )
+            with currentPlayer.timeout(self.threadTimeOut):
+                currentPlayer.actionUpdate(observations, nextobs, action, reward, info)
 
-            # # Observe others
-            # for p in group:
-            #     # Observe Others will be called in a thread, that will be killed in self.threadTimes
-            #     self.startThread(p.observeOthers, args=([info]))
+            # self.startThread(currentPlayer.actionUpdate, args=(observations, nextobs, action, reward, info))
+            # currentPlayer.actionUpdate(observations, nextobs, action, reward, info)
+
+
+            # Observe others
+            for p in group:
+                # Observe Others will be called in a thread, that will be killed in self.threadTimes
+                with p.timeout(self.threadTimeOut):
+                    p.observeOthers(info)
             #
-            # if isMatchOver:
-            #     # Update the match info as a thread that will be killed in self.threadTimes
-            #     for p in group:
-            #         self.startThread(p.matchUpdate, args=([info]))
+            if isMatchOver:
+                # Update the match info as a thread that will be killed in self.threadTimes
+                for p in group:
+                    with p.timeout(self.threadTimeOut):
+                        p.matchUpdate(info)
 
-        if self.verbose:
-            print("-------------")
-            print("Bracket:" + str(bracket))
-            print("Round:" + str(round))
-            print("Group:" + str(agentNames))
-            print("Score:" + str(info["score"]))
-            print("Performance:" + str(info["performanceScore"]))
-            print("-------------")
 
-        sortedScore = info["score"]
+
+
+        sortedScore = copy.copy(info["score"])
         sortedScore.sort()
 
         winner = group[info["score"].index(sortedScore[-1])]
         second = group[info["score"].index(sortedScore[-2])]
         third = group[info["score"].index(sortedScore[-3])]
         fourth = group[info["score"].index(sortedScore[-4])]
+
+        if self.verbose:
+            print("--- Bracket:" + str(bracket))
+            print("--- Round:" + str(round))
+            print("--- Group:" + str(agentNames))
+            print("--- Score:" + str(info["score"]))
+            print("--- Performance:" + str(info["performanceScore"]))
+            print("--- Positions:" + winner.name+","+second.name+","+third.name+","+fourth.name)
+            print("-------------")
 
         return winner, second, third, fourth
 

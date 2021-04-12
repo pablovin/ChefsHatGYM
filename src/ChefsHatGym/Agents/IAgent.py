@@ -2,6 +2,10 @@
 
 from abc import ABCMeta, abstractmethod
 
+import signal
+from contextlib import contextmanager
+
+
 class IAgent():
 
     __metaclass__ = ABCMeta
@@ -17,7 +21,7 @@ class IAgent():
         pass
 
     @abstractmethod
-    def getReward(self,observationBefore, observationAfter, possibleActions, info):
+    def getReward(self, info):
         pass
 
     @abstractmethod
@@ -31,3 +35,25 @@ class IAgent():
     @abstractmethod
     def matchUpdate(self,  envInfo):
         pass
+
+
+    """Adds a timeout for the action function"""
+    @contextmanager
+    def timeout(self,time):
+        # Register a function to raise a TimeoutError on the signal.
+        signal.signal(signal.SIGALRM, self.raise_timeout)
+        # Schedule the signal to be sent after ``time``.
+        signal.alarm(time)
+
+        try:
+            yield
+        except TimeoutError:
+            pass
+        finally:
+            # Unregister the signal so it won't be triggered
+            # if the timeout is not reached.
+            signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
+
+    def raise_timeout(self, signum, frame):
+        raise TimeoutError

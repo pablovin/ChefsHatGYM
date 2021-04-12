@@ -19,7 +19,7 @@ URL = "https://github.com/pablovin/ChefsHatGYM"
 EMAIL = "pablovin@gmail.com"
 AUTHOR = "Pablo Barros"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.1.64"
+VERSION = "0.1.799999997"
 
 # What packages are required for this module to be executed?
 with open("Requirements.txt") as requirements:

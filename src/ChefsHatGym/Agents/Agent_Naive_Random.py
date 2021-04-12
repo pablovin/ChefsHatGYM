@@ -21,6 +21,7 @@ class AgentNaive_Random(IAgent.IAgent):
         a = numpy.zeros(200)
         a[aIndex] = 1
 
+
         return a
 
     def actionUpdate(self, observations, nextobs, action, reward, info):

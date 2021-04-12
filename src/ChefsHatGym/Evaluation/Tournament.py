@@ -10,10 +10,11 @@ import time
 class Tournament():
 
 
-    def __init__(self, opponents, savingDirectory, verbose=True):
+    def __init__(self, opponents, savingDirectory, verbose=True, threadTime=5):
         self.opponents = opponents
         self.savingDirectory = savingDirectory
         self.verbose= verbose
+        self.threadTime = threadTime
 
     def runTournament(self):
         """Tournament parameters"""
@@ -76,9 +77,9 @@ class Tournament():
 
         killProc.start()
 
-    """Kill a thread after 15 seconds"""
+    """Kill a thread after self.threadTime seconds"""
     def killThread(self,proc):
-        time.sleep(15)
+        time.sleep(self.threadTime)
         proc.terminate()
 
     """Playing a Game"""
@@ -115,17 +116,18 @@ class Tournament():
             while not info["validAction"]:
                 nextobs, reward, isMatchOver, info = env.step(action)
 
-            # Training will be called in a thread, that will be killed in 15s
+            # Training will be called in a thread, that will be killed inself.threadTimes
             self.startThread(currentPlayer.actionUpdate, args=(observations, nextobs, action, reward, info))
 
-            # Observe others
-            for p in group:
-                # Observe Others will be called in a thread, that will be killed in 15s
-                self.startThread(p.observeOthers, args=([info]))
-
-            if isMatchOver:
-                for p in group:
-                    self.startThread(p.matchUpdate, args=([info]))
+            # # Observe others
+            # for p in group:
+            #     # Observe Others will be called in a thread, that will be killed in self.threadTimes
+            #     self.startThread(p.observeOthers, args=([info]))
+            #
+            # if isMatchOver:
+            #     # Update the match info as a thread that will be killed in self.threadTimes
+            #     for p in group:
+            #         self.startThread(p.matchUpdate, args=([info]))
 
         if self.verbose:
             print("-------------")

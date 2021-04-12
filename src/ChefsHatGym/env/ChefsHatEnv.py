@@ -320,7 +320,7 @@ class ChefsHatEnv(gym.Env):
     isMatchOver = False
     isPizzaReady = False
     thisPlayerPosition = -1
-
+    actionIsRandom = False
 
     possibleActions = self.getPossibleActions(self.currentPlayer)
     thisPlayer = copy.copy(self.currentPlayer)
@@ -335,6 +335,7 @@ class ChefsHatEnv(gym.Env):
     if self.playersInvalidActions[thisPlayer] >= self.maxInvalidActions:
 
         action = self.getRandomAction(possibleActions)
+        actionIsRandom = True
         # print ("Possible Actions:" + str(numpy.array(possibleActions)))
         # print ("Action:" + str(action))
     if self.isActionAllowed(thisPlayer, action, possibleActions):  # if the player can make the action, do it.
@@ -413,6 +414,7 @@ class ChefsHatEnv(gym.Env):
         isMatchOver = False
 
     info = {}
+    info["actionIsRandom"] = actionIsRandom
     info["validAction"] = validAction
     info["matches"] = self.matches
     info["rounds"] = self.rounds
@@ -430,6 +432,7 @@ class ChefsHatEnv(gym.Env):
     info["thisPlayerPosition"] = thisPlayerPosition
 
     info["lastActionPlayers"] = self.lastActionPlayers
+    info["players"] = self.playerNames
 
     reward = self.rewardFunctions[thisPlayer](info)
 

@@ -1,7 +1,3 @@
-from ChefsHatGym.Agents import Agent_Naive_Random
-
-from ChefsHatGym.Rewards import RewardOnlyWinning
-
 from ChefsHatGym.env import ChefsHatEnv
 
 import gym

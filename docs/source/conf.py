@@ -69,6 +69,9 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+autodoc_mock_imports = ['pandas']
+autodoc_mock_imports = ['gym']
+
 
 # -- Options for HTML output -------------------------------------------------
 

@@ -20,12 +20,9 @@ start_time = time.time()
 saveTournamentDirectory = "/home/pablo/Documents/Datasets/ChefsHatCompetition/testing" #Where all the logs will be saved
 agents = getAgents(35)
 tournament = Tournament.Tournament(agents, saveTournamentDirectory, verbose=True, threadTimeOut=5, actionTimeOut=5, gameType=ChefsHatEnv.GAMETYPE["MATCHES"], gameStopCriteria=1, tournamentType="COMP")
-first, second, third, fourth = tournament.runTournament()
+tournament.runTournament()
 
 print("--- %s seconds ---" % (time.time() - start_time))
-print ("Winner:" + str(first.name))
-print ("Second:" + str(second.name))
-print ("Third:" + str(third.name))
-print ("Fourth:" + str(fourth.name))
+
 
 

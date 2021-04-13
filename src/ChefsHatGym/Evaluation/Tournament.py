@@ -1,5 +1,6 @@
 from ChefsHatGym.Agents import Agent_Naive_Random
 from ChefsHatGym.KEF import LogManager
+import csv
 
 
 import gym
@@ -23,18 +24,22 @@ class Tournament():
         self.tournamentType = tournamentType
 
         """Complement the group of agents to be a number pow 2"""
-
-
         self.opponents = self.complementGroups(opponents)
+
+    def createGroups(self):
+        if self.tournamentType == "COMP":
+            groups = [self.opponents[g:g + 4] for g in list(range(len(self.opponents)))[::4]]  # Create groups of 4 players
+
+        random.shuffle(groups)
+        return groups
 
 
     def runTournament(self):
         """Tournament parameters"""
         saveTournamentDirectory = self.savingDirectory  # Where all the logs will be saved
-        agents = self.opponents
 
-        groups = [agents[g:g + 4] for g in list(range(len(agents)))[::4]]  # Create groups of 4 players
-        random.shuffle(groups)
+
+        groups = self.createGroups()
 
         brackets = [groups[0:int(len(groups) / 2)], groups[int(len(groups) / 2):]]
 
@@ -56,6 +61,10 @@ class Tournament():
         logger.write("Phases per Bracket:" + str(phases))
 
         bWinners = []
+
+        finalPosition = []
+        thirds = []
+        fourths = []
         for b in range(len(brackets)):
             logger.newLogSession("Starting Games from Bracket:" + str(b+1))
             thisPhaseGroup = brackets[b]
@@ -64,13 +73,19 @@ class Tournament():
                 names = [a.name for g in thisPhaseGroup for a in g]
                 logger.write("- Participants:" + str(names))
                 newPhaseGroups = []
+                thirds.append([])
+                fourths.append([])
                 for game in range(len(thisPhaseGroup)):
                     names = [a.name for a in thisPhaseGroup[game]]
                     logger.write("- Game:" + str(game) + " - "+str(names))
-                    first, second, _, _ = self.playGame(thisPhaseGroup[game], b+1, p+1, game,saveTournamentDirectory, logger)
-                    logger.write("-- First:" + str(first.name) + " - Second:" + str(second.name))
-                    newPhaseGroups.append(first)
-                    newPhaseGroups.append(second)
+                    first, second, third, fourth = self.playGame(thisPhaseGroup[game], b+1, p+1, game,saveTournamentDirectory, logger)
+                    logger.write("-- First:" + str(first[0].name) + " - Second:" + str(second[0].name))
+
+                    newPhaseGroups.append(first[0])
+                    newPhaseGroups.append(second[0])
+                    thirds[p].append(third)
+                    fourths[p].append(fourth)
+
                 if p == phases-1:
                     bWinners.append(newPhaseGroups[0])
                     bWinners.append(newPhaseGroups[1])
@@ -78,17 +93,38 @@ class Tournament():
                    thisPhaseGroup = [newPhaseGroups[g:g + 4] for g in list(range(len(newPhaseGroups)))[::4]]
 
                 names = [a.name for a in bWinners if len(bWinners) > 0]
-                print ("bWinners:" + str(names))
+
+        """After the end of the game sort the fourths per phase add in the bottom of the final Position"""
+        for phaseIndex in range(phases):
+            fourthsThisPhase = sorted(fourths[phaseIndex], key=lambda tup: tup[1])
+            [finalPosition.append([f[0].name, f[1], (phaseIndex + 1)]) for f in fourthsThisPhase]
+
+            thirdsThisPhase = sorted(thirds[phaseIndex], key=lambda tup: tup[1])
+            [finalPosition.append([f[0].name, f[1], (phaseIndex + 1)]) for f in thirdsThisPhase]
+
 
         logger.newLogSession("Final match!")
         logger.write("- Participants:" + str(names))
         first, second, third, fourth = self.playGame(bWinners, 3, 1, 1, saveTournamentDirectory, logger)
+
+        """After the end of the last phase add the fourth player"""
+        finalPosition.append([fourth[0].name, fourth[1], phases])
+        finalPosition.append([third[0].name, third[1], phases])
+        finalPosition.append([second[0].name, second[1], phases])
+        finalPosition.append([first[0].name, first[1], phases])
         logger.write("-- Final position:")
-        logger.write("-- 1)" + str(first.name))
-        logger.write("-- 2)" + str(second.name))
-        logger.write("-- 3)" + str(third.name))
-        logger.write("-- 4)" + str(fourth.name))
-        return first, second, third, fourth
+        logger.write("-- 1)" + str(first[0].name))
+        logger.write("-- 2)" + str(second[0].name))
+        logger.write("-- 3)" + str(third[0].name))
+        logger.write("-- 4)" + str(fourth[0].name))
+
+        with open(self.savingDirectory+"/FinalResults.csv", mode='w') as csvFile:
+            csvWriter = csv.writer(csvFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            csvWriter.writerow(["Position", 'Player Name', 'Final Game Performance Score', 'Games Played'])
+            for pIndex, player in enumerate(reversed(finalPosition)):
+                csvWriter.writerow([(pIndex+1), player[0], player[1], player[2]])
+
 
 
 
@@ -112,7 +148,7 @@ class Tournament():
         if difference.is_integer():
             if len(group) < 8:
                 for n in range(int(8-len(group))):
-                    group.append(Agent_Naive_Random.AgentNaive_Random("Random" + str(n)))
+                    group.append(Agent_Naive_Random.AgentNaive_Random("RandomGYM_" + str(n)))
 
             return group
         else:
@@ -121,7 +157,7 @@ class Tournament():
             newAdditions = int(math.pow(2,intDiff+1) - len(group))
 
             for n in range(newAdditions):
-                group.append(Agent_Naive_Random.AgentNaive_Random("Random"+str(n)))
+                group.append(Agent_Naive_Random.AgentNaive_Random("RandomGYM_"+str(n)))
 
         return group
 
@@ -189,16 +225,28 @@ class Tournament():
         sortedScore = copy.copy(info["score"])
         sortedScore.sort()
 
-        winner = group[info["score"].index(sortedScore[-1])]
-        second = group[info["score"].index(sortedScore[-2])]
-        third = group[info["score"].index(sortedScore[-3])]
-        fourth = group[info["score"].index(sortedScore[-4])]
+        winnerIndex = info["score"].index(sortedScore[-1])
+        performanceScoreWinner = info["performanceScore"][winnerIndex]
+
+        secondIndex = info["score"].index(sortedScore[-2])
+        performanceScoreSecond = info["performanceScore"][secondIndex]
+
+        thirdIndex = info["score"].index(sortedScore[-3])
+        performanceScoreThird = info["performanceScore"][thirdIndex]
+
+        fourthIndex = info["score"].index(sortedScore[-4])
+        performanceScoreFourth = info["performanceScore"][fourthIndex]
+
+        winner = group[winnerIndex]
+        second = group[secondIndex]
+        third = group[thirdIndex]
+        fourth = group[fourthIndex]
 
         if self.verbose:
             logger.write("-- Performance:" + str(info["performanceScore"]))
             logger.write("-- Points:" + str(info["score"]))
 
-        return winner, second, third, fourth
+        return [winner,performanceScoreWinner], [second, performanceScoreSecond], [third,performanceScoreThird], [fourth,performanceScoreFourth]
 
 
 

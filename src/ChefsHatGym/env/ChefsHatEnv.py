@@ -365,7 +365,8 @@ class ChefsHatEnv(gym.Env):
 
                 self.score[self.currentPlayer] += points
 
-                pScore =  points / self.rounds
+
+                pScore =  (points*10) / self.rounds
                 # self.performanceScore[self.currentPlayer] += pScore
                 self.performanceScore[self.currentPlayer] = (self.performanceScore[self.currentPlayer] * (self.matches-1) + pScore)/ self.matches
                 thisPlayerPosition = playerFinishingPosition

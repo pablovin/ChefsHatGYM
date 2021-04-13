@@ -47,7 +47,6 @@ class Logger:
 
         """
 
-
         if saveLog:
             try:
                 self.isLogDirectoryValid(logDirectory)

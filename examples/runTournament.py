@@ -17,9 +17,9 @@ def getAgents(totalAgents):
 
 start_time = time.time()
 """Tournament parameters"""
-saveTournamentDirectory = "folder" #Where all the logs will be saved
+saveTournamentDirectory = "/home/pablo/Documents/Datasets/ChefsHatCompetition/testing" #Where all the logs will be saved
 agents = getAgents(35)
-tournament = Tournament.Tournament(agents, saveTournamentDirectory, verbose=True, threadTimeOut=5, actionTimeOut=5, gameType=ChefsHatEnv.GAMETYPE["MATCHES"], gameStopCriteria=1)
+tournament = Tournament.Tournament(agents, saveTournamentDirectory, verbose=True, threadTimeOut=5, actionTimeOut=5, gameType=ChefsHatEnv.GAMETYPE["MATCHES"], gameStopCriteria=1, tournamentType="COMP")
 first, second, third, fourth = tournament.runTournament()
 
 print("--- %s seconds ---" % (time.time() - start_time))

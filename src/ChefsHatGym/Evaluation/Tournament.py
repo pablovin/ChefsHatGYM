@@ -1,4 +1,6 @@
 from ChefsHatGym.Agents import Agent_Naive_Random
+from ChefsHatGym.KEF import LogManager
+
 
 import gym
 import numpy
@@ -11,19 +13,20 @@ import copy
 class Tournament():
 
 
-    def __init__(self, opponents, savingDirectory, verbose=True, threadTimeOut=5, actionTimeOut=5,  gameType=["POINTS"], gameStopCriteria=15):
+    def __init__(self, opponents, savingDirectory, verbose=True, threadTimeOut=5, actionTimeOut=5,  gameType=["POINTS"], gameStopCriteria=15, tournamentType="COMP"):
         self.savingDirectory = savingDirectory
         self.verbose= verbose
         self.threadTimeOut = threadTimeOut
         self.actionTimeout = actionTimeOut
         self.gameType = gameType
         self.gameStopCriteria = gameStopCriteria
+        self.tournamentType = tournamentType
 
         """Complement the group of agents to be a number pow 2"""
 
+
         self.opponents = self.complementGroups(opponents)
-        if self.verbose:
-            print("--- Complementing the opponents with random agents to a total of " + str(len(opponents)) + " agents!")
+
 
     def runTournament(self):
         """Tournament parameters"""
@@ -35,41 +38,56 @@ class Tournament():
 
         brackets = [groups[0:int(len(groups) / 2)], groups[int(len(groups) / 2):]]
 
-        """Start each game of each bracket"""
-        finalGroup = []
-        for indexBracket, bracket in enumerate(brackets):  # for every bracket
-            currentBracket = bracket
-            newGroup = []
-            currentRound = 1
-            numberOfGroupsInThisRound = len(bracket)
-            removedGroups = 0
+        phases = int(math.log(len(brackets[0]),2))+1
 
-            while len(currentBracket) > 0:
-                group = currentBracket[0].copy()
-                first, second, _, _ = self.playGame(group, indexBracket, currentRound, saveTournamentDirectory)
+        logger = LogManager.Logger(saveTournamentDirectory+"/Log.txt", verbose=True)
 
-                newGroup.append(first)
-                newGroup.append(second)
+        names = [a.name for g in brackets[0] for a in g]
 
-                if len(newGroup) == 4:
-                    currentBracket.append(newGroup)
-                    newGroup = []
+        logger.newLogSession("Tournament starting!")
+        logger.write("Total players:" + str(len(self.opponents)))
+        logger.write("Total groups:" + str(len(groups)))
+        for bIndex, b in enumerate(brackets):
+            logger.write("Bracket "+str(bIndex)+":")
+            for gIndex, g in enumerate(b):
+                names = [a.name for a in b[gIndex]]
+                logger.write(" -Group "+str(gIndex)+":"+str(names))
 
-                del currentBracket[0]
-                removedGroups += 1
+        logger.write("Phases per Bracket:" + str(phases))
 
-                if removedGroups == numberOfGroupsInThisRound:
-                    currentRound += currentRound
-                    removedGroups = 0
-                    numberOfGroupsInThisRound = numberOfGroupsInThisRound / 2
+        bWinners = []
+        for b in range(len(brackets)):
+            logger.newLogSession("Starting Games from Bracket:" + str(b+1))
+            thisPhaseGroup = brackets[b]
+            for p in range(phases):
+                logger.newLogSession("Starting Phase:" + str(p+1))
+                names = [a.name for g in thisPhaseGroup for a in g]
+                logger.write("- Participants:" + str(names))
+                newPhaseGroups = []
+                for game in range(len(thisPhaseGroup)):
+                    names = [a.name for a in thisPhaseGroup[game]]
+                    logger.write("- Game:" + str(game) + " - "+str(names))
+                    first, second, _, _ = self.playGame(thisPhaseGroup[game], b+1, p+1, game,saveTournamentDirectory, logger)
+                    logger.write("-- First:" + str(first.name) + " - Second:" + str(second.name))
+                    newPhaseGroups.append(first)
+                    newPhaseGroups.append(second)
+                if p == phases-1:
+                    bWinners.append(newPhaseGroups[0])
+                    bWinners.append(newPhaseGroups[1])
+                else:
+                   thisPhaseGroup = [newPhaseGroups[g:g + 4] for g in list(range(len(newPhaseGroups)))[::4]]
 
-            finalGroup.append(first)
-            finalGroup.append(second)
+                names = [a.name for a in bWinners if len(bWinners) > 0]
+                print ("bWinners:" + str(names))
 
-        indexBracket = 3
-        currentRound = 1
-        first, second, third, fourth = self.playGame(group, indexBracket, currentRound, saveTournamentDirectory)
-
+        logger.newLogSession("Final match!")
+        logger.write("- Participants:" + str(names))
+        first, second, third, fourth = self.playGame(bWinners, 3, 1, 1, saveTournamentDirectory, logger)
+        logger.write("-- Final position:")
+        logger.write("-- 1)" + str(first.name))
+        logger.write("-- 2)" + str(second.name))
+        logger.write("-- 3)" + str(third.name))
+        logger.write("-- 4)" + str(fourth.name))
         return first, second, third, fourth
 
 
@@ -109,19 +127,15 @@ class Tournament():
 
 
     """Playing a Game"""
-    def playGame(self, group, bracket, round, saveDirectory):
+    def playGame(self, group, bracket, round, gameNumber, saveDirectory, logger):
 
         """Experiment parameters"""
-        saveDirectory = saveDirectory+"/Bracket_"+str(bracket)+"/Round_"+str(round)
+        saveDirectory = saveDirectory+"/Bracket_"+str(bracket)+"/Phase_"+str(round)+"/Game_"+str(gameNumber)
         verbose = False
         saveLog = True
         saveDataset = True
 
         agentNames = [agent.name for agent in group]
-
-        if self.verbose:
-            print("-------------")
-            print ("--- Opponents:" + str(agentNames))
 
         rewards = []
         for agent in group:
@@ -181,13 +195,8 @@ class Tournament():
         fourth = group[info["score"].index(sortedScore[-4])]
 
         if self.verbose:
-            print("--- Bracket:" + str(bracket))
-            print("--- Round:" + str(round))
-            print("--- Group:" + str(agentNames))
-            print("--- Score:" + str(info["score"]))
-            print("--- Performance:" + str(info["performanceScore"]))
-            print("--- Positions:" + winner.name+","+second.name+","+third.name+","+fourth.name)
-            print("-------------")
+            logger.write("-- Performance:" + str(info["performanceScore"]))
+            logger.write("-- Points:" + str(info["score"]))
 
         return winner, second, third, fourth
 

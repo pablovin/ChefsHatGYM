@@ -33,6 +33,7 @@ class ChefsHatEnv(gym.Env):
       self.maxInvalidActions = maxInvalidActions
 
       self.playersInvalidActions = [0, 0, 0, 0]
+      self.playersPassAction = [0, 0, 0, 0]
 
       # if integratedState:
       self.action_space = spaces.Discrete(200)
@@ -330,16 +331,11 @@ class ChefsHatEnv(gym.Env):
 
     stateBefore = copy.copy(self.getObservation())
 
-    # print ("self.maxInvalidActions:"+str(self.maxInvalidActions))
-    # print (" This player:" + str( thisPlayer))
-    # print (" self.playersInvalidActions[thisPlayer]:" + str( self.playersInvalidActions))
-
-    if self.playersInvalidActions[thisPlayer] >= self.maxInvalidActions:
+    if self.playersInvalidActions[thisPlayer] >= self.maxInvalidActions or self.playersPassAction[thisPlayer >= self.maxInvalidActions]:
 
         action = self.getRandomAction(possibleActions)
         actionIsRandom = True
-        # print ("Possible Actions:" + str(numpy.array(possibleActions)))
-        # print ("Action:" + str(action))
+
     if self.isActionAllowed(thisPlayer, action, possibleActions):  # if the player can make the action, do it.
 
         validAction = True
@@ -348,8 +344,10 @@ class ChefsHatEnv(gym.Env):
 
         if numpy.argmax(action) == len(possibleActions) - 1: # Pass action
             actionComplete = (DataSetManager.actionPass, [0])
+            self.playersPassAction[thisPlayer] +=1
 
         else: # Discard action
+            self.playersPassAction[thisPlayer] = 0
             cardsDiscarded = self.discardCards(self.currentPlayer, action)
             actionComplete = (DataSetManager.actionDiscard, cardsDiscarded)
             self.lastToDiscard = self.currentPlayer

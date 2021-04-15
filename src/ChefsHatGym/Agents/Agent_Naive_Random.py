@@ -5,7 +5,7 @@ from ChefsHatGym.Rewards import RewardOnlyWinning
 
 class AgentNaive_Random(IAgent.IAgent):
 
-    def __init__(self, name="NAIVE_RANDOM"):
+    def __init__(self, name="NAIVE"):
 
         self.name = "RANDOM_"+name
         self.reward = RewardOnlyWinning.RewardOnlyWinning()
@@ -33,7 +33,7 @@ class AgentNaive_Random(IAgent.IAgent):
     def matchUpdate(self, envInfo):
         pass
 
-    def getReward(self, info):
+    def getReward(self, info, stateBefore, stateAfter):
 
         thisPlayer = info["thisPlayerPosition"]
         matchFinished = info["thisPlayerFinished"]

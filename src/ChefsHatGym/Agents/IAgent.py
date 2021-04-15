@@ -13,7 +13,7 @@ class IAgent():
     name = ""
 
     @abstractmethod
-    def __init__(self, name, _):
+    def __init__(self, name, saveFolder, _):
         pass
 
     @abstractmethod
@@ -21,7 +21,7 @@ class IAgent():
         pass
 
     @abstractmethod
-    def getReward(self, info):
+    def getReward(self, info, stateBefore, stateAfter):
         pass
 
     @abstractmethod

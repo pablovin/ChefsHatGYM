@@ -328,6 +328,8 @@ class ChefsHatEnv(gym.Env):
 
     observationBefore = copy.copy(self.getObservation())
 
+    stateBefore = copy.copy(self.getObservation())
+
     # print ("self.maxInvalidActions:"+str(self.maxInvalidActions))
     # print (" This player:" + str( thisPlayer))
     # print (" self.playersInvalidActions[thisPlayer]:" + str( self.playersInvalidActions))
@@ -435,7 +437,8 @@ class ChefsHatEnv(gym.Env):
     info["lastActionPlayers"] = self.lastActionPlayers
     info["players"] = self.playerNames
 
-    reward = self.rewardFunctions[thisPlayer](info)
+    stateAfter = copy.copy(self.getObservation())
+    reward = self.rewardFunctions[thisPlayer](info,stateBefore, stateAfter )
 
     return self.getObservation(), reward, isMatchOver, info
         # observation, reward, isMatchOver, {}

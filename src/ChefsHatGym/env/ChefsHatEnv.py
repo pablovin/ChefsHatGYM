@@ -331,7 +331,7 @@ class ChefsHatEnv(gym.Env):
 
     stateBefore = copy.copy(self.getObservation())
 
-    if self.playersInvalidActions[thisPlayer] >= self.maxInvalidActions or self.playersPassAction[thisPlayer >= self.maxInvalidActions]:
+    if self.playersInvalidActions[thisPlayer] >= self.maxInvalidActions or self.playersPassAction[thisPlayer] >= self.maxInvalidActions:
 
         action = self.getRandomAction(possibleActions)
         actionIsRandom = True

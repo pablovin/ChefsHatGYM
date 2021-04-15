@@ -8,6 +8,7 @@ import numpy
 import random
 import math
 import copy
+import gc
 
 
 
@@ -120,10 +121,10 @@ class Tournament():
 
                     """Competitive Ranking"""
                     if third[0].name in self.opponentsComp or third[0].name in self.oponentsCompCoop:
-                        thirds[p].append([third[0].name, third[1]])
+                        thirds[p].append([copy.copy(third[0].name), copy.copy(third[1])])
 
                     if fourth[0].name in self.opponentsComp or fourth[0].name in self.oponentsCompCoop:
-                        fourths[p].append([fourth[0].name, fourth[1]])
+                        fourths[p].append([copy.copy(fourth[0].name), copy.copy(fourth[1])])
 
                     """Cooperative Ranking"""
 
@@ -142,7 +143,7 @@ class Tournament():
                             # print("TeamMate:" + str(teamMate))
                             if not playerCoop[0].name == teamMate[0].name:
                                 if "TeamMate" in teamMate[0].name and playerCoop[0].name in teamMate[0].name:
-                                    outCoop[p].append([[playerCoop[0].name, playerCoop[1]], [teamMate[0].name, teamMate[1]]])
+                                    outCoop[p].append([[copy.copy(playerCoop[0].name), copy.copy(playerCoop[1])], [copy.copy(teamMate[0].name), copy.copy(teamMate[1])]])
 
 
                     """Check if the first and second are team mates and If not, then check which is the position of the team mate
@@ -162,9 +163,11 @@ class Tournament():
                                 if not playerCoop[0].name == teamMate[0].name:
                                     if "TeamMate" in teamMate[0].name and playerCoop[0].name in teamMate[0].name:
                                         outCoop[p].append(
-                                            [[playerCoop[0].name, playerCoop[1]], [teamMate[0].name, teamMate[1]]])
+                                            [[copy.copy(playerCoop[0].name), copy.copy(playerCoop[1])], [copy.copy(teamMate[0].name), copy.copy(teamMate[1])]])
 
-
+                    del third
+                    del fourth
+                    gc.collect()
 
                 if p == phases-1:
                     bWinners.append(newPhaseGroups[0])
@@ -172,7 +175,7 @@ class Tournament():
                 else:
                    thisPhaseGroup = [newPhaseGroups[g:g + 4] for g in list(range(len(newPhaseGroups)))[::4]]
 
-                names = [a.name for a in bWinners if len(bWinners) > 0]
+
 
 
         """After the end of the game sort the competitive rank fourths and thirds per phase and add them the bottom of the final Position"""
@@ -189,13 +192,15 @@ class Tournament():
             [finalPositionCoop.append([f[0][0],f[0][1], f[1][0],f[1][1], (phaseIndex + 1)]) for f in agentsThisPhase]
 
         logger.newLogSession("Final match!")
+
+        names = [a.name for a in bWinners if len(bWinners) > 0]
         logger.write("- Participants:" + str(names))
         first, second, third, fourth = self.playGame(bWinners, 3, 1, 1, saveTournamentDirectory, logger)
 
         """After the end of the last phase add the competitive agents to the competitive rank"""
         for agent in [fourth, third, second, first]:
             if agent[0].name in self.opponentsComp or agent[0].name in self.oponentsCompCoop:
-                finalPositionComp.append([agent[0].name, agent[1], phases+1])
+                finalPositionComp.append([copy.copy(agent[0].name), copy.copy(agent[1]), copy.copy(phases+1)])
 
         """After the end of the last phase add the coop agents to the cooperative rank"""
         """Find fourth's and third's team mate and log them"""
@@ -211,7 +216,7 @@ class Tournament():
                     if not agent[0].name == teamMate[0].name:
                         if "TeamMate" in teamMate[0].name and agent[0].name in teamMate[0].name:
                             finalCoopPositions.append(
-                                [[agent[0].name, agent[1]], [teamMate[0].name, teamMate[1]]])
+                                [[copy.copy(agent[0].name), copy.copy(agent[1])], [copy.copy(teamMate[0].name), copy.copy(teamMate[1])]])
 
 
         agentsThisPhase = sorted(finalCoopPositions, key=lambda tup: tup[1][1])
@@ -342,19 +347,19 @@ class Tournament():
 
 
 
-        sortedScore = copy.copy(info["score"])
+        sortedScore = copy.copy(info["performanceScore"])
         sortedScore.sort()
 
-        winnerIndex = info["score"].index(sortedScore[-1])
+        winnerIndex = info["performanceScore"].index(sortedScore[-1])
         performanceScoreWinner = info["performanceScore"][winnerIndex]
 
-        secondIndex = info["score"].index(sortedScore[-2])
+        secondIndex = info["performanceScore"].index(sortedScore[-2])
         performanceScoreSecond = info["performanceScore"][secondIndex]
 
-        thirdIndex = info["score"].index(sortedScore[-3])
+        thirdIndex = info["performanceScore"].index(sortedScore[-3])
         performanceScoreThird = info["performanceScore"][thirdIndex]
 
-        fourthIndex = info["score"].index(sortedScore[-4])
+        fourthIndex = info["performanceScore"].index(sortedScore[-4])
         performanceScoreFourth = info["performanceScore"][fourthIndex]
 
         winner = group[winnerIndex]

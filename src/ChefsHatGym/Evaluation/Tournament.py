@@ -353,13 +353,19 @@ class Tournament():
         winnerIndex = info["performanceScore"].index(sortedScore[-1])
         performanceScoreWinner = info["performanceScore"][winnerIndex]
 
-        secondIndex = info["performanceScore"].index(sortedScore[-2])
+        sortedScore.pop(-1)
+
+        secondIndex = info["performanceScore"].index(sortedScore[-1])
         performanceScoreSecond = info["performanceScore"][secondIndex]
 
-        thirdIndex = info["performanceScore"].index(sortedScore[-3])
+        sortedScore.pop(-1)
+
+        thirdIndex = info["performanceScore"].index(sortedScore[-1])
         performanceScoreThird = info["performanceScore"][thirdIndex]
 
-        fourthIndex = info["performanceScore"].index(sortedScore[-4])
+        sortedScore.pop(-1)
+
+        fourthIndex = info["performanceScore"].index(sortedScore[-1])
         performanceScoreFourth = info["performanceScore"][fourthIndex]
 
         winner = group[winnerIndex]

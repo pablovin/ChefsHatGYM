@@ -51,7 +51,7 @@ class ChefsHatEnv(gym.Env):
   def startNewGame(self):
 
     if not self.logDirectory=="":
-        experimentName = "Episode_"+str(self.episodeNumber)+"_Players_" + str(self.playerNames) +  "_GameType_" + str(self.gameType) + "_StopCriteria" + str(self.stopCriteria)
+        experimentName = "E_"+str(self.episodeNumber)+"_P_" + str(self.playerNames) +  "_GT_" + str(self.gameType) + "_SC" + str(self.stopCriteria)
         self.experimentManager = ExperimentManager.ExperimentManager(self.logDirectory,
                                                                      experimentName,
                                                                      verbose=self.verbose, saveLog=self.saveLog)

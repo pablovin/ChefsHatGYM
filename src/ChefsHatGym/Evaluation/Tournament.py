@@ -70,7 +70,7 @@ class Tournament():
         for agentCategory in [self.agentsComp, self.agentsCoop, self.agentsCompCoop]:
             for agent in agentCategory:
                 if not "TeamMate" in agent.name or not "RandomGYM_" in agent.name:
-                    thisAgentFolder = self.savingDirectory+"/"+agent.name
+                    thisAgentFolder = self.savingDirectory+"/Agents/"+agent.name
                     if not os.path.exists(thisAgentFolder):
                         os.makedirs(thisAgentFolder)
                         agent.saveModelIn = thisAgentFolder

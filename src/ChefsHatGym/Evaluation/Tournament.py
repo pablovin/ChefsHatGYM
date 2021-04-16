@@ -16,6 +16,35 @@ class Tournament():
 
 
     def __init__(self, savingDirectory, verbose=True, opponentsComp=[], opponentsCoop=[], oponentsCompCoop=[],threadTimeOut=5, actionTimeOut=5,  gameType=["POINTS"], gameStopCriteria=15):
+
+        """Constructor of the tournament.
+                :param savingDirectory: directory where the tournament logs and data will be saved.
+                :type savingDirectory: str
+
+                :param verbose: if the tournament will be written on the console
+                :type verbose: bool
+
+                :param opponentsComp:list of IAgents that will play the tournament and will  be evaluated in a competitive manner only.
+                :type opponentsComp: list
+
+                :param opponentsCoop:list of IAgents that will play the tournament and will be evaluated in a cooperative manner only.
+                :type opponentsCoop: list
+
+                :param oponentsCompCoop:list of IAgents that will play the tournament and will be evaluated in both competitive and cooperative manner.
+                :type opponentsCoop: list
+
+                :param threadTimeOut: value in seconds that each agent is allowed when executing the actionUpdate, observeOthers and matchUpdate functions indidividually
+                :type threadTimeOut: int
+
+                :param actionTimeOut: value in seconds that each agent is allowed when executing the getAction function
+                :type threadTimeOut: int
+
+                :param gameType: type of the played game, can be POINTS or MATCH
+                :type gameType: str
+
+        """
+
+
         self.savingDirectory = savingDirectory
         self.verbose= verbose
         self.threadTimeOut = threadTimeOut
@@ -36,7 +65,8 @@ class Tournament():
         self.createFolderss()
 
     def createFolderss(self):
-
+        """Create the folders that will be acessible by the agents
+        """
         for agentCategory in [self.agentsComp, self.agentsCoop, self.agentsCompCoop]:
             for agent in agentCategory:
                 if not "TeamMate" in agent.name or not "RandomGYM_" in agent.name:
@@ -48,7 +78,12 @@ class Tournament():
 
 
     def createGroups(self):
+        """Create the groups that will play the game.
+         For each coop and compcoop agent, the agent will be paired with a "TeamMate_agent.name" random agent.
 
+        :return: groups - list
+        :rtype: list
+        """
         random.shuffle(self.agentsComp)
         random.shuffle(self.agentsCoop)
         random.shuffle(self.agentsCompCoop)
@@ -71,6 +106,11 @@ class Tournament():
 
 
     def runTournament(self):
+
+        """Run an entire tournament.
+         Create all the brackets, control the game and tournament phases and creates all the metrics for comp and coop measures.
+        """
+
         """Tournament parameters"""
         saveTournamentDirectory = self.savingDirectory  # Where all the logs will be saved
 
@@ -81,8 +121,6 @@ class Tournament():
         phases = int(math.log(len(brackets[0]),2))+1
 
         logger = LogManager.Logger(saveTournamentDirectory+"/Log.txt", verbose=True)
-
-        names = [a.name for g in brackets[0] for a in g]
 
         logger.newLogSession("Tournament starting!")
         logger.write("Total players:" + str(len(self.opponentsComp) + len(self.opponentsCoop)*2 + len(self.oponentsCompCoop)*2))
@@ -255,8 +293,15 @@ class Tournament():
                 csvWriter.writerow([(pIndex+1), player[0], player[1], player[2], player[3],player[4]])
 
 
-    """Get Random action"""
     def getRandomAction(self, possibleActions):
+        """getRandomAction
+               Return a random allowed action.
+
+              :param possibleActions: The list of possible actions
+              :type possibleActions: list, mandatory
+              :return: List the random action.
+              :rtype: list
+        """
         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
 
         random.shuffle(itemindex)
@@ -269,6 +314,23 @@ class Tournament():
     """Complement the opponents with random agents until we have enough to create two brackets"""
     def complementGroups(self, comp, coop, compCoop):
 
+        """Complement the number of agents so the game will have a number of 2^n players.
+        The new players will be all random players and will have a RandomGYM_ name pattern.
+
+
+               :param comp: The list of comp agents
+               :type comp: list, mandatory
+
+               :param coop: The list of coop agents
+               :type coop: list, mandatory
+
+               :param compCoop: The list of compCoop agents
+               :type compCoop: list, mandatory
+
+
+               :return: List of updated agents
+               :rtype: list
+         """
 
         totalAgents = len(comp) + len(coop)*2 + len(compCoop)*2
         # print ("Total agents:" + str(totalAgents))
@@ -297,6 +359,34 @@ class Tournament():
 
     """Playing a Game"""
     def playGame(self, group, bracket, round, gameNumber, saveDirectory, logger):
+
+        """Play a single game and return the players in finishing order together with their score.
+
+        The new players will be all random players and will have a RandomGYM_ name pattern.
+
+
+               :param group: The list of players
+               :type group: list, mandatory
+
+               :param bracket: The bracket number
+               :type bracket: int, mandatory
+
+               :param round: The round number
+               :type round: int, mandatory
+
+               :param gameNumber: The number of this game within the tournament context
+               :type gameNumber: int, mandatory
+
+               :param saveDirectory: where this game will be saved
+               :type gameNumber: str, mandatory
+
+               :param logger: The logger
+               :type logger: KEF.LogManager
+
+
+               :return: [winner,performanceScoreWinner], [second, performanceScoreSecond], [third,performanceScoreThird], [fourth,performanceScoreFourth]
+               :rtype: list
+         """
 
         """Experiment parameters"""
         saveDirectory = saveDirectory+"/Bracket_"+str(bracket)+"/Phase_"+str(round)+"/Game_"+str(gameNumber)

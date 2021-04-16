@@ -102,18 +102,6 @@ class ExperimentManager:
         self._baseDirectory = baseDirectory
         self._experimentName = experimentName + "_" + str(datetime.datetime.now()).replace(" ", "_")
 
-        """Creating the Model Folder"""
-        self._createFolder("Model")
-
-        self._modelDirectory = self.baseDirectory + "/" + self.experimentName + "/Model"
-
-        """Creating the Plots Folder"""
-        self._createFolder("Plots")
-
-        self._plotManager = PlotManager.PlotManager(self.baseDirectory + "/" + self.experimentName + "/Plots/")
-
-        self._plotsDirectory = self.baseDirectory + "/" + self.experimentName + "/Plots"
-
         """Creating the dataset folder"""
         self._dataSetDirectory = self.baseDirectory + "/" + self.experimentName + "/Datasets"
 

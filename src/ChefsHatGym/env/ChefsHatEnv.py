@@ -10,14 +10,45 @@ GAMETYPE = {"POINTS":"POINTS",
             "MATCHES":"MATCHES"}
 
 class ChefsHatEnv(gym.Env):
+  """ChefsHatEnv is the Chefs Hat game enviromnet class that allows to start and execute each step of the game.
+       To instatiate the class, use gym.make('chefshat-v0')
+      Attributes
+      :param gameFinished: Whether the game has been finished (True) or not (False).
+      :type gameFinished:bool
+  """
+
+
   metadata = {'render.modes': ['human']}
 
 
   def __init__(self):
+      """Constructor method. Use gym.make instead of it.
+      """
       pass
 
 
   def startExperiment(self, rewardFunctions=[], gameType=GAMETYPE["POINTS"], stopCriteria=3, maxInvalidActions=10, playerNames=[], logDirectory="", verbose=0, saveLog=False, saveDataset=False):
+      """This method stores parameters for a new exeperiment. An experiment is a set of games (see startNewGame method).
+           :param rewardFunctions: A list of reward functions for each player, defaults to []
+           :type rewardFunctions: list, mandatory
+           :param gameType: The game type ("POINTS" or "MATCHES"), defaults to GAMETYPE["POINTS"]
+           :type gameType: str, optional
+           :param stopCriteria: Number of "MATCHES" or "POINTS" to stop the experiment, defaults to 3
+           :type stopCriteria: int, optional
+           :param maxInvalidActions: How many invalid or continuous pass actions an Agent can do before a random action is assigned to it, defaults to 10
+           :type maxInvalidActions: int, optional
+           :param playerNames: A list of names for each player, defaults to []
+           :type playerNames: list, mandatory
+           :param logDirectory: The path for log directory, defaults to ""
+           :type logDirectory: str, optional
+           :param verbose: Verbose level (0 to 1), defaults to 0
+           :type verbose: int, optional
+           :param saveLog: Whether the log file will be generated (True) or not (False), defaults to False
+           :type saveLog: bool, optional
+           :param saveDataset: Whether the game dataset will be saved (True) or not (False), defaults to False
+           :type saveDataset: bool, optional
+      """
+
       # Start all game variables
       self.rewardFunctions = rewardFunctions
       self.gameType = gameType
@@ -40,15 +71,21 @@ class ChefsHatEnv(gym.Env):
       self.observation_space = spaces.Box(low=numpy.zeros(228), high=numpy.ones(228))
 
   def reset(self):
+      """This method increments episodeNumber, start a new game and return the first observation
+            :return: The first observation array after the game has started. The observation is an int data-type ndarray.
+            :rtype: ndarray
+      """
+
       self.episodeNumber += 1
       self.startNewGame()
       return self.getObservation()
 
-  """Starts a new game: you have to define the game type (per points or per game), and the stoping criteria (maximum points, maximum games)
-  saveLog = save a logfile 
-  verbose = writes the log on screen
-  """
+
   def startNewGame(self):
+    """Starts a new game using the parameters defined by the method startExperiment.
+          You have to define the game type (per points or per game), and the stoping criteria (maximum points, maximum games).
+          For logging purpose, set the saveLog, verbose and logDirectory in startExperiment method.
+    """
 
     if not self.logDirectory=="":
         experimentName = "E_"+str(self.episodeNumber)+"_P_" + str(self.playerNames) +  "_GT_" + str(self.gameType) + "_SC" + str(self.stopCriteria)
@@ -113,8 +150,9 @@ class ChefsHatEnv(gym.Env):
 
   """Start a new match"""
   def startNewmatch(self):
-
-    # Create a deck
+    """"Start a new match
+    """
+      # Create a deck
     self.cards = []
     for i in range(self.maxCardNumber + 1):
       for a in range(i):
@@ -171,7 +209,7 @@ class ChefsHatEnv(gym.Env):
 
         dishwasherCards, waiterCard, souschefCard, chefCards = [], [], [], []
         if not foodFight or not specialAction:
-            self.changeRoles(foodFight)
+            self.changeRoles()
 
             if not self.experimentManager == None:
                 self.logger.newLogSession("Changind roles!")
@@ -224,13 +262,19 @@ class ChefsHatEnv(gym.Env):
     if not self.experimentManager == None:
       self.logger.newLogSession("Round:" + str(self.rounds))
 
-  """Get a new observation
-  
-  composed of the current board, the playersHand and the possible actions
-  
-  """
-  def getObservation(self):
 
+  def getObservation(self):
+   """Get a new observation. The observation is composed of the current board, the playersHand and the possible actions.
+      :return: The observation is an int data-type ndarray.
+                The observation array has information about the board game, the current player's hand, and current player possible actions.
+                This array must have the shape of (228, ) as follows:
+                The first 11 elements represent the board game card placeholder (the pizza area).
+                The game cards are represented by an integer, where 0 (zero) means no card.
+                The following 17 elements (from index 11 to 27) represent the current player hand cards in the sequence.
+                By the end, the last 200 elements (from index 28 to 227) represent all possible actions in the game.
+                The allowed actions for the current player are filled with one, while invalid actions are filled with 0.
+      :rtype: ndarray
+   """
    board = numpy.array(self.board) / (self.maxCardNumber + 2)
    playersHand = numpy.array(self.playersHand[self.currentPlayer]) / (self.maxCardNumber + 2)
    possibleActions = self.getPossibleActions(self.currentPlayer)
@@ -239,7 +283,10 @@ class ChefsHatEnv(gym.Env):
 
 
   def isGameOver(self):
-
+      """isGameOver
+           :return: Boolean flag if the game is over.
+           :rtype: bool
+      """
       gameFinished = False
 
       # input("here")
@@ -257,31 +304,10 @@ class ChefsHatEnv(gym.Env):
 
       return gameFinished
 
-
-  def thisPlayerCanPlay(self, player):
-
-      thisPlayer = False
-      playersInGame = []
-      for i in range(len(self.lastActionPlayers)):
-          if not (i in self.finishingOrder):
-              playersInGame.append(i)
-
-      # if player in playersInGame:
-      #     return True
-
-      if self.hasPlayerPassed(self.currentPlayer):
-          return False
-
-      return True
-
-
-      # print("player in playersInGame:" + str(player in playersInGame) + " - hasPassed:" + str(
-      #     self.hasPlayerPassed(self.currentPlayer)))
-      #
-      # return thisPlayer
-
   def nextPlayer(self):
-
+    """nextPlayer
+           advance to the next player
+    """
     self.currentPlayer = self.currentPlayer + 1
     if self.currentPlayer == self.numberPlayers:
           self.currentPlayer = 0
@@ -292,20 +318,25 @@ class ChefsHatEnv(gym.Env):
             if self.currentPlayer == self.numberPlayers:
                 self.currentPlayer = 0
 
-    # if len(self.finishingOrder) <= 3:
-    #     for i in range(len(self.lastActionPlayers)):
-    #         if self.currentPlayer in self.finishingOrder or((not self.lastActionPlayers[self.currentPlayer] == "") and self.lastActionPlayers[self.currentPlayer][0] == DataSetManager.actionPass):
-    #             self.currentPlayer = self.currentPlayer + 1
-    #             if self.currentPlayer == self.numberPlayers:
-    #                 self.currentPlayer = 0
 
-
-  """Calculate Score"""
   def calculateScore(self, playerPosition):
-
+      """calculateScore
+           :param playerPosition: The finishing position of the player
+           :type playerPosition: int, mandatory
+           :return: Integer the score of the given player.
+           :rtype: int
+      """
       return 3 - playerPosition
 
   def getRandomAction(self, possibleActions):
+     """getRandomAction
+            Return a random allowed action.
+
+           :param possibleActions: The list of possible actions
+           :type possibleActions: list, mandatory
+           :return: List the random action.
+           :rtype: list
+     """
      itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
 
      random.shuffle(itemindex)
@@ -316,6 +347,34 @@ class ChefsHatEnv(gym.Env):
      return a
 
   def step(self, action):
+    """Execute an action in the game.
+    :param action: The action array with 200 elements, where the choosen action is the index of the highest value
+    :type action: ndarray
+    :return: a tuple cointaining:
+            observation - ndarray
+            return of reward function - float
+            True if the match is over, False if not - bool
+            info - dict: {
+            'actionIsRandom':(bool),
+            'validAction': (bool),
+            'matches': (bool),
+            'rounds': (int),
+            'score': (int),
+            'performanceScore': (int),
+            'thisPlayer': (int),
+            'thisPlayerFinished': (bool),
+            'isPizzaReady': (bool),
+            'boardBefore': (ndarray),
+            'boardAfter': (ndarray),
+            'possibleActions': (list),
+            'action': (ndarray),
+            'thisPlayerPosition': (int),
+            'thisPlayerPosition': (ndarray),
+            'players': (list),
+             }
+
+    :rtype: tuple
+    """
 
     validAction = False
     isMatchOver = False
@@ -450,7 +509,11 @@ class ChefsHatEnv(gym.Env):
       pass
 
   def makePizza(self):
+    """Make a pizza. Update the game to the next round and collect all cards from the board
 
+    :return: pizzaReady - bool
+    :rtype: bool
+    """
     playersInGame = []
     for i in range(len(self.lastActionPlayers)):
        if not (i in self.finishingOrder):
@@ -492,6 +555,10 @@ class ChefsHatEnv(gym.Env):
     return pizzaReady
 
   def nextRound(self):
+      """move the game to the next round
+
+
+      """
       self.rounds = self.rounds+1
 
       newLastActionPlayers = ["", "", "", ""]
@@ -508,7 +575,11 @@ class ChefsHatEnv(gym.Env):
 
 
   def isMatchover(self):
+      """Verify if this match is over
 
+       :return: isMatchOver - bool
+        :rtype: bool
+      """
       isMatchOver = True
       for i in range(len(self.playersHand)):
           if numpy.array(self.playersHand[i]).sum() > 0:
@@ -524,6 +595,11 @@ class ChefsHatEnv(gym.Env):
 
 
   def getHighLevelActions(self):
+      """Generate all the possible actions in a human-friendly way
+
+       :return: highLevelActions - List
+        :rtype: list
+      """
       highLevelActions = []
 
       for cardNumber in range(self.maxCardNumber):
@@ -541,7 +617,14 @@ class ChefsHatEnv(gym.Env):
   # where the *3 refers to the options: discard a card, card+1 joker, card + 2 jokers
   # the 2 refers to: discard only one joker, and pass action
   def getPossibleActions(self, player):
+      """Given a player, return the actions this player is allowed to make
 
+        :param player: the player index
+        :type player: int
+
+       :return: getPossibleActions - (ndarray)
+        :rtype: (ndarray)
+      """
       if self.playerStartedGame == self.currentPlayer and self.rounds == 1:
           firstAction = True
 
@@ -668,6 +751,20 @@ class ChefsHatEnv(gym.Env):
       return possibleActions
 
   def isActionAllowed(self, player, action, possibleActions):
+      """Given a player, the action and possible actions, verify if this action is allowed
+
+        :param player: the player index
+        :type player: int
+
+        :param action: the action
+        :type player: list
+
+        :param possibleActions: the possible actions for this player
+        :type player: (ndarray)
+
+        :return: if the action is allowed or not - bool
+        :rtype: bool
+      """
       actionToTake = numpy.argmax(action)
 
       if possibleActions[actionToTake] == 1: # if this specific action is part of the game
@@ -676,7 +773,17 @@ class ChefsHatEnv(gym.Env):
           return False
 
   def discardCards(self, player, action):
+      """Discard a set of cards from a player's hand
 
+        :param player: the player index
+        :type player: int
+
+        :param action: the action
+        :type player: list
+
+        :return: the discarded cards - list
+        :rtype: list
+      """
       cardsToDiscard = []
       actionIndex = numpy.argmax(action)
       takenAction = self.highLevelActions[actionIndex].split(";")
@@ -712,6 +819,16 @@ class ChefsHatEnv(gym.Env):
 
 
   def declareSpecialAction(self):
+      """Declare a special action (food fight/dinner is served)
+
+
+        :return: if it is a special action
+        :rtype: bool
+
+        :return: if it is a food fight
+        :rtype: bool
+      """
+
       specialAction =""
       for i in range(len(self.playersHand)):
           if self.maxCardNumber + 1 in self.playersHand[i]:
@@ -749,7 +866,10 @@ class ChefsHatEnv(gym.Env):
       return (False, False)
 
 
-  def changeRoles(self, foodFight=False):
+  def changeRoles(self):
+    """Change the player's roles, following a new game start
+
+    """
 
     score = self.currentRoles
 
@@ -783,6 +903,9 @@ class ChefsHatEnv(gym.Env):
 
 
   def dealCards(self):
+    """Deal the cards at the begining of a match
+
+    """
 
     self.numberOfCardsPerPlayer = int(len(self.cards) / len(self.playersHand))
 
@@ -795,6 +918,8 @@ class ChefsHatEnv(gym.Env):
         self.experimentManager.dataSetManager.dealAction(self.playersHand, self.matches)
 
   def restartBoard(self):
+        """restart the board
+        """
         # clean the board
         self.board = []
         for i in range(self.maxCardNumber):
@@ -804,31 +929,19 @@ class ChefsHatEnv(gym.Env):
         self.board[0] = self.maxCardNumber + 2
         # input ("Board:" + str(self.board))
 
-  def hasPlayerPassed(self, player):
-
-    hasPlayerPassed = False
-    if (not self.lastActionPlayers[player] == "" ) and (self.lastActionPlayers[player][0] == DataSetManager.actionPass):
-        hasPlayerPassed = True
-
-    return hasPlayerPassed
-
 
   def hasPlayerFinished(self, player):
+    """Identify it this specific player has finished the match
 
+        :param player: the player index
+        :type player: int
+
+
+        :return: if the player has finished the match
+        :rtype: bool
+
+    """
     if numpy.array(self.playersHand[player]).sum() > 0:
       return False
     else:
       return True
-
-  def getCurrentPlayerState(self):
-
-    stateVector = []
-    for a in self.playersHand[self.currentPlayer]:
-      stateVector.append(a)
-    for a in self.board:
-      stateVector.append(a)
-
-    return numpy.array(stateVector) / (self.maxCardNumber+2)  # preprocess the state input
-
-  def writeLog(self, message):
-      self.logger.write(message)

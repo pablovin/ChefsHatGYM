@@ -11,9 +11,10 @@ class IAgent():
     __metaclass__ = ABCMeta
 
     name = ""
+    saveModelIn = ""
 
     @abstractmethod
-    def __init__(self, name, saveFolder, _):
+    def __init__(self, name, saveModelIn, _):
         pass
 
     @abstractmethod

@@ -9,7 +9,7 @@ import random
 import math
 import copy
 import gc
-
+import os
 
 
 class Tournament():
@@ -33,6 +33,20 @@ class Tournament():
         self.opponentsCoop = [a.name for a in self.agentsCoop]
         self.oponentsCompCoop = [a.name for a in self.agentsCompCoop]
 
+        self.createFolderss()
+
+    def createFolderss(self):
+
+        for agentCategory in [self.agentsComp, self.agentsCoop, self.agentsCompCoop]:
+            for agent in agentCategory:
+                if not "TeamMate" in agent.name or not "RandomGYM_" in agent.name:
+                    thisAgentFolder = self.savingDirectory+"/"+agent.name
+                    if not os.path.exists(thisAgentFolder):
+                        os.makedirs(thisAgentFolder)
+                        agent.saveModelIn = thisAgentFolder
+
+
+
     def createGroups(self):
 
         random.shuffle(self.agentsComp)
@@ -41,17 +55,11 @@ class Tournament():
 
         pairs = []
 
-        print ("Comp:" + str(len(self.agentsComp)))
-        print("Coop:" + str(len(self.agentsCoop)))
-        print("CompCoop:" + str(len(self.agentsCompCoop)))
-
         [pairs.append([self.agentsComp[i], self.agentsComp[i + 1]]) for i in list(range(len(self.agentsComp)))[::2]]
         [pairs.append([a,Agent_Naive_Random.AgentNaive_Random("TeamMate_" + str(a.name))]) for a in self.agentsCoop]
         [pairs.append([a, Agent_Naive_Random.AgentNaive_Random("TeamMate_" + str(a.name))]) for a in self.agentsCompCoop]
         random.shuffle(pairs)
 
-        print ("Pairs:" + str(len(pairs)))
-        print ("Pairs:" + str(pairs))
         groups = []
         for p in list(range(len(pairs)))[::2]:
             random.shuffle(pairs[p])

@@ -6,7 +6,7 @@ Here you will find instructions regarding how to install the environment, run yo
 Instalation
 ^^^^^^^^^^^^^^^
 
-To install ChefsHatGym, you will need python >= 3.6. The environment has a list of `_requirements <https://pypi.org/project/ChefsHatGym/>`_ that will be installed automatically if you run:
+To install ChefsHatGym, you will need python >= 3.6. The environment has a list of `requirements <https://pypi.org/project/ChefsHatGym/>`_ that will be installed automatically if you run:
 
 ```shell
     pip install ChefsHatGym

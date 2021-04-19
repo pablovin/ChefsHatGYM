@@ -20,5 +20,5 @@ observeOthers | It will be called as soon as any of the opponents makes an actio
 Chef's Hat Players Club
 ^^^^^^^^^^^^^^^
 
-Besides the naive random agent present on the Chef's Hat environment, we also let available the Chef's Hat Player's Club <https://github.com/pablovin/ChefsHatPlayersClub>, a collection of ready-to-use players. Each of these agents where implemented, evaluated and discussed in specific peer-reviewed publications and can be used at any time. If you want your agent to be included to the Player's Club, send us a message.
+Besides the naive random agent present on the Chef's Hat environment, we also let available the Chef's Hat Player's Club  `_<https://github.com/pablovin/ChefsHatPlayersClub>`_, a collection of ready-to-use players. Each of these agents where implemented, evaluated and discussed in specific peer-reviewed publications and can be used at any time. If you want your agent to be included to the Player's Club, send us a message.
 

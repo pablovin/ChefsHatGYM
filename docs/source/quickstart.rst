@@ -9,14 +9,11 @@ Instalation
 To install ChefsHatGym, you will need python >= 3.6. The environment has a list of `requirements <https://pypi.org/project/ChefsHatGym/>`_ that will be installed automatically if you run:
 
 To run the demo just use
-```sh
-$ python run.py
 
-```
 
-```shell
+.. code-block:: console
     pip install ChefsHatGym
-```
+
 
 Understanding Chef's Hat
 ^^^^^^^^^^^^^^^

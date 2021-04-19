@@ -11,9 +11,10 @@ To install ChefsHatGym, you will need python >= 3.6. The environment has a list 
 To run the demo just use
 
 
-.. code-block:: console
-    pip install ChefsHatGym
+```sh
+$ python run.py
 
+```
 
 Understanding Chef's Hat
 ^^^^^^^^^^^^^^^
@@ -25,7 +26,6 @@ Fora a complete overview on the development of the game, refer to:
 
 And for a complete understanding of the game's rules, please check:
 * The Chef's Hat rulebook `The Chef's Hat rulebook <https://github.com/pablovin/ChefsHatGYM/blob/master/gitImages/RulebookMenuv08.pdf>`_.
-
 
 Creating new players!
 ^^^^^^^^^^^^^^^

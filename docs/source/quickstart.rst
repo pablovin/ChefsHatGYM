@@ -8,7 +8,7 @@ Instalation
 
 To install ChefsHatGym, you will need python >= 3.6. The environment has a list of `_requirements(https://pypi.org/project/ChefsHatGym/)`_ that will be installed automatically if you run:
 
-```
+```shell
 pip install ChefsHatGym
 ```
 
@@ -31,13 +31,13 @@ Creating new players!
 
 To run a game in Chef's Hat, first you need four players. The Environment provides a naive type of agent, that will execute random actions. To initiate the agents, simply call them:
 
-``
+```python
 """Player Parameters"""
 agent1 = Agent_Naive_Random.AgentNaive_Random("Random1")
 agent2 = Agent_Naive_Random.AgentNaive_Random("Random2")
 agent3 = Agent_Naive_Random.AgentNaive_Random("Random3")
 agent4 = Agent_Naive_Random.AgentNaive_Random("Random4")
-``
+```
 
 Starting a Chef's Hat Game!
 ^^^^^^^^^^^^^^^

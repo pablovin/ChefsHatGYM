@@ -3,8 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Chef's Hat Competition documentation!
+Welcome to Chef's Hat Environment documentation!
 ================================================
+
+This project aimns at providing a multi-agent competitive card game for training and evaluating different learning agents.
+The Chef's Hat Environment provides a simple and easy to use API, based on the OpenAI GYM interface, for implementing, embedding, deploying and evaluating reinforcemenr learning agents.
+
 
 .. toctree::
    :maxdepth: 1
@@ -16,10 +20,8 @@ Welcome to Chef's Hat Competition documentation!
    ChefsHatGym
    license
    contact
-
-Indices and tables
+   
+Acknowledgment
 ==================
+This environment and all its development is supported by a Starting Grant from the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation programme. G.A. No 804388, wHiSPER.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

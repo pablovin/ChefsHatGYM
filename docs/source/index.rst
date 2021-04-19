@@ -13,9 +13,9 @@ The Chef's Hat Environment provides a simple and easy to use API, based on the O
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
-   
-   intro
+ 
    quickstart
+   intro
    evalEnv
    ChefsHatGym
    license

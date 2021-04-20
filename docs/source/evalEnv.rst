@@ -45,6 +45,7 @@ Tournament Game Flow
 Each game of the tournament, implements the following game flow:
 
 .. code-block:: python
+
   while not env.gameFinished:
       currentPlayer = group[env.currentPlayer]
 

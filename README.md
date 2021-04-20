@@ -1,3 +1,5 @@
+The First Chef's Hat Cup is online!
+Get more information here: https://www.whisperproject.eu/chefshat#competition
 
 ## Chef's Hat Card game
 

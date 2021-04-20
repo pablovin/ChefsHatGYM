@@ -1,8 +1,8 @@
 ChefsHatGym.env package
 =======================
 
-Submodules
-----------
+.. Submodules
+.. ----------
 
 ChefsHatGym.env.ChefsHatEnv module
 ----------------------------------

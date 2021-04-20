@@ -29,8 +29,7 @@ Once all of the cards and roles are exchanged, the game starts. The goal of each
 
 The game is controlled by a simple flow:
 
-.. code-block:: python
-
+```python
     observations = env.reset()
 
     while not env.gameFinished:
@@ -42,6 +41,7 @@ The game is controlled by a simple flow:
         info = {"validAction":False}
         while not info["validAction"]:
             nextobs, reward, isMatchOver, info = env.step(action)
+```
             
 You can check it all in details in our [documentation.](https://chefshatgym.readthedocs.io/en/latest/)
  

@@ -24,7 +24,9 @@ Tournament Structure
 ^^^^^^^^^^^^^^^^^^^^
 
 The tournament can be instantiated easily:
+
 .. code-block:: python
+
   tournament = Tournament.Tournament(saveTournamentDirectory, opponentsComp=compAgents, opponentsCoop=coopAgents, oponentsCompCoop=compCoopAgents, threadTimeOut=5,  actionTimeOut=5, gameType=ChefsHatEnv.GAMETYPE["MATCHES"], gameStopCriteria=1)
 
 

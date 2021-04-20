@@ -10,9 +10,9 @@ If, after the exchange of roles, any of the players have two jokers at hand, the
 
 Once all of the cards and roles are exchanged, the game starts. The goal of each player is to discard all the cards at hand. They can do this by making a pizza by laying down the cards into the playing field, represented by a pizza dough. The person who possesses a Golden 11 card at hand starts making the first pizza of the game. A pizza is done when no one can, or wants, to lay down any ingredients anymore. A player can play cards by discarding their ingredient cards on the pizza base. To play cards, they need to be rarer (i.e. lowest face values) than the previously played cards. The ingredients are played from highest to the lowest number, which means from 11 to 1. Players can play multiple copies of an ingredient at once, but always have to play an equal or greater amount of copies than the previous player did. If a player cannot (or does not want) to play, they pass until the next pizza starts. A joker card is also available and when played together with other cards, it assumes their value. When played alone, the joker has the highest face value (12). Once everyone has passed, they start a new pizza by cleaning the playing field, and the last player to play an ingredient is the first one to start the new pizza.
 
-.. image:: ../../gitImages/ChefsHat_GYM_-_Example_Random_Agent.gif
+.. image:: ../../gitImages/ChefsHatAlgorithm.png
 	:alt: Chef's Hat Card Game
-	:align: center
+	:align: center 
 	
 
 Action and Observation Space

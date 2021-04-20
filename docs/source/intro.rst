@@ -50,6 +50,21 @@ The environment requests that every implemented agent have its reward definition
 
 In this reward, an agent will receive a maximum reward (1), if, and only if, it finished a game in the first position, otherwise it receives a small (-0.001) reward.
 
+Score
+^^^^^
+
+After each match of the Chef's Hat game, players are rewarded with points (from 3 to 0, depending on the finishing position). We also calculate a performance score, based on the following:
+
+.. code-block:: python
+	performanceScore = ((points*10)/rounds)/matches
+
+The performance score allows us to represent better the behavior of an agent in terms of the number of rounds it needed to win the match, and number of matches needed to win the game.
+
+Dataset
+^^^^^^^
+
+The environment allows the generation of datasets, which are .csv files that contain all the actions of the entire game in an easy-to-parse format. These datasets can be used to collect data from players, to generate analysis and interpretation about the game, or to log an entire match, for example.
+
 
 The IAgent Interface
 ^^^^^^^^^^^^^^^^^^^^
@@ -80,7 +95,7 @@ Besides the naive random agent present in the Chef's Hat environment, we also le
 Chef's Hat Online
 ^^^^^^^^^^^^^^^^^
 
-We also have available the `Chef's Hat Online<https://github.com/pablovin/ChefsHatOnline>`_, which encapsulates the Chef's Hat Environment and allow a human to play against three agents. The system is built using a web platform, which allows you to deploy it on a web server and run it from any device. The data collected by the Chef's Hat Online is presented in the same format as the Chef's Hat Gym, and can be used to train or update agents, but also to leverage human performance.
+We also have available the `Chef's Hat Online <https://github.com/pablovin/ChefsHatOnline>`_, which encapsulates the Chef's Hat Environment and allow a human to play against three agents. The system is built using a web platform, which allows you to deploy it on a web server and run it from any device. The data collected by the Chef's Hat Online is presented in the same format as the Chef's Hat Gym, and can be used to train or update agents, but also to leverage human performance.
 
 
 

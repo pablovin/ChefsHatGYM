@@ -6,8 +6,8 @@
 Welcome to Chef's Hat Environment documentation!
 ================================================
 
-This project aimns at providing a multi-agent competitive card game for training and evaluating different learning agents.
-The Chef's Hat Environment provides a simple and easy to use API, based on the OpenAI GYM interface, for implementing, embedding, deploying and evaluating reinforcemenr learning agents.
+This project aims at providing a multi-agent competitive card game for training and evaluating different learning agents.
+The Chef's Hat Environment provides a simple and easy-to-use API, based on the OpenAI GYM interface, for implementing, embedding, deploying, and evaluating reinforcement learning agents.
 
 
 .. toctree::

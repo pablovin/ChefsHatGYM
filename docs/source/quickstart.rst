@@ -13,7 +13,7 @@ To run the demo just use
 
 .. code-block:: bash
 
-    $ python run.py
+    pip install chefshatgym
 
 
 Understanding Chef's Hat

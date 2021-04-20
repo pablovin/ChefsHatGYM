@@ -6,7 +6,7 @@
 Welcome to Chef's Hat Environment documentation!
 ================================================
 
-.. image:: ../../gitImages/ChefsHatAlgorithm.png
+.. image:: ../../gitImages/ChefsHat_GYM_-_Example_Random_Agent.gif
 	:alt: Chef's Hat Card Game
 	:align: center
    

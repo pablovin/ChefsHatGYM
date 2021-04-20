@@ -4,20 +4,20 @@ Quickstart Guide
 Here you will find instructions regarding how to install the environment, run your first games and implement your first agent!
 
 Instalation
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^
 
 To install ChefsHatGym, you will need python >= 3.6. The environment has a list of `requirements <https://pypi.org/project/ChefsHatGym/>`_ that will be installed automatically if you run:
 
 To run the demo just use
 
 
-```sh
-$ python run.py
+.. code-block:: bash
 
-```
+    $ python run.py
+
 
 Understanding Chef's Hat
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Chef's Hat is a cardgame designed with multimodal and competitive interactions in mind, which allows it to be followed and modeled by artificial agents with ease. It ahs simple, but difficult to master, rules that provide an excelent opportunity for learning agents. 
 Fora a complete overview on the development of the game, refer to:
@@ -28,25 +28,26 @@ And for a complete understanding of the game's rules, please check:
 * The Chef's Hat rulebook `The Chef's Hat rulebook <https://github.com/pablovin/ChefsHatGYM/blob/master/gitImages/RulebookMenuv08.pdf>`_.
 
 Creating new players!
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 To run a game in Chef's Hat, first you need four players. The Environment provides a naive type of agent, that will execute random actions. To initiate the agents, simply call them:
 
-```python
+.. code-block:: python
+
     """Player Parameters"""
     agent1 = Agent_Naive_Random.AgentNaive_Random("Random1")
     agent2 = Agent_Naive_Random.AgentNaive_Random("Random2")
     agent3 = Agent_Naive_Random.AgentNaive_Random("Random3")
     agent4 = Agent_Naive_Random.AgentNaive_Random("Random4")
-```
 
 Starting a Chef's Hat Game!
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Once you have all four players, you must collect the agent's names and implemented reward functions. There are two game types: MATCHES, that will run a limited number of matches, and POINTS, that will run until one of the players reach a limited number of points. You have to define the type of game and the stoping criteria when starting a new game:
 
 
-```python
+.. code-block:: python
+
     agentNames = [agent1.name, agent2.name, agent3.name, agent4.name]
     playersAgents = [agent1, agent2, agent3, agent4]
 
@@ -56,11 +57,11 @@ Once you have all four players, you must collect the agent's names and implement
 
     env = gym.make('chefshat-v0') #starting the game Environment
     env.startExperiment(rewardFunctions=rewards, playerNames=agentNames,gameType=gameType, stopCriteria=gameStopCriteria,)
-```
 
 Once the game started, each agent must perform an action until the game is finished:
 
-```python
+.. code-block:: python
+
     observations = env.reset()
 
     while not env.gameFinished:
@@ -79,7 +80,6 @@ Once the game started, each agent must perform an action until the game is finis
             print ("Score:" + str(info["score"]))
             print("Performance:" + str(info["performanceScore"]))
             print("-------------")
-```
 
 The environment controls the gameflow, and after each action, indicates which agent will perform the next action. The info, returned by the environment, contains important information about the game status, and might be primordial for learning agents!
 

@@ -4,9 +4,9 @@ Introduction
 The Chef's Hat Game 
 ^^^^^^^^^^^^^^^^^^^
 
-
-![Chef's Hat Card Game](gitImages/ChefsHatAlgorithm.png)
-
+.. image:: ../../gitImages/ChefsHatAlgorithm.png
+	:alt: Chef's Hat Card Game
+	:align: center
 
 During each game there are three phases: Start of the game, Making Pizzas, End of the game. The game starts with the cards been shuffled and dealt with the players. Then, starting from the second game, the exchange of roles takes place based on the last games' finishing positions. The player who finished first becomes the Chef, the one that finished second becomes the Sous-Chef, the one that finished third becomes the Waiter and the last one the Dishwasher. Once the roles are exchanged, the exchange of the cards starts. The Dishwasher has to give the two cards with the highest values to the Chef, who in return gives back two cards of their liking. The Waiter has to give their lowest valued card to the Sous-Chef, who in return gives one card of their liking.
 

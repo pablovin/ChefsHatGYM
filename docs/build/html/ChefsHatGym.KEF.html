@@ -1,0 +1,890 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ChefsHatGym.KEF package &mdash; Chef&#39;s Hat Gym  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Chef's Hat Gym
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evalEnv.html">Evaluation Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.html">ChefsHatGym package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Chef's Hat Gym</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>ChefsHatGym.KEF package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/ChefsHatGym.KEF.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="chefshatgym-kef-package">
+<h1>ChefsHatGym.KEF package<a class="headerlink" href="#chefshatgym-kef-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.DataSetManager">
+<span id="chefshatgym-kef-datasetmanager-module"></span><h2>ChefsHatGym.KEF.DataSetManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.DataSetManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager">
+<em class="property">class </em><code class="descclassname">ChefsHatGym.KEF.DataSetManager.</code><code class="descname">DataSetManager</code><span class="sig-paren">(</span><em>dataSetDirectory=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataSet Manager Class</p>
+<p>This class manages the function of the framework to create datasets. Here each datapoint is created, and written if necessary.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>dataSetDiretory (String): This variable keeps the directory which the dataSet files are stored.</dd>
+</dl>
+<p>Author: Pablo Barros
+Created on: 26.02.2020
+Last Update: 26.02.2020</p>
+<dl class="docutils">
+<dt>Todo:</dt>
+<dd><ul class="first last simple">
+<li>Create functions to log images and graphs as well.</li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.actions">
+<code class="descname">actions</code><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.addDataFrame">
+<code class="descname">addDataFrame</code><span class="sig-paren">(</span><em>gameNumber=''</em>, <em>roundNumber=''</em>, <em>player=''</em>, <em>actionType=''</em>, <em>playersHand=[]</em>, <em>board=[]</em>, <em>cardsAction=''</em>, <em>reward=''</em>, <em>qvalues=''</em>, <em>loss=''</em>, <em>wrongActions=''</em>, <em>totalActions=''</em>, <em>score=[]</em>, <em>roles=''</em>, <em>playersStatus=[]</em>, <em>agentNames=''</em>, <em>possibleActions=[]</em>, <em>performanceScore=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.addDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.currentDataSetFile">
+<code class="descname">currentDataSetFile</code><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.currentDataSetFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.dataFrame">
+<code class="descname">dataFrame</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.dataFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.dataSetDirectory">
+<code class="descname">dataSetDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.dataSetDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.dealAction">
+<code class="descname">dealAction</code><span class="sig-paren">(</span><em>playersHand</em>, <em>game</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.dealAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.doActionAction">
+<code class="descname">doActionAction</code><span class="sig-paren">(</span><em>game</em>, <em>player</em>, <em>roundNumber</em>, <em>action</em>, <em>board</em>, <em>wrongActions</em>, <em>reward</em>, <em>playersHand</em>, <em>roles</em>, <em>score</em>, <em>playersStatus</em>, <em>qValue</em>, <em>loss</em>, <em>totalActions</em>, <em>possibleActions</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.doActionAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.doActionPizzaReady">
+<code class="descname">doActionPizzaReady</code><span class="sig-paren">(</span><em>roundNumber</em>, <em>board</em>, <em>playersHand</em>, <em>roles</em>, <em>score</em>, <em>playersStatus</em>, <em>game</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.doActionPizzaReady" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.exchangeRolesAction">
+<code class="descname">exchangeRolesAction</code><span class="sig-paren">(</span><em>playersHand</em>, <em>roles</em>, <em>cardsAction</em>, <em>game</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.exchangeRolesAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.saveFile">
+<code class="descname">saveFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.saveFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.startNewGame">
+<code class="descname">startNewGame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.startNewGame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.startNewMatch">
+<code class="descname">startNewMatch</code><span class="sig-paren">(</span><em>gameNumber</em>, <em>agentsNames</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.startNewMatch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.DataSetManager.DataSetManager.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#ChefsHatGym.KEF.DataSetManager.DataSetManager.verbose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.ExperimentManager">
+<span id="chefshatgym-kef-experimentmanager-module"></span><h2>ChefsHatGym.KEF.ExperimentManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.ExperimentManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager">
+<em class="property">class </em><code class="descclassname">ChefsHatGym.KEF.ExperimentManager.</code><code class="descname">ExperimentManager</code><span class="sig-paren">(</span><em>baseDirectory</em>, <em>experimentName</em>, <em>verbose=True</em>, <em>saveLog=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Experiment Manager Class</p>
+<p>This class manager the experiments. It creates all the folder structures, if necessary and create the log.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>baseDirectory (String): Base directory of the experiment.
+experimentName (String): Name of the experiment.
+logManager (LogManager):</dd>
+</dl>
+<p>Author: Pablo Barros
+Created on: 02.02.2017
+Last Update: 20.02.2017</p>
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.baseDirectory">
+<code class="descname">baseDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.baseDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.createLocalFolder">
+<code class="descname">createLocalFolder</code><span class="sig-paren">(</span><em>parentDirectory</em>, <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.createLocalFolder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.dataSet">
+<code class="descname">dataSet</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.dataSet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.dataSetManager">
+<code class="descname">dataSetManager</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.dataSetManager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.experimentName">
+<code class="descname">experimentName</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.experimentName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.logManager">
+<code class="descname">logManager</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.logManager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.metricManager">
+<code class="descname">metricManager</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.metricManager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.modelDirectory">
+<code class="descname">modelDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.modelDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.outputsDirectory">
+<code class="descname">outputsDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.outputsDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.plotManager">
+<code class="descname">plotManager</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.plotManager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.ExperimentManager.ExperimentManager.plotsDirectory">
+<code class="descname">plotsDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.plotsDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.LogManager">
+<span id="chefshatgym-kef-logmanager-module"></span><h2>ChefsHatGym.KEF.LogManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.LogManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ChefsHatGym.KEF.LogManager.Logger">
+<em class="property">class </em><code class="descclassname">ChefsHatGym.KEF.LogManager.</code><code class="descname">Logger</code><span class="sig-paren">(</span><em>logDirectory=None</em>, <em>saveLog=True</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log Manager Class</p>
+<p>This class manager the log function of the framework. Here the log is created, and written if necessary.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>logDiretory (String): This variable keeps the directory which the log file is saved.</dd>
+</dl>
+<p>Author: Pablo Barros
+Created on: 02.02.2017
+Last Update: 20.02.2017</p>
+<dl class="docutils">
+<dt>Todo:</dt>
+<dd><ul class="first last simple">
+<li>Create functions to log images and graphs as well.</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="ChefsHatGym.KEF.LogManager.Logger.endLogSession">
+<code class="descname">endLogSession</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger.endLogSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that writes the end of a session in the Log.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>sessionName (String): The name of the new session</dd>
+</dl>
+<p>Raises:</p>
+<blockquote>
+<div>Exception: if the logDirectory is invalid.</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.LogManager.Logger.isLogDirectoryValid">
+<code class="descname">isLogDirectoryValid</code><span class="sig-paren">(</span><em>logDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger.isLogDirectoryValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that verifies if the log directory is valid and is an openable document.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>logDirectory (String): the directory where the log is / will be is saved</dd>
+</dl>
+<p>Raises:</p>
+<blockquote>
+<div>Exception: if the logDirectory is invalid.</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>True if succesfull, raises the exception otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.LogManager.Logger.logDirectory">
+<code class="descname">logDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger.logDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.LogManager.Logger.newLogSession">
+<code class="descname">newLogSession</code><span class="sig-paren">(</span><em>sessionName</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger.newLogSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that writes a new session in the Log.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>sessionName (String): The name of the new session</dd>
+</dl>
+<p>Raises:</p>
+<blockquote>
+<div>Exception: if the logDirectory is invalid.</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.LogManager.Logger.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger.verbose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.LogManager.Logger.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.LogManager.Logger.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that writes messages in the log.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>message (String): The message which will be written in the log.</dd>
+</dl>
+<p>Raises:</p>
+<blockquote>
+<div>Exception: if the logDirectory is invalid.</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.MetricsManager">
+<span id="chefshatgym-kef-metricsmanager-module"></span><h2>ChefsHatGym.KEF.MetricsManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.MetricsManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ChefsHatGym.KEF.MetricsManager.MetricsManager">
+<em class="property">class </em><code class="descclassname">ChefsHatGym.KEF.MetricsManager.</code><code class="descname">MetricsManager</code><span class="sig-paren">(</span><em>dataSetDirectory=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.MetricsManager.MetricsManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataSet Manager Class</p>
+<p>This class manages the function of the framework to create a metrics summary. Here each metric data point is created, and written if necessary.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>dataSetDiretory (String): This variable keeps the directory which the dataSet files are stored.</dd>
+</dl>
+<p>Author: Pablo Barros
+Created on: 12.03.2020
+Last Update: 12.03.2020</p>
+<dl class="docutils">
+<dt>Todo:</dt>
+<dd><ul class="first last simple">
+<li>Create functions to log images and graphs as well.</li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.MetricsManager.MetricsManager.actions">
+<code class="descname">actions</code><a class="headerlink" href="#ChefsHatGym.KEF.MetricsManager.MetricsManager.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.MetricsManager.MetricsManager.currentDataSetFile">
+<code class="descname">currentDataSetFile</code><a class="headerlink" href="#ChefsHatGym.KEF.MetricsManager.MetricsManager.currentDataSetFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.MetricsManager.MetricsManager.dataSetDirectory">
+<code class="descname">dataSetDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.MetricsManager.MetricsManager.dataSetDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.MetricsManager.MetricsManager.saveMetricPlayer">
+<code class="descname">saveMetricPlayer</code><span class="sig-paren">(</span><em>metrics</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.MetricsManager.MetricsManager.saveMetricPlayer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.MetricsManager.MetricsManager.verbose">
+<code class="descname">verbose</code><a class="headerlink" href="#ChefsHatGym.KEF.MetricsManager.MetricsManager.verbose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.PlotManager">
+<span id="chefshatgym-kef-plotmanager-module"></span><h2>ChefsHatGym.KEF.PlotManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.PlotManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ChefsHatGym.KEF.PlotManager.PlotManager">
+<em class="property">class </em><code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">PlotManager</code><span class="sig-paren">(</span><em>plotDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.PlotManager" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ChefsHatGym.KEF.PlotManager.PlotManager.generateAllPlots">
+<code class="descname">generateAllPlots</code><span class="sig-paren">(</span><em>plotsToGenerate</em>, <em>dataset</em>, <em>gameRound</em>, <em>intrinsicDataset=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.PlotManager.generateAllPlots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.PlotManager.PlotManager.plotsDirectory">
+<code class="descname">plotsDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.PlotManager.plotsDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.generateExperimentPlotsFromDataset">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">generateExperimentPlotsFromDataset</code><span class="sig-paren">(</span><em>plotsToGenerate</em>, <em>dataset</em>, <em>specificGame=-1</em>, <em>saveDirectory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.generateExperimentPlotsFromDataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.generateIntrinsicPlotsFromDataset">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">generateIntrinsicPlotsFromDataset</code><span class="sig-paren">(</span><em>plotsToGenerate</em>, <em>IntrinsicDataset</em>, <em>gameNumber=-1</em>, <em>specificLine=-1</em>, <em>saveDirectory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.generateIntrinsicPlotsFromDataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.generateSingleGamePlotsFromDataset">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">generateSingleGamePlotsFromDataset</code><span class="sig-paren">(</span><em>plotsToGenerate</em>, <em>dataset</em>, <em>gameNumber</em>, <em>saveDirectory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.generateSingleGamePlotsFromDataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotActionBehavior">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotActionBehavior</code><span class="sig-paren">(</span><em>names</em>, <em>actions</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotActionBehavior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotCorrectActions">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotCorrectActions</code><span class="sig-paren">(</span><em>names</em>, <em>wrongActions</em>, <em>totalActions</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotCorrectActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotDiscardBehavior">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotDiscardBehavior</code><span class="sig-paren">(</span><em>names</em>, <em>actions</em>, <em>gameNumber</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotDiscardBehavior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotFinishPositions">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotFinishPositions</code><span class="sig-paren">(</span><em>names</em>, <em>scoresAll</em>, <em>winners</em>, <em>iteraction</em>, <em>plotDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotFinishPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotLosses">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotLosses</code><span class="sig-paren">(</span><em>names</em>, <em>losses</em>, <em>iteraction</em>, <em>name</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotLosses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotMeanQValuesGames">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotMeanQValuesGames</code><span class="sig-paren">(</span><em>names</em>, <em>meanQValues</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotMeanQValuesGames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotMood">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotMood</code><span class="sig-paren">(</span><em>names</em>, <em>moodReading</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotMood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotMoodNeurons">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotMoodNeurons</code><span class="sig-paren">(</span><em>names</em>, <em>moodNeurons</em>, <em>moodReading</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotMoodNeurons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotNumberOfActions">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotNumberOfActions</code><span class="sig-paren">(</span><em>names</em>, <em>actions</em>, <em>gameNumber</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotNumberOfActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotPoints">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotPoints</code><span class="sig-paren">(</span><em>names</em>, <em>pointsAll</em>, <em>iteraction</em>, <em>plotDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotPoints" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotQValues">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotQValues</code><span class="sig-paren">(</span><em>names</em>, <em>Qvalues</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotQValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotQValuesOverSeveralGames">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotQValuesOverSeveralGames</code><span class="sig-paren">(</span><em>numPLayers</em>, <em>Qvalues</em>, <em>experimentName</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotQValuesOverSeveralGames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotRewardsAll">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotRewardsAll</code><span class="sig-paren">(</span><em>names</em>, <em>rewards</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotRewardsAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotRounds">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotRounds</code><span class="sig-paren">(</span><em>allRounds</em>, <em>iteraction</em>, <em>plotDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotRounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotSelfProbabilitySuccess">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotSelfProbabilitySuccess</code><span class="sig-paren">(</span><em>names</em>, <em>prob</em>, <em>iteraction</em>, <em>plotsDirectory</em>, <em>name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotSelfProbabilitySuccess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotSelfRewardsAll">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotSelfRewardsAll</code><span class="sig-paren">(</span><em>names</em>, <em>meanReward</em>, <em>allReward</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotSelfRewardsAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotTimeLine">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotTimeLine</code><span class="sig-paren">(</span><em>names</em>, <em>actions</em>, <em>gameNumber=0</em>, <em>plotsDirectory=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotTimeLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotTimeLineMood">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotTimeLineMood</code><span class="sig-paren">(</span><em>names</em>, <em>moodNeurons</em>, <em>moodReading</em>, <em>iteraction</em>, <em>playersAction</em>, <em>totalActions</em>, <em>totalColors</em>, <em>arousalValenceInput</em>, <em>selfExpectation</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotTimeLineMood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotTotalActions">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotTotalActions</code><span class="sig-paren">(</span><em>names</em>, <em>totalActionsAll</em>, <em>iteraction</em>, <em>plotDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotTotalActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotVictoriesTotal">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotVictoriesTotal</code><span class="sig-paren">(</span><em>winsP1</em>, <em>winsP2</em>, <em>winsP3</em>, <em>winsP4</em>, <em>maxNumGames</em>, <em>experimentName</em>, <em>savingFolder</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotVictoriesTotal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotWinners">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotWinners</code><span class="sig-paren">(</span><em>numPLayers</em>, <em>winners</em>, <em>iteraction</em>, <em>names</em>, <em>plotDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotWinners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.PlotManager.plotWrongActions">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plotWrongActions</code><span class="sig-paren">(</span><em>names</em>, <em>wrongActions</em>, <em>iteraction</em>, <em>plotsDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plotWrongActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="ChefsHatGym.KEF.PlotManager.plots">
+<code class="descclassname">ChefsHatGym.KEF.PlotManager.</code><code class="descname">plots</code><em class="property"> = {'Experiment_ActionsBehavior': 'expActionBeh', 'Experiment_CorrectActions': 'expCorrect', 'Experiment_FinishingPosition': 'expFinish', 'Experiment_Losses': 'expLoss', 'Experiment_MeanQValues': 'expMeanQ', 'Experiment_Mood': 'expMood', 'Experiment_MoodFaces': 'expFacesMood', 'Experiment_MoodNeurons': 'expNeuronsMood', 'Experiment_Points': 'expPoints', 'Experiment_QValues': 'expQValue', 'Experiment_Reward': 'expReward', 'Experiment_Rounds': 'expRound', 'Experiment_SelfProbabilitySuccess': 'expSelfProb', 'Experiment_SelfReward': 'expSelfReward', 'Experiment_TimeLimeMood': 'timelineMood', 'Experiment_TotalActions': 'expTotalActionsActions', 'Experiment_Winners': 'expWin', 'Experiment_WrongActions': 'expWrong', 'OneGame_DiscardBehavior': 'oneGDiscard', 'OneGame_NumberOfActions': 'oneGNumbAct', 'OneGame_Timeline': 'oneGTimeline', 'SeveralGames_QValues': 'sevQVal', 'SeveralGames_Victories:': 'sevVic', 'all': 'all'}</em><a class="headerlink" href="#ChefsHatGym.KEF.PlotManager.plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>#Experiment-related Plots</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.RenderManager">
+<span id="chefshatgym-kef-rendermanager-module"></span><h2>ChefsHatGym.KEF.RenderManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.RenderManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager">
+<em class="property">class </em><code class="descclassname">ChefsHatGym.KEF.RenderManager.</code><code class="descname">RenderManager</code><span class="sig-paren">(</span><em>saveVideoDirectory</em>, <em>resourcesFolder</em>, <em>fps=1</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.actionCardsDirectory">
+<code class="descname">actionCardsDirectory</code><em class="property"> = 'actionCards/'</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.actionCardsDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.blackCard">
+<code class="descname">blackCard</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.blackCard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.cards">
+<code class="descname">cards</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.cards" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.cardsDirectory">
+<code class="descname">cardsDirectory</code><em class="property"> = 'deck/'</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.cardsDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.createVideo">
+<code class="descname">createVideo</code><span class="sig-paren">(</span><em>gamesToRender</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.createVideo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.currentFrameNumber">
+<code class="descname">currentFrameNumber</code><em class="property"> = 0</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.currentFrameNumber" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.currentGameDirectory">
+<code class="descname">currentGameDirectory</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.currentGameDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.drawBoard">
+<code class="descname">drawBoard</code><span class="sig-paren">(</span><em>originalImage</em>, <em>board</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawBoard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.drawFinishingPosition">
+<code class="descname">drawFinishingPosition</code><span class="sig-paren">(</span><em>originalImage</em>, <em>playerStatus</em>, <em>score</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawFinishingPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.drawPassCard">
+<code class="descname">drawPassCard</code><span class="sig-paren">(</span><em>originalImage</em>, <em>playerCurrentStatus</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawPassCard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayField">
+<code class="descname">drawPlayField</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayField" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayers">
+<code class="descname">drawPlayers</code><span class="sig-paren">(</span><em>playerHands</em>, <em>originalImage</em>, <em>agentsNames</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.drawRoleCards">
+<code class="descname">drawRoleCards</code><span class="sig-paren">(</span><em>originalImage</em>, <em>roles</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawRoleCards" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.fps">
+<code class="descname">fps</code><em class="property"> = 10</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.fps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.getImages">
+<code class="descname">getImages</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.getImages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.getImagesSeconds">
+<code class="descname">getImagesSeconds</code><span class="sig-paren">(</span><em>image</em>, <em>seconds</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.getImagesSeconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.getMoodPlots">
+<code class="descname">getMoodPlots</code><span class="sig-paren">(</span><em>intrinsicDataset</em>, <em>gameNumber</em>, <em>currentLine</em>, <em>originalImage</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.getMoodPlots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.imageSize">
+<code class="descname">imageSize</code><em class="property"> = (2160, 3840, 3)</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.imageSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.passCard">
+<code class="descname">passCard</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.passCard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.playField">
+<code class="descname">playField</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.playField" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.playingFieldDirectory">
+<code class="descname">playingFieldDirectory</code><em class="property"> = 'playingField.png'</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.playingFieldDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.renderDirectory">
+<code class="descname">renderDirectory</code><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.renderDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.renderGameStatus">
+<code class="descname">renderGameStatus</code><span class="sig-paren">(</span><em>dataSet</em>, <em>intrinsicData=None</em>, <em>gamesToRender=[]</em>, <em>createVideo=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.renderGameStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.resourcesFolder">
+<code class="descname">resourcesFolder</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.resourcesFolder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.roleCards">
+<code class="descname">roleCards</code><em class="property"> = []</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.roleCards" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.saveImages">
+<code class="descname">saveImages</code><span class="sig-paren">(</span><em>image</em>, <em>seconds</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.saveImages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.saveVideoDirectory">
+<code class="descname">saveVideoDirectory</code><em class="property"> = ''</em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.saveVideoDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ChefsHatGym.KEF.RenderManager.RenderManager.writeHeader">
+<code class="descname">writeHeader</code><span class="sig-paren">(</span><em>originalImage</em>, <em>message</em>, <em>detailedMessage=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.writeHeader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ChefsHatGym.KEF.StatisticsManager">
+<span id="chefshatgym-kef-statisticsmanager-module"></span><h2>ChefsHatGym.KEF.StatisticsManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.StatisticsManager" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.calculateAfterGameStatistics">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">calculateAfterGameStatistics</code><span class="sig-paren">(</span><em>statisticsToCalculate</em>, <em>afterGameCSV</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.calculateAfterGameStatistics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.calculateGameStatistics">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">calculateGameStatistics</code><span class="sig-paren">(</span><em>statisticsToCalculate</em>, <em>datasets</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.calculateGameStatistics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.calculateIntegratedGameStatistics">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">calculateIntegratedGameStatistics</code><span class="sig-paren">(</span><em>statisticsToCalculate</em>, <em>afterGameCSV</em>, <em>preGameCSV</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.calculateIntegratedGameStatistics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.calculatePreGameStatistics">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">calculatePreGameStatistics</code><span class="sig-paren">(</span><em>statisticsToCalculate</em>, <em>preGameCSV</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.calculatePreGameStatistics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotAgregatedScore">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotAgregatedScore</code><span class="sig-paren">(</span><em>thisGameAgregatedScore</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotAgregatedScore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotCompetitiveness">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotCompetitiveness</code><span class="sig-paren">(</span><em>competitiveness</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotCompetitiveness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotExperience">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotExperience</code><span class="sig-paren">(</span><em>experience</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotExperience" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotNumberGames">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotNumberGames</code><span class="sig-paren">(</span><em>numberGames</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotNumberGames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotNumberRounds">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotNumberRounds</code><span class="sig-paren">(</span><em>numberRounds</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotNumberRounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotPersonalitiesAfterGame">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotPersonalitiesAfterGame</code><span class="sig-paren">(</span><em>agencies</em>, <em>competences</em>, <em>communnions</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotPersonalitiesAfterGame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotPersonalitiesPreGame">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotPersonalitiesPreGame</code><span class="sig-paren">(</span><em>agencies</em>, <em>competences</em>, <em>communnions</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotPersonalitiesPreGame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotPlayedTime">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotPlayedTime</code><span class="sig-paren">(</span><em>playedTimes</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotPlayedTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotPlayerScore">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotPlayerScore</code><span class="sig-paren">(</span><em>playerScore</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotPlayerScore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ChefsHatGym.KEF.StatisticsManager.plotSimilaritiesIntegrated">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">plotSimilaritiesIntegrated</code><span class="sig-paren">(</span><em>agenciesAgent</em>, <em>competencesAgent</em>, <em>communnionsAgent</em>, <em>agenciesPlayer</em>, <em>competencesPlayer</em>, <em>communnionsPlayer</em>, <em>saveDirectory</em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.plotSimilaritiesIntegrated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="ChefsHatGym.KEF.StatisticsManager.statisticsIntegrated">
+<code class="descclassname">ChefsHatGym.KEF.StatisticsManager.</code><code class="descname">statisticsIntegrated</code><em class="property"> = {'Similarity': 'similarity'}</em><a class="headerlink" href="#ChefsHatGym.KEF.StatisticsManager.statisticsIntegrated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots per game</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Pablo Vinicius Alves De Barros.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

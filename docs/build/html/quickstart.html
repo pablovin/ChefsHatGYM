@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Quickstart Guide &mdash; Chef&#39;s Hat Gym  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="intro.html" />
+    <link rel="prev" title="Welcome to Chef’s Hat Environment documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Chef's Hat Gym
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#instalation">Instalation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#understanding-chef-s-hat">Understanding Chef’s Hat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-new-players">Creating new players!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#starting-a-chef-s-hat-game">Starting a Chef’s Hat Game!</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evalEnv.html">Evaluation Environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.html">ChefsHatGym package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Chef's Hat Gym</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Quickstart Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="quickstart-guide">
+<h1>Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Permalink to this headline">¶</a></h1>
+<p>Here you will find instructions regarding how to install the environment, run your first games and implement your first agent!</p>
+<div class="section" id="instalation">
+<h2>Instalation<a class="headerlink" href="#instalation" title="Permalink to this headline">¶</a></h2>
+<p>To install ChefsHatGym, you will need python &gt;= 3.6. The environment has a list of <a class="reference external" href="https://pypi.org/project/ChefsHatGym/">requirements</a> that will be installed automatically if you run:</p>
+<p>To run the demo just use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python run.py
+</pre></div>
+</div>
+</div>
+<div class="section" id="understanding-chef-s-hat">
+<h2>Understanding Chef’s Hat<a class="headerlink" href="#understanding-chef-s-hat" title="Permalink to this headline">¶</a></h2>
+<p>Chef’s Hat is a cardgame designed with multimodal and competitive interactions in mind, which allows it to be followed and modeled by artificial agents with ease. It ahs simple, but difficult to master, rules that provide an excelent opportunity for learning agents.
+Fora a complete overview on the development of the game, refer to:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/3434074.3447227">Barros, P., Sciutti, A., Bloem, A. C., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., &amp; Barakova, E. (2021, March). It’s Food Fight! Designing the Chef’s Hat Card Game for Affective-Aware HRI. In Companion of the 2021 ACM/IEEE International Conference on Human-Robot Interaction (pp. 524-528).</a></li>
+</ul>
+<p>And for a complete understanding of the game’s rules, please check:
+* The Chef’s Hat rulebook <a class="reference external" href="https://github.com/pablovin/ChefsHatGYM/blob/master/gitImages/RulebookMenuv08.pdf">The Chef’s Hat rulebook</a>.</p>
+</div>
+<div class="section" id="creating-new-players">
+<h2>Creating new players!<a class="headerlink" href="#creating-new-players" title="Permalink to this headline">¶</a></h2>
+<p>To run a game in Chef’s Hat, first you need four players. The Environment provides a naive type of agent, that will execute random actions. To initiate the agents, simply call them:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Player Parameters&quot;&quot;&quot;</span>
+<span class="n">agent1</span> <span class="o">=</span> <span class="n">Agent_Naive_Random</span><span class="o">.</span><span class="n">AgentNaive_Random</span><span class="p">(</span><span class="s2">&quot;Random1&quot;</span><span class="p">)</span>
+<span class="n">agent2</span> <span class="o">=</span> <span class="n">Agent_Naive_Random</span><span class="o">.</span><span class="n">AgentNaive_Random</span><span class="p">(</span><span class="s2">&quot;Random2&quot;</span><span class="p">)</span>
+<span class="n">agent3</span> <span class="o">=</span> <span class="n">Agent_Naive_Random</span><span class="o">.</span><span class="n">AgentNaive_Random</span><span class="p">(</span><span class="s2">&quot;Random3&quot;</span><span class="p">)</span>
+<span class="n">agent4</span> <span class="o">=</span> <span class="n">Agent_Naive_Random</span><span class="o">.</span><span class="n">AgentNaive_Random</span><span class="p">(</span><span class="s2">&quot;Random4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="starting-a-chef-s-hat-game">
+<h2>Starting a Chef’s Hat Game!<a class="headerlink" href="#starting-a-chef-s-hat-game" title="Permalink to this headline">¶</a></h2>
+<p>Once you have all four players, you must collect the agent’s names and implemented reward functions. There are two game types: MATCHES, that will run a limited number of matches, and POINTS, that will run until one of the players reach a limited number of points. You have to define the type of game and the stoping criteria when starting a new game:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agentNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">agent1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">agent2</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">agent3</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">agent4</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<span class="n">playersAgents</span> <span class="o">=</span> <span class="p">[</span><span class="n">agent1</span><span class="p">,</span> <span class="n">agent2</span><span class="p">,</span> <span class="n">agent3</span><span class="p">,</span> <span class="n">agent4</span><span class="p">]</span>
+
+
+<span class="n">gameType</span> <span class="o">=</span> <span class="n">ChefsHatEnv</span><span class="o">.</span><span class="n">GAMETYPE</span><span class="p">[</span><span class="s2">&quot;MATCHES&quot;</span><span class="p">]</span>
+<span class="n">gameStopCriteria</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s1">&#39;chefshat-v0&#39;</span><span class="p">)</span> <span class="c1">#starting the game Environment</span>
+<span class="n">env</span><span class="o">.</span><span class="n">startExperiment</span><span class="p">(</span><span class="n">rewardFunctions</span><span class="o">=</span><span class="n">rewards</span><span class="p">,</span> <span class="n">playerNames</span><span class="o">=</span><span class="n">agentNames</span><span class="p">,</span><span class="n">gameType</span><span class="o">=</span><span class="n">gameType</span><span class="p">,</span> <span class="n">stopCriteria</span><span class="o">=</span><span class="n">gameStopCriteria</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>Once the game started, each agent must perform an action until the game is finished:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observations</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<span class="k">while</span> <span class="ow">not</span> <span class="n">env</span><span class="o">.</span><span class="n">gameFinished</span><span class="p">:</span>
+    <span class="n">currentPlayer</span> <span class="o">=</span> <span class="n">playersAgents</span><span class="p">[</span><span class="n">env</span><span class="o">.</span><span class="n">currentPlayer</span><span class="p">]</span>
+
+    <span class="n">observations</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">getObservation</span><span class="p">()</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">currentPlayer</span><span class="o">.</span><span class="n">getAction</span><span class="p">(</span><span class="n">observations</span><span class="p">)</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;validAction&quot;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;validAction&quot;</span><span class="p">]:</span>
+        <span class="n">nextobs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">isMatchOver</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">isMatchOver</span><span class="p">:</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;-------------&quot;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Match:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;matches&quot;</span><span class="p">]))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Score:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;score&quot;</span><span class="p">]))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Performance:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;performanceScore&quot;</span><span class="p">]))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;-------------&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The environment controls the gameflow, and after each action, indicates which agent will perform the next action. The info, returned by the environment, contains important information about the game status, and might be primordial for learning agents!</p>
+<p>A full running example can be found at the examples folder.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="intro.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Chef’s Hat Environment documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Pablo Vinicius Alves De Barros.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

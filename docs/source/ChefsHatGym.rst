@@ -8,7 +8,7 @@ ChefsHatGym package
 
     ChefsHatGym.Agents
     ChefsHatGym.env
-	ChefsHatGym.Evaluation
+    ChefsHatGym.Evaluation
 ..    ChefsHatGym.KEF
 ..    ChefsHatGym.Rewards
     

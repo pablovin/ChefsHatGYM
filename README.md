@@ -98,8 +98,7 @@ All the examples in this repository are distributed under a Non-Comercial licens
 
 ## Contact
 
-Pablo Barros - pablo.alvesdebarros@iit.it
+Pablo Barros - pablovin@gmail.com
 
-- [http://pablobarros.net](http://pablobarros.net)
 - [Twitter](https://twitter.com/PBarros_br)
 - [Google Scholar](https://scholar.google.com/citations?user=LU9tpkMAAAAJ)

@@ -26,9 +26,9 @@ class RenderManager():
     currentFrameNumber = 0
 
     cards = ""
-    cardsDirectory = "deck/"
+    cardsDirectory = "deck"
 
-    actionCardsDirectory = "actionCards/"
+    actionCardsDirectory = "actionCards"
     passCard = ""
     roleCards = []
 

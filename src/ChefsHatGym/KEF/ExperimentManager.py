@@ -70,7 +70,7 @@ class ExperimentManager:
         return self._outputsDirectory
 
     def createLocalFolder(self, parentDirectory, name):
-        self._createFolder(parentDirectory + "/" + name)
+        self._createFolder(os.path.join(parentDirectory ,name))
 
     def _createFolder(self, directoryName):
         """
@@ -82,8 +82,8 @@ class ExperimentManager:
 
         """
 
-        if not os.path.exists(self.baseDirectory + "/" + self.experimentName + "/" + directoryName):
-            os.makedirs(self.baseDirectory + "/" + self.experimentName + "/" + directoryName)
+        if not os.path.exists(os.path.join(self.baseDirectory, self.experimentName, directoryName)):
+            os.makedirs(os.path.join(self.baseDirectory, self.experimentName, directoryName))
 
     def __init__(self, baseDirectory, experimentName, verbose=True, saveLog=False):
         """
@@ -100,20 +100,20 @@ class ExperimentManager:
         assert (not experimentName == None or not experimentName == ""), "Empty Experiment Name!"
 
         self._baseDirectory = baseDirectory
-        self._experimentName = experimentName + "_" + str(datetime.datetime.now()).replace(" ", "_")
-
+        timeNow = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        self._experimentName = f"experimentName_{timeNow}"
         """Creating the dataset folder"""
-        self._dataSetDirectory = self.baseDirectory + "/" + self.experimentName + "/Datasets"
+        self._dataSetDirectory = os.path.join(self.baseDirectory, self.experimentName, "Datasets")
 
         self._dataSetManager = DataSetManager.DataSetManager(self._dataSetDirectory)
         self._createFolder("Datasets")
 
         """Creating the log folder"""
         self._createFolder("Log")
-        self._logManager = LogManager.Logger(self.baseDirectory + "/" + self.experimentName + "/Log/" + "Log.txt",
+        self._logManager = LogManager.Logger(os.path.join(self.baseDirectory, self.experimentName, "Log", "Log.txt"),
                                              verbose=verbose, saveLog=saveLog)
 
-        self._metricManager = MetricsManager.MetricsManager(self.baseDirectory + "/" + self.experimentName + "/Log/")
+        self._metricManager = MetricsManager.MetricsManager(os.path.join(self.baseDirectory, self.experimentName, "Log"))
 
         self.logManager.newLogSession("Experiment: " + self.experimentName)
-        self.logManager.write("Base Directory: " + self.baseDirectory + "/" + self.experimentName)
+        self.logManager.write("Base Directory: " + os.path.join(self.baseDirectory, self.experimentName))

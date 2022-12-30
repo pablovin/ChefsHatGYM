@@ -61,7 +61,7 @@ def plotPlayedTime(playedTimes, saveDirectory):
     ax.axhline(averagePlayedTime, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " s")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Game_PlayedTime.png")
+    plt.savefig(os.path.join(saveDirectory, "Game_PlayedTime.png"))
 
     plt.clf()
 
@@ -83,7 +83,7 @@ def plotNumberGames(numberGames, saveDirectory):
     ax.axhline(averageGames, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " games")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Game_NumberGames.png")
+    plt.savefig(os.path.join(saveDirectory, "Game_NumberGames.png") )
 
     plt.clf()
 
@@ -105,7 +105,7 @@ def plotNumberRounds(numberRounds, saveDirectory):
     ax.axhline(averageGames, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " pizzas")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Game_NumberPizzas.png")
+    plt.savefig(os.path.join(saveDirectory, "Game_NumberPizzas.png") )
 
     plt.clf()
 
@@ -126,7 +126,7 @@ def plotPlayerScore(playerScore, saveDirectory):
     ax.axhline(averageGames, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " points")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Game_Score.png")
+    plt.savefig(os.path.join(saveDirectory, "Game_Score.png")  )
 
     plt.clf()
 
@@ -150,7 +150,7 @@ def plotAgregatedScore(thisGameAgregatedScore, saveDirectory):
     ax.axhline(averageGames, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " points")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Game_ScoreAgregated.png")
+    plt.savefig(os.path.join(saveDirectory, "Game_ScoreAgregated.png"))
 
     plt.clf()
 
@@ -182,7 +182,7 @@ def plotPersonalitiesPreGame(agencies,competences,communnions,saveDirectory):
     plt.ylabel('Value')
 
     # plt.legend()
-    plt.savefig(saveDirectory + "/Player_Personalities.png")
+    plt.savefig(os.path.join(saveDirectory, "Player_Personalities.png"))
 
     plt.clf()
 
@@ -204,7 +204,7 @@ def plotCompetitiveness(competitiveness, saveDirectory):
     ax.axhline(averagePlayedTime, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " s")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Player_Competitiveness.png")
+    plt.savefig(os.path.join(saveDirectory, "Player_Competitiveness.png"))
 
     plt.clf()
 
@@ -226,7 +226,7 @@ def plotExperience(experience, saveDirectory):
     ax.axhline(averagePlayedTime, color='red', linewidth=2, label='Avg: ' + str(averageLabel) + " s")
 
     plt.legend()
-    plt.savefig(saveDirectory + "/Player_Experiences.png")
+    plt.savefig(os.path.join(saveDirectory, "Player_Experiences.png") )
 
     plt.clf()
 
@@ -280,7 +280,7 @@ def plotPersonalitiesAfterGame(agencies,competences,communnions,saveDirectory):
         plt.ylabel('Value')
 
         # plt.legend()
-        plt.savefig(saveDirectory + "/Agents_Personalities.png")
+        plt.savefig(os.path.join(saveDirectory, "Agents_Personalities.png") )
 
         plt.clf()
 
@@ -348,7 +348,7 @@ def plotSimilaritiesIntegrated(agenciesAgent, competencesAgent, communnionsAgent
     plt.ylabel('Value')
 
     # plt.legend()
-    plt.savefig(saveDirectory + "/Agents_Similarity.png")
+    plt.savefig(os.path.join(saveDirectory, "Agents_Similarity.png")  )
 
     plt.clf()
 

@@ -70,7 +70,7 @@ class Tournament():
         for agentCategory in [self.agentsComp, self.agentsCoop, self.agentsCompCoop]:
             for agent in agentCategory:
                 if not "TeamMate" in agent.name or not "RandomGYM_" in agent.name:
-                    thisAgentFolder = self.savingDirectory+"/Agents/"+agent.name
+                    thisAgentFolder = os.path.join (self.savingDirectory, "Agents", agent.name) 
                     if not os.path.exists(thisAgentFolder):
                         os.makedirs(thisAgentFolder)
                         agent.saveModelIn = thisAgentFolder
@@ -120,7 +120,7 @@ class Tournament():
 
         phases = int(math.log(len(brackets[0]),2))+1
 
-        logger = LogManager.Logger(saveTournamentDirectory+"/Log.txt", verbose=True)
+        logger = LogManager.Logger(os.path.join (saveTournamentDirectory, "Log.txt"), verbose=True)
 
         logger.newLogSession("Tournament starting!")
         logger.write("Total players:" + str(len(self.opponentsComp) + len(self.opponentsCoop)*2 + len(self.oponentsCompCoop)*2))
@@ -276,7 +276,7 @@ class Tournament():
         logger.write("-- 4)" + str(fourth[0].name))
 
         """Writing comp rank"""
-        with open(self.savingDirectory+"/FinalResultsComp.csv", mode='w') as csvFile:
+        with open(os.path.join (self.savingDirectory, "FinalResultsComp.csv"), mode='w') as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
             csvWriter.writerow(["Position", 'Player Name', 'Final Game Performance Score', 'Games Played'])
@@ -285,7 +285,7 @@ class Tournament():
 
 
         """Writing coop rank"""
-        with open(self.savingDirectory+"/FinalResultsCoop.csv", mode='w') as csvFile:
+        with open(os.path.join (self.savingDirectory, "FinalResultsCoop.csv") , mode='w') as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
             csvWriter.writerow(["Position", 'Player Name', 'Final Game Performance Score',  "TeamMate Name", "TeamMate Final Game Performance Score" ,'Games Played Team Mate'])
@@ -389,7 +389,7 @@ class Tournament():
          """
 
         """Experiment parameters"""
-        saveDirectory = saveDirectory+"/Bracket_"+str(bracket)+"/Phase_"+str(round)+"/Game_"+str(gameNumber)
+        saveDirectory = os.path.join (saveDirectory, f"Bracket{bracket}", f"Phase_{round}", f"Game_{gameNumber}")
         verbose = False
         saveLog = True
         saveDataset = True

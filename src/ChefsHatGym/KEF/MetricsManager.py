@@ -3,6 +3,7 @@ import datetime
 import sys
 import datetime
 import csv
+import os
 
 class MetricsManager:
     """DataSet Manager Class
@@ -62,12 +63,12 @@ class MetricsManager:
 
     def saveMetricPlayer(self, metrics):
 
-        self._currentDataSetFile = self._metricDirectory + "/Metrics_Player.csv"
+        self._currentDataSetFile = os.path.join(self._metricDirectory,"Metrics_Player.csv" )
 
-        with open(self._currentDataSetFile, mode='a') as employee_file:
-            employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with open(self._currentDataSetFile, mode='a') as fileDS:
+            fileWriter = csv.writer(fileDS, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-            employee_writer.writerow(
+            fileWriter.writerow(
                 ["Game", "P1_position",  "P1_average_reward",  "P1_Q1_passes", "P1_Q1_discards",
                  "P1_Q2_passes", "P1_Q2_discards", "P1_Q3_passes", "P1_Q3_discards", "P1_Q4_passes", "P1_Q4_discards",
                  "P2_position", "P2_average_reward",  "P2_Q1_passes", "P2_Q1_discards",
@@ -78,6 +79,6 @@ class MetricsManager:
                  "P4_Q2_passes", "P4_Q2_discards", "P4_Q3_passes", "P4_Q3_discards", "P4_Q4_passes", "P4_Q4_discards",
                  ])
             for m in metrics:
-                employee_writer.writerow(
+                fileWriter.writerow(
                     m)
 

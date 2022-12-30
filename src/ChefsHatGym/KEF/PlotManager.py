@@ -82,7 +82,8 @@ def plotWinners(numPLayers, winners, iteraction, names, plotDirectory):
     plt.xlim(0, numPLayers)
     # plt.xlim(0, range(len(dataY)))
 
-    plt.savefig(plotDirectory + "/Game_WinnersHistogram_iteration_" + str(iteraction) + ".png")
+    plt.savefig(
+        os.path.join(plotDirectory, f"Game_WinnersHistogram_iteration_{iteraction}.png"))
 
     plt.clf()
 
@@ -112,7 +113,7 @@ def plotRounds(allRounds, iteraction, plotDirectory):
         roundsNumber = allRounds[-1]
 
     plt.savefig(
-        plotDirectory + "/Game_Rounds_iteration_" + str(iteraction) + "_Rounds_" + str(roundsNumber) + ".png")
+        os.path.join(plotDirectory, f"Game_Rounds_iteration_{iteraction}_Rounds_{roundsNumber}.png"))
 
     plt.clf()
 
@@ -139,12 +140,14 @@ def plotPoints(names, pointsAll, iteraction, plotDirectory):
         plt.grid()
         ax.plot(dataY, points)
 
-        directory = plotDirectory  + "/Points_Players/"
+        directory = os.path.join(plotDirectory, "Points_Players")
+        
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/Points_player_"+str(names[i])+"("+str(i)+")"+"_iteration_"+str(iteraction)+".png")
+        plt.savefig(
+            os.path.join(directory, f"Points_player_{names[i]}_({i})_iteration_{iteraction}.png"))
 
         fig.clf()
 
@@ -167,12 +170,14 @@ def plotTotalActions(names, totalActionsAll, iteraction, plotDirectory):
         plt.grid()
         ax.plot(dataY, actions)
 
-        directory = plotDirectory  + "/TotalActions_Players/"
+        directory = os.path.join(plotDirectory, "TotalActions_Players")
+        
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/TotalActions_player_"+str(names[i])+"("+str(i)+")"+"_iteration_"+str(iteraction)+".png")
+        plt.savefig(
+            os.path.join(directory, f"TotalActions_player_{names[i]}_({i})_iteration_{iteraction}.png")   )
 
         fig.clf()
 
@@ -223,13 +228,15 @@ def plotFinishPositions(names, scoresAll, winners, iteraction, plotDirectory):
         # plt.yticks(dataY, my_xticks)
         # # plt.yticks(np.arange(y.min(), y.max(), 0.005))
         #
-
-        directory = plotDirectory  + "/FinishingPosition_Players/"
+    
+        directory = os.path.join(plotDirectory, "FinishingPosition_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/HistoryWinners_player_"+str(names[i])+"("+str(i)+")"+"_iteration_"+str(iteraction)+"_TotalWin_"+str(totalWins)+".png")
+        plt.savefig(
+            os.path.join(directory, f"HistoryWinners_player_{names[i]}_({i})_iteration_{iteraction}_TotalWin_{totalWins}.png")
+            )
 
         fig.clf()
 
@@ -331,13 +338,13 @@ def plotActionBehavior(names, actions, iteraction, plotsDirectory):
         for ax in axs.flat:
             ax.label_outer()
 
-        directory = plotsDirectory + "/ActionBehavior_AllGames_Players/"
+        directory =  os.path.join(plotsDirectory, "ActionBehavior_AllGames_Players")
+
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/ActionBehavior_AllGames_Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(
-            iteraction) + ".png", dpi=500)
+        plt.savefig(os.path.join(directory, f"ActionBehavior_AllGames_Player_{names[i]}_({i})_iteration_{iteraction}.png"), dpi=500)
 
         fig.clf()
 
@@ -377,11 +384,16 @@ def plotTimeLineMood(names, moodNeurons, moodReading, iteraction, playersAction,
         # print ("Name:"  + str(names[i]) + " - "+str(moodReading[0]))
         if len(moodReading[i]) > 0:
 
-            directory = plotsDirectory + "/TimeLine_MoodNeurons_Players/"
+            directory = os.path.join(plotsDirectory, "TimeLine_MoodNeurons_Players")
+
+            
+
+
             if not os.path.exists(directory):
                 os.mkdir(directory)
-            plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                i) + ")" + "_iteration_" + str(iteraction) + ".png"
+
+            
+            plotName = os.path.join(directory, f"Mood_Player_{names[i]}({i})_iteration_{iteraction}.png")
 
             thisPlayerNeurons = moodNeurons[i]
             moodReading = numpy.array(moodReading)
@@ -520,28 +532,31 @@ def plotMoodNeurons(names, moodNeurons, moodReading, iteraction, plotsDirectory)
             for index, moodNeuronReadings in enumerate(moodNeurons[i]):
 
                 if len(moodNeuronReadings) > 0:
-                    directory = plotsDirectory + "/MoodNeurons_Players/"
+                    
+                    directory = os.path.join(plotsDirectory, f"MoodNeurons_Players")
+
+
                     if not os.path.exists(directory):
                         os.mkdir(directory)
 
                     if index == i:
-                        directory = plotsDirectory + "/MoodNeurons_Players/Self/"
-                        plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
-                            i) + ")" + "_iteration_" + str(iteraction) + ".png"
+                        
+                        directory = os.path.join(plotsDirectory, f"MoodNeurons_Players")
+
+
+                        plotName = os.path.join(directory, f"Mood_Player_{names[i]}({i})_iteration_{iteraction}.png")
 
                     else:
-                        directory = plotsDirectory + "/MoodNeurons_Players/Oponents/"
+                        directory = os.path.join(plotsDirectory, f"MoodNeurons_Players", "Oponents")
 
                         newIndexes = numpy.array(range(4)).tolist()
                         newIndexes.remove(i)
                         newNames = names.copy()
                         newNames.remove(names[i])
 
-                        plotName = directory + "/MoodNeurons_Player_" + str(names[i]) + "(" + str(
-                            i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
-                            names[index]) + ")" +"("+ str(index)+ ")_iteration_" + str(
-                            iteraction) + ".png"
+                        plotName = os.path.join(directory, f"MoodNeurons_Player_{names[i]}({i})_AboutPlayer_{names[index]}({index})_iteration_{iteraction}.png")
 
+      
                     if not os.path.exists(directory):
                         os.mkdir(directory)
 
@@ -630,22 +645,29 @@ def plotMood(names, moodReading, iteraction, plotsDirectory):
 
             for index, moodReadings in enumerate(moodReading[i]):
                 if len(moodReadings) > 0:
-                    directory = plotsDirectory + "/Mood_Players/"
+                    
+                    directory = os.path.join(directory, f"Mood_Players")
+
+
                     if not os.path.exists(directory):
                         os.mkdir(directory)
 
                     if index == i:
-                        directory = plotsDirectory + "/Mood_Players/Self/"
+                        
+                        directory = os.path.join(plotsDirectory, f"Mood_Players", "Self")
+
                         plotName = directory + "/Mood_Player_" + str(names[i]) + "(" + str(
                             i) + ")" + "_iteration_" + str(iteraction) + ".png"
+                        
+                        plotName = os.path.join(directory, f"Mood_Player_{names[i]}({i})_iteration_{iteraction}.png")
 
                     else:
-                        directory = plotsDirectory + "/Mood_Players/Oponents/"
+                        
+                        directory = os.path.join(plotsDirectory, f"Mood_Players", "Oponents")
+                            
+                        plotName = os.path.join(directory, f"Mood_Player_{names[i]}_AboutPlayer_{names[index]}({i})_iteration_{iteraction}.png")
 
-                        directory + "/Mood_Players" + str(names[i]) + "(" + str(
-                            i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
-                            names[index]) + ")" + "(" + str(index) + ")_iteration_" + str(
-                            iteraction) + ".png"
+
 
 
                     if not os.path.exists(directory):
@@ -689,21 +711,23 @@ def plotSelfProbabilitySuccess(names, prob, iteraction, plotsDirectory, name="")
                     # print ("I:" + str(names[i]))
                     # print ("Index: " + str(index))
 
-                    directory = plotsDirectory + "/ProbabilitySuccess_Players/"
+                    
+                    directory = os.path.join(plotsDirectory, f"ProbabilitySuccess_Players")
+
                     if not os.path.exists(directory):
                         os.mkdir(directory)
 
                     if index == i:
-                        directory = plotsDirectory + "/ProbabilitySuccess_Players/Self/"
-                        plotName = directory + "/ProbabilitySuccess_Players" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png"
+                        
+                        directory = os.path.join(plotsDirectory, f"ProbabilitySuccess_Players", "Self")                        
+
+                        plotName = os.path.join(directory, f"ProbabilitySuccess_Players_{names[i]}({i})_iteration_{iteraction}.png")
 
                     else:
-                        directory = plotsDirectory + "/ProbabilitySuccess_Players/Oponents/"
-
-                        plotName = directory + "/ProbabilitySuccess_Players_" + str(names[i]) + "(" + str(
-                            i) + ")" + "_AboutPlayer_" + str(names[index]) + "(" + str(
-                            i) + ")" + ")_iteration_" + str(
-                            iteraction) + ".png"
+                        
+                        directory = os.path.join(plotsDirectory, f"ProbabilitySuccess_Players", "Oponents")
+                       
+                        plotName = os.path.join(directory, f"ProbabilitySuccess_Players_{names[i]}({i})_AboutPlayer_{names[index]}_iteration_{iteraction}.png")
 
 
                     if not os.path.exists(directory):
@@ -768,20 +792,23 @@ def plotRewardsAll(names, rewards, iteraction, plotsDirectory):
         plt.grid()
         ax.plot(dataY, reward)
 
-        directory = plotsDirectory + "/Rewards_Players/"
+        
+        directory = os.path.join(plotsDirectory, f"Rewards_Players")
+
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/Reward_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"_meanReward_"+str(meanReward)+".png")
+    
+        plt.savefig(os.path.join(directory, f"Reward_player_{names[i]}({i})_iteration_{iteraction}_meanReward_{meanReward}.png"))
 
         fig.clf()
 
 def plotSelfRewardsAll(names, meanReward, allReward, iteraction, plotsDirectory):
 
     for i in range(len(names)):
-
-        directory = plotsDirectory + "/Self_Rewards_Players/"
+        
+        directory = os.path.join(plotsDirectory, f"Self_Rewards_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
@@ -805,7 +832,9 @@ def plotSelfRewardsAll(names, meanReward, allReward, iteraction, plotsDirectory)
         plt.grid()
         ax.plot(dataY, reward)
 
-        plt.savefig(directory + "/Reward_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+".png")
+
+        
+        plt.savefig(os.path.join(directory, f"Reward_player_{names[i]}({i})_iteration_{iteraction}.png"))
 
         fig.clf()
 
@@ -828,8 +857,9 @@ def plotSelfRewardsAll(names, meanReward, allReward, iteraction, plotsDirectory)
         plt.grid()
         ax.plot(dataY, reward)
 
-        plt.savefig(directory + "/AverageReward_player_" + str(names[i]) + "(" + str(i) + ")" + "_iteration_" + str(
-            iteraction) +".png")
+
+        plt.savefig(os.path.join(directory, f"AverageReward_player_{names[i]}({i})_iteration_{iteraction}.png"))
+
 
         fig.clf()
 
@@ -857,12 +887,15 @@ def plotCorrectActions(names, wrongActions, totalActions, iteraction, plotsDirec
         ax.legend()
         plt.grid()
 
-        directory = plotsDirectory + "/CorrectActions_Players/"
+        
+
+        directory = os.path.join(plotsDirectory, f"CorrectActions_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/CorrectActionsPlot_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"CorrectActions_"+str(totalCorrectActions)+"("+str(totalActionsGame)+").png")
+        plt.savefig(os.path.join(directory, f"CorrectActionsPlot_player_{names[i]}({i})_iteration_{iteraction}_CorrectActions_{totalCorrectActions}({totalActionsGame}).png"))
+
 
         plt.clf()
 
@@ -896,12 +929,15 @@ def plotWrongActions( names, wrongActions, iteraction, plotsDirectory):
         plt.plot(dataY, wrongActionsPlot)
         plt.grid()
 
-        directory = plotsDirectory + "/WrongActions_Players/"
+        
+        directory = os.path.join(plotsDirectory, f"WrongActions_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory + "/WrongActionsPlot_player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"WrongActions_"+str(totalWrongActions)+".png")
+        
+        plt.savefig(os.path.join(directory, f"WrongActionsPlot_player_{names[i]}({i})_iteration_{iteraction}WrongActions_{totalWrongActions}.png"))
+        
 
         plt.clf()
 
@@ -910,8 +946,8 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
     # Plot selected QValues for an agent.
 
     for i in range(len(names)):
-
-        directory = plotsDirectory + "/QValues_Players/"
+        
+        directory = os.path.join(plotsDirectory, f"QValues_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
@@ -945,7 +981,8 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
 
             plt.ylim(0, 0.5)
         plt.legend()
-        plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_BestQValues_Agregated.png")
+        
+        plt.savefig(os.path.join(directory, f"Player_{names[i]}({i})_iteration_{iteraction}_BestQValues_Agregated.png"))
 
         plt.clf()
 
@@ -957,8 +994,8 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
             axs.plot(dataY, selectedQValues)
 
             plt.ylim(0, 1)
-
-            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_BestQValue.png")
+            
+            plt.savefig(os.path.join(directory, f"Player_{names[i]}({i})_iteration_{iteraction}_BestQValue.png"))
 
             plt.clf()
 
@@ -967,8 +1004,8 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
             axs.plot(dataY, summedQValues)
 
             plt.ylim(0, 1)
-
-            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_SummedQValue.png")
+            
+            plt.savefig(os.path.join(directory, f"Player_{names[i]}({i})_iteration_{iteraction}_SummedQValue.png"))
 
             plt.clf()
 
@@ -977,8 +1014,8 @@ def plotQValues( names, Qvalues, iteraction, plotsDirectory):
             axs.plot(dataY, averagedQValues)
 
             plt.ylim(0, 1)
-
-            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + "_AvgQValue.png")
+            
+            plt.savefig(os.path.join(directory, f"Player_{names[i]}({i})_iteration_{iteraction}_AvgQValue.png"))
 
             plt.clf()
 
@@ -987,8 +1024,8 @@ def plotMeanQValuesGames( names, meanQValues, iteraction, plotsDirectory):
     # Plot selected QValues for an agent.
 
     for i in range(len(names)):
-
-        directory = plotsDirectory + "/Mean_QValues_Players/"
+        
+        directory = os.path.join(plotsDirectory, f"Mean_QValues_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
@@ -1001,8 +1038,9 @@ def plotMeanQValuesGames( names, meanQValues, iteraction, plotsDirectory):
         axs.plot(dataY, qValue)
 
         plt.ylim(0, 1)
+        
 
-        plt.savefig(directory + "/MeanValues_player_" + str(names[i])+"("+str(i)+")" + "_iteration_" + str(iteraction) + ".png")
+        plt.savefig(os.path.join(directory, f"MeanValues_player_{names[i]}({i})_iteration_{iteraction}.png"))
 
         plt.clf()
 
@@ -1010,7 +1048,8 @@ def plotMeanQValuesGames( names, meanQValues, iteraction, plotsDirectory):
 def plotLosses(names, losses, iteraction, name, plotsDirectory):
 
     # Plot wrong actions all players
-    directory = plotsDirectory + "/Losses_" + str(name) + "/"
+    
+    directory = os.path.join(plotsDirectory, f"Losses_{name}")
 
     if not os.path.exists(directory):
         os.mkdir(directory)
@@ -1039,7 +1078,8 @@ def plotLosses(names, losses, iteraction, name, plotsDirectory):
             plt.plot(dataY, actorLoss)
             plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
             plt.grid()
-            plt.savefig(directory + "/Player_" + str(names[i])+"("+str(i)+")" +"_iteration_"+str(iteraction)+"_Actor.png")
+            
+            plt.savefig(os.path.join(directory, f"Player_{names[i]}({i})_iteration_{iteraction}_Actor.png"))
 
             plt.clf()
 
@@ -1053,8 +1093,9 @@ def plotLosses(names, losses, iteraction, name, plotsDirectory):
                 plt.plot(dataY, criticLoss)
                 plt.xticks(numpy.arange(0, len(dataY) + 1, 1.0))
                 plt.grid()
-                plt.savefig(directory + "/Player_" + str(names[i]) + "(" + str(i) + ")" + "_iteration_" + str(
-                    iteraction) + "_Critic.png")
+            
+
+                plt.savefig(os.path.join(directory, f"Player_{names[i]}({i})_iteration_{iteraction}_Critic.png"))
 
                 plt.clf()
 
@@ -1146,13 +1187,13 @@ def plotNumberOfActions(names, actions, gameNumber, plotsDirectory):
 
         autolabel(rects1)
         autolabel(rects2)
-
-        directory = plotsDirectory + "/ActionBehavior_LastGame_Players/"
+        
+        directory = os.path.join(plotsDirectory, f"ActionBehavior_LastGame_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
-
-        plt.savefig(directory + "/ActionBehavior_" + str(names[i])+"("+str(i)+")" + "_Game_"+str(gameNumber)+".png")
+        
+        plt.savefig(os.path.join(directory, f"ActionBehavior_{names[i]}({i})_Game_{gameNumber}.png"))
 
         fig.clf()
 
@@ -1240,15 +1281,16 @@ def plotDiscardBehavior( names, actions, gameNumber, plotsDirectory):
             # # plt.yticks(np.arange(y.min(), y.max(), 0.005))
             #
 
-            directory = plotsDirectory + "/DiscardBehavior_LastGame_Players/"
+            
+            directory = os.path.join(plotsDirectory, f"DiscardBehavior_LastGame_Players")
 
             if not os.path.exists(directory):
                 os.mkdir(directory)
 
 
-            plt.savefig(directory + "/Player_Discards_player_" + str(names[i])+"("+str(i)+")" + "_Game_" + str(
-                gameNumber) + ".png")
+            plt.savefig(os.path.join(directory, f"Player_Discards_player_{names[i]}({i})_Game_{gameNumber}.png"))
 
+  
             fig.clf()
 
 def plotTimeLine (names,actions,  gameNumber=0, plotsDirectory=""):
@@ -1287,14 +1329,14 @@ def plotTimeLine (names,actions,  gameNumber=0, plotsDirectory=""):
         ax.set_xlabel('Actions')
         ax.set_yticks([1, 2, 3])
         ax.set_yticklabels([DataSetManager.actionDiscard, DataSetManager.actionPass,DataSetManager.actionFinish])
-
-
-        directory = plotsDirectory + "/TimeLine_LastGame_Players"
+        
+        directory = os.path.join(plotsDirectory, f"TimeLine_LastGame_Players")
 
         if not os.path.exists(directory):
             os.mkdir(directory)
 
-        plt.savefig(directory  + "/Game_TimeLine_Game_"+str(gameNumber)+"_Player_"+str(names[i])+"("+str(i)+")"+".png")
+        
+        plt.savefig(os.path.join(directory, f"Game_TimeLine_Game_{gameNumber}_Player_{names[i]}({i}).png"))
 
         fig.clf()
 
@@ -1327,8 +1369,8 @@ def plotQValuesOverSeveralGames(numPLayers, Qvalues, experimentName, saveDirecto
 
             plt.ylim(0, 1)
             plt.legend()
-
-            plt.savefig(saveDirectory + "/"+experimentName+"_SelectedQValues_player_" + str(i) + ".png")
+            
+            plt.savefig(os.path.join(saveDirectory, f"{experimentName}_SelectedQValues_player_{i}.png"))
 
             plt.clf()
 
@@ -1382,7 +1424,9 @@ def plotVictoriesTotal(winsP1, winsP2, winsP3, winsP4, maxNumGames, experimentNa
     autolabel(rects3, stdP3)
     autolabel(rects4, stdP4)
 
-    plt.savefig(savingFolder + "/" + str(experimentName) + "_TotalVictories.png")
+    
+    plt.savefig(os.path.join(savingFolder, f"{experimentName}_TotalVictories"))
+
 
     plt.clf()
 
@@ -1865,5 +1909,6 @@ class PlotManager():
         generateExperimentPlotsFromDataset(plotsToGenerate, dataset, saveDirectory=self._plotsDirectory)
 
         if not intrinsicDataset == "":
-            intrinsicDataset = intrinsicDataset+"/"+"IntrinsicDataset.pkl"
+            intrinsicDataset = os.path.join(intrinsicDataset, "IntrinsicDataset.pkl")            
+
             generateIntrinsicPlotsFromDataset(plotsToGenerate,intrinsicDataset, saveDirectory=self._plotsDirectory)

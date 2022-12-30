@@ -50,6 +50,9 @@ You can check it all in details in our [documentation.](https://chefshatgym.read
 
 ### Instalation and Examples
 
+The environment runs on Python 3.8!
+
+
 Our documentation containing the instalation instructions, the entire game structure and coding examples can be accesed through our [readTheDocs.](https://chefshatgym.readthedocs.io/en/latest/)
  
 ### Chef's Hat Player's Club

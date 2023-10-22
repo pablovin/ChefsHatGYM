@@ -100,8 +100,7 @@ class ExperimentManager:
         assert (not experimentName == None or not experimentName == ""), "Empty Experiment Name!"
 
         self._baseDirectory = baseDirectory
-        timeNow = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        self._experimentName = f"experimentName_{timeNow}"
+        self._experimentName = experimentName
         """Creating the dataset folder"""
         self._dataSetDirectory = os.path.join(self.baseDirectory, self.experimentName, "Datasets")
 

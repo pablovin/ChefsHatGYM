@@ -1,21 +1,17 @@
-from ChefsHatGym.Agents import Agent_Naive_Random
+from ChefsHatGym.Agents import AgentNaive_Random
 from ChefsHatGym.KEF import LogManager
 import csv
-
-
 import gym
-import numpy
+import numpy as np
 import random
 import math
-import copy
+from copy import copy
 import gc
 import os
 
 
 class Tournament():
-
-
-    def __init__(self, savingDirectory, verbose=True, opponentsComp=[], opponentsCoop=[], oponentsCompCoop=[],threadTimeOut=5, actionTimeOut=5,  gameType=["POINTS"], gameStopCriteria=15):
+    def __init__(self, savingDirectory, verbose=True, opponentsComp=[], opponentsCoop=[], oponentsCompCoop=[],  gameType=["POINTS"], gameStopCriteria=15):
 
         """Constructor of the tournament.
                 :param savingDirectory: directory where the tournament logs and data will be saved.
@@ -33,22 +29,13 @@ class Tournament():
                 :param oponentsCompCoop:list of IAgents that will play the tournament and will be evaluated in both competitive and cooperative manner.
                 :type opponentsCoop: list
 
-                :param threadTimeOut: value in seconds that each agent is allowed when executing the actionUpdate, observeOthers and matchUpdate functions indidividually
-                :type threadTimeOut: int
-
-                :param actionTimeOut: value in seconds that each agent is allowed when executing the getAction function
-                :type threadTimeOut: int
-
                 :param gameType: type of the played game, can be POINTS or MATCH
                 :type gameType: str
 
         """
 
-
         self.savingDirectory = savingDirectory
         self.verbose= verbose
-        self.threadTimeOut = threadTimeOut
-        self.actionTimeout = actionTimeOut
         self.gameType = gameType
         self.gameStopCriteria = gameStopCriteria
 
@@ -75,8 +62,6 @@ class Tournament():
                         os.makedirs(thisAgentFolder)
                         agent.saveModelIn = thisAgentFolder
 
-
-
     def createGroups(self):
         """Create the groups that will play the game.
          For each coop and compcoop agent, the agent will be paired with a "TeamMate_agent.name" random agent.
@@ -91,8 +76,8 @@ class Tournament():
         pairs = []
 
         [pairs.append([self.agentsComp[i], self.agentsComp[i + 1]]) for i in list(range(len(self.agentsComp)))[::2]]
-        [pairs.append([a,Agent_Naive_Random.AgentNaive_Random("TeamMate_" + str(a.name))]) for a in self.agentsCoop]
-        [pairs.append([a, Agent_Naive_Random.AgentNaive_Random("TeamMate_" + str(a.name))]) for a in self.agentsCompCoop]
+        [pairs.append([a, AgentNaive_Random("TeamMate_" + str(a.name))]) for a in self.agentsCoop]
+        [pairs.append([a, AgentNaive_Random("TeamMate_" + str(a.name))]) for a in self.agentsCompCoop]
         random.shuffle(pairs)
 
         groups = []
@@ -167,10 +152,10 @@ class Tournament():
 
                     """Competitive Ranking"""
                     if third[0].name in self.opponentsComp or third[0].name in self.oponentsCompCoop:
-                        thirds[p].append([copy.copy(third[0].name), copy.copy(third[1])])
+                        thirds[p].append([copy(third[0].name), copy(third[1])])
 
                     if fourth[0].name in self.opponentsComp or fourth[0].name in self.oponentsCompCoop:
-                        fourths[p].append([copy.copy(fourth[0].name), copy.copy(fourth[1])])
+                        fourths[p].append([copy(fourth[0].name), copy(fourth[1])])
 
                     """Cooperative Ranking"""
 
@@ -182,14 +167,13 @@ class Tournament():
                     if fourth[0].name in self.opponentsCoop or fourth[0].name in self.oponentsCompCoop:
                         coopPlayers.append(fourth)
 
-
                     for playerCoop in coopPlayers:
                         for teamMate in (first,second,third,fourth):
                             # print ("PLayer coop:" + str(playerCoop))
                             # print("TeamMate:" + str(teamMate))
                             if not playerCoop[0].name == teamMate[0].name:
                                 if "TeamMate" in teamMate[0].name and playerCoop[0].name in teamMate[0].name:
-                                    outCoop[p].append([[copy.copy(playerCoop[0].name), copy.copy(playerCoop[1])], [copy.copy(teamMate[0].name), copy.copy(teamMate[1])]])
+                                    outCoop[p].append([[copy(playerCoop[0].name), copy(playerCoop[1])], [copy(teamMate[0].name), copy(teamMate[1])]])
 
 
                     """Check if the first and second are team mates and If not, then check which is the position of the team mate
@@ -208,8 +192,7 @@ class Tournament():
                                 # print("TeamMate:" + str(teamMate))
                                 if not playerCoop[0].name == teamMate[0].name:
                                     if "TeamMate" in teamMate[0].name and playerCoop[0].name in teamMate[0].name:
-                                        outCoop[p].append(
-                                            [[copy.copy(playerCoop[0].name), copy.copy(playerCoop[1])], [copy.copy(teamMate[0].name), copy.copy(teamMate[1])]])
+                                        outCoop[p].append([[copy(playerCoop[0].name), copy(playerCoop[1])], [copy(teamMate[0].name), copy(teamMate[1])]])
 
                     del third
                     del fourth
@@ -220,9 +203,6 @@ class Tournament():
                     bWinners.append(newPhaseGroups[1])
                 else:
                    thisPhaseGroup = [newPhaseGroups[g:g + 4] for g in list(range(len(newPhaseGroups)))[::4]]
-
-
-
 
         """After the end of the game sort the competitive rank fourths and thirds per phase and add them the bottom of the final Position"""
         for phaseIndex in range(phases):
@@ -246,7 +226,7 @@ class Tournament():
         """After the end of the last phase add the competitive agents to the competitive rank"""
         for agent in [fourth, third, second, first]:
             if agent[0].name in self.opponentsComp or agent[0].name in self.oponentsCompCoop:
-                finalPositionComp.append([copy.copy(agent[0].name), copy.copy(agent[1]), copy.copy(phases+1)])
+                finalPositionComp.append([copy(agent[0].name), copy(agent[1]), copy(phases+1)])
 
         """After the end of the last phase add the coop agents to the cooperative rank"""
         """Find fourth's and third's team mate and log them"""
@@ -262,7 +242,7 @@ class Tournament():
                     if not agent[0].name == teamMate[0].name:
                         if "TeamMate" in teamMate[0].name and agent[0].name in teamMate[0].name:
                             finalCoopPositions.append(
-                                [[copy.copy(agent[0].name), copy.copy(agent[1])], [copy.copy(teamMate[0].name), copy.copy(teamMate[1])]])
+                                [[copy(agent[0].name), copy(agent[1])], [copy(teamMate[0].name), copy(teamMate[1])]])
 
 
         agentsThisPhase = sorted(finalCoopPositions, key=lambda tup: tup[1][1])
@@ -302,11 +282,11 @@ class Tournament():
               :return: List the random action.
               :rtype: list
         """
-        itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[0].tolist()
+        itemindex = np.array(np.where(np.array(possibleActions) == 1))[0].tolist()
 
         random.shuffle(itemindex)
         aIndex = itemindex[0]
-        a = numpy.zeros(200)
+        a = np.zeros(200)
         a[aIndex] = 1
 
         return a
@@ -343,7 +323,7 @@ class Tournament():
         if difference.is_integer():
             if totalAgents < 8:
                 for n in range(int(8-totalAgents)):
-                    group.append(Agent_Naive_Random.AgentNaive_Random("RandomGYM_" + str(n)))
+                    group.append(AgentNaive_Random("RandomGYM_" + str(n)))
 
             return group
         else:
@@ -352,7 +332,7 @@ class Tournament():
             newAdditions = int(math.pow(2,intDiff+1) - totalAgents)
 
             for n in range(newAdditions):
-                group.append(Agent_Naive_Random.AgentNaive_Random("RandomGYM_"+str(n)))
+                group.append(AgentNaive_Random("RandomGYM_"+str(n)))
 
         return group
 
@@ -408,12 +388,9 @@ class Tournament():
 
         while not env.gameFinished:
             currentPlayer = group[env.currentPlayer]
-
             observations = env.getObservation()
-
-            action = []
-            with currentPlayer.timeout(self.actionTimeout):
-                action = currentPlayer.getAction(observations)
+            action = currentPlayer.getAction(observations)
+            
             if len(action) == 0:
                 action = self.getRandomAction(observations[28:])
 
@@ -421,31 +398,21 @@ class Tournament():
             while not info["validAction"]:
                 nextobs, reward, isMatchOver, info = env.step(action)
 
-            # Training will be called in a thread, that will be killed inself.threadTimes
             # self.runUpdateAction(currentPlayer, args=(observations, nextobs, action, reward, info) )
-            with currentPlayer.timeout(self.threadTimeOut):
-                currentPlayer.actionUpdate(observations, nextobs, action, reward, info)
+            currentPlayer.actionUpdate(observations, nextobs, action, reward, info)
 
             # self.startThread(currentPlayer.actionUpdate, args=(observations, nextobs, action, reward, info))
             # currentPlayer.actionUpdate(observations, nextobs, action, reward, info)
 
-
             # Observe others
             for p in group:
-                # Observe Others will be called in a thread, that will be killed in self.threadTimes
-                with p.timeout(self.threadTimeOut):
-                    p.observeOthers(info)
+                p.observeOthers(info)
             #
             if isMatchOver:
-                # Update the match info as a thread that will be killed in self.threadTimes
                 for p in group:
-                    with p.timeout(self.threadTimeOut):
-                        p.matchUpdate(info)
+                    p.matchUpdate(info)
 
-
-
-
-        sortedScore = copy.copy(info["performanceScore"])
+        sortedScore = copy(info["performanceScore"])
         sortedScore.sort()
 
         winnerIndex = info["performanceScore"].index(sortedScore[-1])

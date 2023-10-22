@@ -107,29 +107,17 @@ class RenderManager():
             cardNumber = 1
             for card in cardImages:
                 # self.cards[cardNumber] = cv2.resize(numpy.array(cv2.imread(self.resourcesFolder+"/"+self.cardsDirectory+"/"+card)), (141,195))
-                self.cards[cardNumber] = cv2.resize(
-                    numpy.array(cv2.imread(self.resourcesFolder + "/" + self.cardsDirectory + "/" + card)), (70, 90))
+                self.cards[cardNumber] = cv2.resize(numpy.array(cv2.imread(self.resourcesFolder + "/" + self.cardsDirectory + "/" + card)), (70, 90))
                 cardNumber = cardNumber + 1
             # print ("Size:", self.playField.shape)
 
         # Pass Card
-        self.passCard = numpy.array(
-            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/pass.png"), (176, 243)))
-
-        self.roleCards.append(
-            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/dishwasher.png"),
-                       (176, 243)))
-        self.roleCards.append(
-            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/wait.png"), (176, 243)))
-        self.roleCards.append(
-            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/souschef.png"),
-                       (176, 243)))
-        self.roleCards.append(
-            cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/chef.png"), (176, 243)))
-
-        self.blackCard = cv2.resize(
-            numpy.array(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/cardBlack.png")),
-            (70, 90))
+        self.passCard = numpy.array(cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/pass.png"), (176, 243)))
+        self.roleCards.append(cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/dishwasher.png"), (176, 243)))
+        self.roleCards.append(cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/wait.png"), (176, 243)))
+        self.roleCards.append(cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/souschef.png"), (176, 243)))
+        self.roleCards.append(cv2.resize(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/chef.png"), (176, 243)))
+        self.blackCard = cv2.resize(numpy.array(cv2.imread(self.resourcesFolder + "/" + self.actionCardsDirectory + "/cardBlack.png")), (70, 90))
 
         # self.playField = numpy.array(cv2.resize(self.playField,(1920, 1080)))
 

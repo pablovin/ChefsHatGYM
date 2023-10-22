@@ -1,46 +1,62 @@
 from ChefsHatGym.Evaluation import Tournament
 from ChefsHatGym.env import ChefsHatEnv
 import random
-from ChefsHatGym.Agents import Agent_Naive_Random
+from ChefsHatGym.Agents import AgentNaive_Random, RemoteAgent
 import time
-
+import os
+import sys
+from multiprocessing import Process
 
 """Agents Factory"""
-def getCompAgents(totalAgents):
-    agents = []
-    for i in range(totalAgents):
-        agents.append(Agent_Naive_Random.AgentNaive_Random("COMP_"+str(i)))
 
+
+def getCompAgents(totalAgents):
+    agents = [AgentNaive_Random("COMP_" + str(i)) for i in range(totalAgents)]
     random.shuffle(agents)
     return agents
 
 
 def getCoopAgents(totalAgents):
-    agents = []
-    for i in range(totalAgents):
-        agents.append(Agent_Naive_Random.AgentNaive_Random("COOP_"+str(i)))
-
+    agents = [AgentNaive_Random("COOP_" + str(i)) for i in range(totalAgents)]
     random.shuffle(agents)
     return agents
+
 
 def getCompCoop(totalAgents):
-    agents = []
-    for i in range(totalAgents):
-        agents.append(Agent_Naive_Random.AgentNaive_Random("COMPCOOP"+str(i)))
-
+    agents = [AgentNaive_Random("COMPCOOP_" + str(i)) for i in range(totalAgents)]
     random.shuffle(agents)
     return agents
 
-start_time = time.time()
-"""Tournament parameters"""
-saveTournamentDirectory = "/home/pablo/Documents/Datasets/ChefsHatCompetition/testing" #Where all the logs will be saved
-compAgents = getCompAgents(5)
-coopAgents = getCoopAgents(5)
-compCoopAgents = getCompCoop(5)
-tournament = Tournament.Tournament(saveTournamentDirectory, opponentsComp=compAgents,  oponentsCompCoop=compCoopAgents, verbose=True, threadTimeOut=5, actionTimeOut=5, gameType=ChefsHatEnv.GAMETYPE["MATCHES"], gameStopCriteria=1)
-tournament.runTournament()
 
-print("--- %s seconds ---" % (time.time() - start_time))
+# self, playersAgents, gameType=ChefsHatEnv.GAMETYPE["MATCHES"], gameStopCriteria=10, rewardFunction=RewardOnlyWinning, verbose=False
+class SimpleTournament:
+    def __init__(
+        self,
+        compAgents=[],
+        compCoopAgents=[],
+        verbose=True,
+        gameType=ChefsHatEnv.GAMETYPE["MATCHES"],
+        gameStopCriteria=1,
+        path="examples/tournament_0",
+    ):
+        self.compCoopAgents = compCoopAgents
+        self.compAgents = compAgents
+        self.verbose = verbose
+        self.gameType = gameType
+        self.gameStopCriteria = gameStopCriteria
+        self.path = path
 
-
-
+    def run(self):
+        os.mkdir(self.path)
+        sys.stdout = open(os.devnull, "w")
+        self.tournament = Tournament(
+            self.path,
+            self.verbose,
+            self.compAgents,
+            [],
+            self.compCoopAgents,
+            self.gameType,
+            self.gameStopCriteria,
+        )
+        self.tournament.runTournament()
+        sys.stdout = sys.__stdout__

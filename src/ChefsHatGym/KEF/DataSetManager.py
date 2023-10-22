@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
 import sys
-import datetime
 import csv
 import pandas as pd
-import numpy
+from copy import copy
 
 # Action types
 actionDeal = "DEAL"
@@ -27,7 +26,6 @@ class DataSetManager:
     Attributes:
         dataSetDiretory (String): This variable keeps the directory which the dataSet files are stored.
 
-
     Author: Pablo Barros
     Created on: 26.02.2020
     Last Update: 26.02.2020
@@ -44,7 +42,6 @@ class DataSetManager:
     def dataSetDirectory(self):
         return self._dataSetDirectory
 
-
     @property
     def currentDataSetFile(self):
         return self._currentDataSetFile
@@ -53,12 +50,9 @@ class DataSetManager:
     def verbose(self):
         return self._verbose
 
-
     dataFrame = ""
     def __init__(self, dataSetDirectory=None, verbose=True):
-
         # sys.stdout = open(logDirectory+"2.txt",'w')
-
         """
         Constructor function, which basically verifies if the dataSetdirectory is correct,
         and if so, or creates or loads the log file.
@@ -66,31 +60,24 @@ class DataSetManager:
         Args:
             logDirectory (String): the directory where the dataSet will be is saved
             verbose(Boolean): Indicates if the log will also be printed in the console
-
-
         """
-
         self._dataSetDirectory = dataSetDirectory
-
         self._verbose = verbose
-
         self._actions = []
-
 
     def addDataFrame(self, gameNumber ="", roundNumber ="", player="", actionType="", playersHand=[], board=[],
                      cardsAction="", reward="", qvalues="", loss="", wrongActions="", totalActions="",
                      score=[], roles="", playersStatus=[], agentNames="", possibleActions=[], performanceScore = []):
 
         #Guarantee is a copy
-
-        score = numpy.copy(score)
-        playersHand = numpy.copy(playersHand)
-        board = numpy.copy(board)
-        reward = numpy.copy(reward)
-        qvalues = numpy.copy(qvalues)
-        loss = numpy.copy(loss)
-        roles= numpy.copy(roles)
-        playersStatus = numpy.copy(playersStatus)
+        score = copy(score)
+        playersHand = copy(playersHand)
+        board = copy(board)
+        reward = copy(reward)
+        qvalues = copy(qvalues)
+        loss = copy(loss)
+        roles= copy(roles)
+        playersStatus = copy(playersStatus)
 
         date =  str(datetime.datetime.now()).replace(" ", "_")
         dataframe= [date, gameNumber,roundNumber,player,actionType,playersHand,board,possibleActions, cardsAction,reward,qvalues,loss,wrongActions,totalActions,
@@ -99,9 +86,7 @@ class DataSetManager:
         self.dataFrame.loc[-1] = dataframe
         self.dataFrame.index = self.dataFrame.index + 1
 
-
     def startNewGame(self):
-
         self._currentDataSetFile = self._dataSetDirectory+"/Dataset.pkl"
 
         columns = ["Time", "Game Number", "Round Number", "Player", "Action Type", "Player Hand",  "Board", "Possible Actions","Cards Action", "Reward",
@@ -113,17 +98,11 @@ class DataSetManager:
 
 
     def startNewMatch(self, gameNumber, agentsNames):
-
         self.addDataFrame(gameNumber=gameNumber, agentNames=agentsNames)
 
-
     def dealAction(self, playersHand, game):
-
         actionType = actionDeal
-
         self.addDataFrame(actionType=actionType, playersHand=playersHand, gameNumber=game)
-
-
 
     def doActionPizzaReady(self, roundNumber, board, playersHand, roles, score, playersStatus, game):
 
@@ -132,8 +111,6 @@ class DataSetManager:
         self.addDataFrame(actionType=actionType, playersHand=playersHand, score=score,
                                       roundNumber=roundNumber, board=board,
                                       roles=roles, playersStatus=playersStatus, gameNumber=game)
-
-
 
     def doActionAction(self, game, player, roundNumber, action, board, wrongActions, reward,
                        playersHand, roles, score, playersStatus, qValue, loss, totalActions, possibleActions):
@@ -149,14 +126,9 @@ class DataSetManager:
                                       totalActions=totalActions, score=score, roles=roles, playersStatus=playersStatus, possibleActions=possibleActions
                                       )
 
-
-
     def exchangeRolesAction(self, playersHand, roles, cardsAction, game):
-
         actionType = actionChangeRole
         self.addDataFrame(actionType=actionType, playersHand=playersHand, cardsAction=cardsAction, roles=roles, gameNumber=game)
-
-
 
     def saveFile(self):
         self.dataFrame.to_pickle(self.currentDataSetFile)

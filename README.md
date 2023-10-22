@@ -1,4 +1,5 @@
-![Chef's Hat Card Game](https://whisperproject.eu/templates/yootheme/cache/f4/logo-f43bb945.webp) 
+![Chef's Hat Card Game](gitImages/chefsHatLogo.png)
+
 ## ChefsHatGym V2
 
 This repository holds the ChefsHatGym2 environment, which contains all the necessary tools to run, train and evaluate your agents while they play the Chef`s Hat game.

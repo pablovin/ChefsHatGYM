@@ -16,7 +16,7 @@ Full documentation can be found here: [Documentation.](https://chefshatgym.readt
 
 We also provide a list of existing plugins and extensions for this library:
 
-### Chef`s Hat Player`s Club
+### Chef`s Hat Players Club
 
 The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersClub) is a collection of ready-to-use artificial agents. Each of these agents were implemented, evaluated, and discussed in specific peer-reviewed publications and can be used at any time. If you want your agent to be included in the Player’s Club, send us a message.
 

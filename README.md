@@ -37,7 +37,7 @@ Fora a complete overview on the development of the game, refer to:
 
 If you want to have access to the game materials (cards and playing field), please contact us using the contact information at the end of the page.
 
-## Chef`sHatGym2 Simulator
+## Chef`sHatGym Simulator
 
 ![Chef's Hat Card Game](gitImages/ChefsHat_GYM_-_Example_Random_Agent.gif) 
 

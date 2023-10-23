@@ -27,9 +27,17 @@ The Chef's Hat Environment provides a simple and easy-to-use API, based on the O
    contact
 
 
+
+
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+Acknowledgment
+===========================================
+This environment and all its development is supported by a Starting Grant from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme. G.A. No 804388, wHiSPER.

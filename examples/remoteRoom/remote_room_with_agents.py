@@ -2,17 +2,17 @@ from ChefsHatGym.gameRooms.chefs_hat_room_remote import ChefsHatRoomRemote
 import time
 from ChefsHatGym.env import ChefsHatEnv
 import redis
-from ChefsHatGym.agents.remote.random_agent_remote import AgentRandonRemote
+from ChefsHatGym.agents.agent_random import AgentRandon
 
 
 # Room parameters
 room_name = "Testing_1"
 
 # Create the players
-p1 = AgentRandonRemote(name="01")
-p2 = AgentRandonRemote(name="02")
-p3 = AgentRandonRemote(name="03")
-p4 = AgentRandonRemote(name="04")
+p1 = AgentRandon(name="01")
+p2 = AgentRandon(name="02")
+p3 = AgentRandon(name="03")
+p4 = AgentRandon(name="04")
 
 
 # Clean all the rooms

@@ -22,7 +22,7 @@ REQUIRES_PYTHON = ">=3.10.0"
 VERSION = "2.0.002"
 
 # What packages are required for this module to be executed?
-with open("Requirements.txt") as requirements:
+with open("E:\workspace\ChefsHatGYM\Requirements.txt") as requirements:
     REQUIRED = requirements.read().split("\n")
 
 # What packages are optional?

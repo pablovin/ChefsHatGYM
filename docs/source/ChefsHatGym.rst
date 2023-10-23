@@ -1,14 +1,21 @@
 ChefsHatGym package
 ===================
 
-.. Subpackages
-.. -----------
+Subpackages
+-----------
 
 .. toctree::
+   :maxdepth: 4
 
-    ChefsHatGym.Agents
-    ChefsHatGym.env
-    ChefsHatGym.Evaluation
-..    ChefsHatGym.KEF
-..    ChefsHatGym.Rewards
-    
+   ChefsHatGym.KEF
+   ChefsHatGym.env
+   ChefsHatGym.gameRooms
+   ChefsHatGym.utils
+
+Module contents
+---------------
+
+.. automodule:: ChefsHatGym
+   :members:
+   :undoc-members:
+   :show-inheritance:

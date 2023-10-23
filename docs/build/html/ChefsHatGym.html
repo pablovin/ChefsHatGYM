@@ -1,232 +1,315 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
-<head>
-  <meta charset="utf-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>ChefsHatGym package &mdash; Chef&#39;s Hat Gym  documentation</title>
-  
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  
-  
-
-  
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <title>ChefsHatGym package &#8212; ChefsHatGym2 2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <script src="_static/documentation_options.js?v=1e5e4989"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ChefsHatGym.Agents package" href="ChefsHatGym.Agents.html" />
-    <link rel="prev" title="Evaluation Environment" href="evalEnv.html" /> 
-</head>
-
-<body class="wy-body-for-nav">
-
    
-  <div class="wy-grid-for-nav">
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="index.html" class="icon icon-home"> Chef's Hat Gym
-          
-
-          
-          </a>
-
-          
-            
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="evalEnv.html">Evaluation Environment</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ChefsHatGym package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.Agents.html">ChefsHatGym.Agents package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.env.html">ChefsHatGym.env package</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
-</ul>
-
-            
-          
-        </div>
-        
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Chef's Hat Gym</a>
-        
-      </nav>
-
-
-      <div class="wy-nav-content">
-        
-        <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
-  <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>ChefsHatGym package</li>
-    
-    
-      <li class="wy-breadcrumbs-aside">
-        
-          
-            <a href="_sources/ChefsHatGym.rst.txt" rel="nofollow"> View page source</a>
-          
-        
-      </li>
-    
-  </ul>
-
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
             
-  <div class="section" id="chefshatgym-package">
-<h1>ChefsHatGym package<a class="headerlink" href="#chefshatgym-package" title="Permalink to this headline">¶</a></h1>
+  <section id="chefshatgym-package">
+<h1>ChefsHatGym package<a class="headerlink" href="#chefshatgym-package" title="Link to this heading">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.Agents.html">ChefsHatGym.Agents package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.Agents.html#module-ChefsHatGym.Agents.IAgent">ChefsHatGym.Agents.IAgent module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.KEF.html">ChefsHatGym.KEF package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF.DataSetManager">ChefsHatGym.KEF.DataSetManager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager"><code class="docutils literal notranslate"><span class="pre">DataSetManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.actions"><code class="docutils literal notranslate"><span class="pre">DataSetManager.actions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.addDataFrame"><code class="docutils literal notranslate"><span class="pre">DataSetManager.addDataFrame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.currentDataSetFile"><code class="docutils literal notranslate"><span class="pre">DataSetManager.currentDataSetFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.dataFrame"><code class="docutils literal notranslate"><span class="pre">DataSetManager.dataFrame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.dataSetDirectory"><code class="docutils literal notranslate"><span class="pre">DataSetManager.dataSetDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.dealAction"><code class="docutils literal notranslate"><span class="pre">DataSetManager.dealAction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.doActionAction"><code class="docutils literal notranslate"><span class="pre">DataSetManager.doActionAction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.doActionPizzaReady"><code class="docutils literal notranslate"><span class="pre">DataSetManager.doActionPizzaReady()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.exchangeRolesAction"><code class="docutils literal notranslate"><span class="pre">DataSetManager.exchangeRolesAction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.saveFile"><code class="docutils literal notranslate"><span class="pre">DataSetManager.saveFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.startNewGame"><code class="docutils literal notranslate"><span class="pre">DataSetManager.startNewGame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.startNewMatch"><code class="docutils literal notranslate"><span class="pre">DataSetManager.startNewMatch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.DataSetManager.DataSetManager.verbose"><code class="docutils literal notranslate"><span class="pre">DataSetManager.verbose</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF.ExperimentManager">ChefsHatGym.KEF.ExperimentManager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager"><code class="docutils literal notranslate"><span class="pre">ExperimentManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.baseDirectory"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.baseDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.createLocalFolder"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.createLocalFolder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.dataSet"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.dataSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.dataSetManager"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.dataSetManager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.experimentName"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.experimentName</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.logManager"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.logManager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.metricManager"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.metricManager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.modelDirectory"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.modelDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.outputsDirectory"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.outputsDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.plotManager"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.plotManager</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.ExperimentManager.ExperimentManager.plotsDirectory"><code class="docutils literal notranslate"><span class="pre">ExperimentManager.plotsDirectory</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF.LogManager">ChefsHatGym.KEF.LogManager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger"><code class="docutils literal notranslate"><span class="pre">Logger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger.endLogSession"><code class="docutils literal notranslate"><span class="pre">Logger.endLogSession()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger.isLogDirectoryValid"><code class="docutils literal notranslate"><span class="pre">Logger.isLogDirectoryValid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger.logDirectory"><code class="docutils literal notranslate"><span class="pre">Logger.logDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger.newLogSession"><code class="docutils literal notranslate"><span class="pre">Logger.newLogSession()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger.verbose"><code class="docutils literal notranslate"><span class="pre">Logger.verbose</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.LogManager.Logger.write"><code class="docutils literal notranslate"><span class="pre">Logger.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF.MetricsManager">ChefsHatGym.KEF.MetricsManager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.MetricsManager.MetricsManager"><code class="docutils literal notranslate"><span class="pre">MetricsManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.MetricsManager.MetricsManager.actions"><code class="docutils literal notranslate"><span class="pre">MetricsManager.actions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.MetricsManager.MetricsManager.currentDataSetFile"><code class="docutils literal notranslate"><span class="pre">MetricsManager.currentDataSetFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.MetricsManager.MetricsManager.dataSetDirectory"><code class="docutils literal notranslate"><span class="pre">MetricsManager.dataSetDirectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.MetricsManager.MetricsManager.saveMetricPlayer"><code class="docutils literal notranslate"><span class="pre">MetricsManager.saveMetricPlayer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.MetricsManager.MetricsManager.verbose"><code class="docutils literal notranslate"><span class="pre">MetricsManager.verbose</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF.PlotManager">ChefsHatGym.KEF.PlotManager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.PlotManager"><code class="docutils literal notranslate"><span class="pre">PlotManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.PlotManager.generateAllPlots"><code class="docutils literal notranslate"><span class="pre">PlotManager.generateAllPlots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.PlotManager.plotsDirectory"><code class="docutils literal notranslate"><span class="pre">PlotManager.plotsDirectory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.generateExperimentPlotsFromDataset"><code class="docutils literal notranslate"><span class="pre">generateExperimentPlotsFromDataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.generateIntrinsicPlotsFromDataset"><code class="docutils literal notranslate"><span class="pre">generateIntrinsicPlotsFromDataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.generateSingleGamePlotsFromDataset"><code class="docutils literal notranslate"><span class="pre">generateSingleGamePlotsFromDataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotActionBehavior"><code class="docutils literal notranslate"><span class="pre">plotActionBehavior()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotCorrectActions"><code class="docutils literal notranslate"><span class="pre">plotCorrectActions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotDiscardBehavior"><code class="docutils literal notranslate"><span class="pre">plotDiscardBehavior()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotFinishPositions"><code class="docutils literal notranslate"><span class="pre">plotFinishPositions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotLosses"><code class="docutils literal notranslate"><span class="pre">plotLosses()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotMeanQValuesGames"><code class="docutils literal notranslate"><span class="pre">plotMeanQValuesGames()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotMood"><code class="docutils literal notranslate"><span class="pre">plotMood()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotMoodNeurons"><code class="docutils literal notranslate"><span class="pre">plotMoodNeurons()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotNumberOfActions"><code class="docutils literal notranslate"><span class="pre">plotNumberOfActions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotPoints"><code class="docutils literal notranslate"><span class="pre">plotPoints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotQValues"><code class="docutils literal notranslate"><span class="pre">plotQValues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotQValuesOverSeveralGames"><code class="docutils literal notranslate"><span class="pre">plotQValuesOverSeveralGames()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotRewardsAll"><code class="docutils literal notranslate"><span class="pre">plotRewardsAll()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotRounds"><code class="docutils literal notranslate"><span class="pre">plotRounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotSelfProbabilitySuccess"><code class="docutils literal notranslate"><span class="pre">plotSelfProbabilitySuccess()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotSelfRewardsAll"><code class="docutils literal notranslate"><span class="pre">plotSelfRewardsAll()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotTimeLine"><code class="docutils literal notranslate"><span class="pre">plotTimeLine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotTimeLineMood"><code class="docutils literal notranslate"><span class="pre">plotTimeLineMood()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotTotalActions"><code class="docutils literal notranslate"><span class="pre">plotTotalActions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotVictoriesTotal"><code class="docutils literal notranslate"><span class="pre">plotVictoriesTotal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotWinners"><code class="docutils literal notranslate"><span class="pre">plotWinners()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plotWrongActions"><code class="docutils literal notranslate"><span class="pre">plotWrongActions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.PlotManager.plots"><code class="docutils literal notranslate"><span class="pre">plots</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#chefshatgym-kef-rendermanager-module">ChefsHatGym.KEF.RenderManager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF.StatisticsManager">ChefsHatGym.KEF.StatisticsManager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.calculateAfterGameStatistics"><code class="docutils literal notranslate"><span class="pre">calculateAfterGameStatistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.calculateGameStatistics"><code class="docutils literal notranslate"><span class="pre">calculateGameStatistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.calculateIntegratedGameStatistics"><code class="docutils literal notranslate"><span class="pre">calculateIntegratedGameStatistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.calculatePreGameStatistics"><code class="docutils literal notranslate"><span class="pre">calculatePreGameStatistics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotAgregatedScore"><code class="docutils literal notranslate"><span class="pre">plotAgregatedScore()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotCompetitiveness"><code class="docutils literal notranslate"><span class="pre">plotCompetitiveness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotExperience"><code class="docutils literal notranslate"><span class="pre">plotExperience()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotNumberGames"><code class="docutils literal notranslate"><span class="pre">plotNumberGames()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotNumberRounds"><code class="docutils literal notranslate"><span class="pre">plotNumberRounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotPersonalitiesAfterGame"><code class="docutils literal notranslate"><span class="pre">plotPersonalitiesAfterGame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotPersonalitiesPreGame"><code class="docutils literal notranslate"><span class="pre">plotPersonalitiesPreGame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotPlayedTime"><code class="docutils literal notranslate"><span class="pre">plotPlayedTime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotPlayerScore"><code class="docutils literal notranslate"><span class="pre">plotPlayerScore()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.plotSimilaritiesIntegrated"><code class="docutils literal notranslate"><span class="pre">plotSimilaritiesIntegrated()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.KEF.html#ChefsHatGym.KEF.StatisticsManager.statisticsIntegrated"><code class="docutils literal notranslate"><span class="pre">statisticsIntegrated</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.KEF.html#module-ChefsHatGym.KEF">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.env.html">ChefsHatGym.env package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.env.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.env.html#module-ChefsHatGym.env.ChefsHatEnv">ChefsHatGym.env.ChefsHatEnv module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.env.html#module-ChefsHatGym.env.ChefsHatEnv">ChefsHatGym.env.ChefsHatEnv module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.calculateScore"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.calculateScore()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.changeRoles"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.changeRoles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.close"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.dealCards"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.dealCards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.declareSpecialAction"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.declareSpecialAction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.discardCards"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.discardCards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.doSpecialAction"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.doSpecialAction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.exchange_cards"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.exchange_cards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.gameFinished"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.gameFinished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.getHighLevelActions"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.getHighLevelActions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.getObservation"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.getObservation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.getPossibleActions"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.getPossibleActions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.getRandomAction"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.getRandomAction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.get_chef_souschef_roles_cards"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.get_chef_souschef_roles_cards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.hasPlayerFinished"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.hasPlayerFinished()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.isActionAllowed"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.isActionAllowed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.isGameOver"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.isGameOver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.isMatchover"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.isMatchover()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.list_players_with_special_actions"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.list_players_with_special_actions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.logNewRoles"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.logNewRoles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.makePizza"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.makePizza()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.metadata"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.nextPlayer"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.nextPlayer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.nextRound"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.nextRound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.render"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.render()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.reset"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.restartBoard"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.restartBoard()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.startExperiment"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.startExperiment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.startNewGame"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.startNewGame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.start_match_define_order"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.start_match_define_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.start_match_handle_cards"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.start_match_handle_cards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.env.html#ChefsHatGym.env.ChefsHatEnv.ChefsHatEnv.step"><code class="docutils literal notranslate"><span class="pre">ChefsHatEnv.step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.env.html#module-ChefsHatGym.env">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.gameRooms.html">ChefsHatGym.gameRooms package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.gameRooms.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.gameRooms.html#module-ChefsHatGym.gameRooms.chefs_hat_room_local">ChefsHatGym.gameRooms.chefs_hat_room_local module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.add_player"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.add_player()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.error"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.get_log_directory"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.get_log_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.get_number_players"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.get_number_players()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.get_room_finished"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.get_room_finished()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.get_room_id"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.get_room_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.log"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_local.ChefsHatRoomLocal.start_new_game"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomLocal.start_new_game()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.gameRooms.html#module-ChefsHatGym.gameRooms.chefs_hat_room_remote">ChefsHatGym.gameRooms.chefs_hat_room_remote module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.add_player"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.add_player()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.error"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.get_log_directory"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.get_log_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.get_number_players"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.get_number_players()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.get_room_finished"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.get_room_finished()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.get_room_id"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.get_room_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.log"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="ChefsHatGym.gameRooms.html#ChefsHatGym.gameRooms.chefs_hat_room_remote.ChefsHatRoomRemote.start_new_game"><code class="docutils literal notranslate"><span class="pre">ChefsHatRoomRemote.start_new_game()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.gameRooms.html#module-ChefsHatGym.gameRooms">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ChefsHatGym.utils.html">ChefsHatGym.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.utils.html#module-ChefsHatGym.utils.utils">ChefsHatGym.utils.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChefsHatGym.utils.html#ChefsHatGym.utils.utils.threaded"><code class="docutils literal notranslate"><span class="pre">threaded()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ChefsHatGym.utils.html#module-ChefsHatGym.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
+</section>
+<section id="module-ChefsHatGym">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ChefsHatGym" title="Link to this heading">¶</a></h2>
+</section>
+</section>
 
 
-           </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="ChefsHatGym.Agents.html" class="btn btn-neutral float-right" title="ChefsHatGym.Agents package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="evalEnv.html" class="btn btn-neutral float-left" title="Evaluation Environment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Pablo Vinicius Alves De Barros.
-
-    </p>
-  </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
-
-</footer>
+          
         </div>
       </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ChefsHatGym2</a></h1>
 
-    </section>
 
-  </div>
-  
 
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
 
-  
-  
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pablo Barros.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/ChefsHatGym.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
     
-   
 
-</body>
+    
+  </body>
 </html>

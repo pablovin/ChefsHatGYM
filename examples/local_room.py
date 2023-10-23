@@ -1,6 +1,6 @@
 from ChefsHatGym.gameRooms.chefs_hat_room_local import ChefsHatRoomLocal
 from ChefsHatGym.env import ChefsHatEnv
-from ChefsHatGym.agents.local.random_agent_local import AgentRandonLocal
+from ChefsHatGym.agents.agent_random import AgentRandon
 
 # Room parameters
 room_name = "Testing_1"
@@ -27,10 +27,10 @@ room = ChefsHatRoomLocal(
 )
 
 # Create the players
-p1 = AgentRandonLocal(name="01")
-p2 = AgentRandonLocal(name="02")
-p3 = AgentRandonLocal(name="03")
-p4 = AgentRandonLocal(name="04")
+p1 = AgentRandon(name="01")
+p2 = AgentRandon(name="02")
+p3 = AgentRandon(name="03")
+p4 = AgentRandon(name="04")
 
 # Adding players to the room
 for p in [p1, p2, p3, p4]:

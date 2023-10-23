@@ -106,9 +106,15 @@ In this example, both dataset and gamelog will be generated from the game enviro
 Remote Rooms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 	
+ .. image:: ../../gitImages/GameCommunicationDiagram_Remote.png
+	:alt: Chef's Hat Environment Diagram Remote room
+	:align: center
+
 To setup a remote room, besides using the room parameters, you have to set a url and port for the redis server, that will be responsible for controlling the communication between the room and the agents.
 
 The remote room uses a pub/sub architecture to register players and send/request information from the agents. 
+
+The remote room setup two channels for each agent connected to it, one to send and one to receive messages.
 
 Before runing the remote room, guarantee that the Redis server is up and runing.
 

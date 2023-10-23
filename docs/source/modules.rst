@@ -1,5 +1,5 @@
-src
-===
+ChefsHatGym Library
+=====================
 
 .. toctree::
    :maxdepth: 4

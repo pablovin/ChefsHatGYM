@@ -143,7 +143,7 @@ class ChefsHatEnv(gym.Env):
         self.start_match_define_order()
 
     def start_match_handle_cards(self):
-        """Start a new match"""
+        """Handle the cards to the players."""
         # Create a deck
         flat = lambda l: [item for sublist in l for item in sublist]
         self.cards = flat(
@@ -189,6 +189,7 @@ class ChefsHatEnv(gym.Env):
                 self.logger.write("Player " + str(i) + ":" + str(self.playersHand[i]))
 
     def start_match_define_order(self):
+        """Define the starting order for each match"""
         # Establishes who starts the game randomly
         playerTurn = numpy.array(range(self.numberPlayers))
         random.shuffle(playerTurn)
@@ -217,6 +218,12 @@ class ChefsHatEnv(gym.Env):
             self.logger.newLogSession("Round:" + str(self.rounds))
 
     def doSpecialAction(self, player, action):
+        """Allows an agent to perform a special action
+
+        Args:
+            player (_type_): _description_
+            action (_type_): _description_
+        """
         if not self.experimentManager == None:
             self.logger.write(
                 "- Player :"
@@ -240,6 +247,11 @@ class ChefsHatEnv(gym.Env):
             self.logNewRoles()
 
     def get_chef_souschef_roles_cards(self):
+        """returns the cards at hand of the chef and souschef.
+
+        Returns:
+            _type_: _description_
+        """
         score = self.currentRoles
         return (
             score[1],
@@ -249,15 +261,16 @@ class ChefsHatEnv(gym.Env):
         )
 
     def exchange_cards(self, souschefCard, chefCards, specialAction, playerDeclared):
+        """Allows a chef and souschef agent to select the cards to be exchanged.
+
+        Args:
+            souschefCard (_type_): _description_
+            chefCards (_type_): _description_
+            specialAction (_type_): _description_
+            playerDeclared (_type_): _description_
+        """
         score = self.currentRoles
         souschefCard = souschefCard[0]
-
-        # print(f"DW: {len(self.playersHand[score[3]])}  - {self.playersHand[score[3]]} ")
-        # print(f"W: {len(self.playersHand[score[2]])}  -  {self.playersHand[score[2]]} ")
-        # print(
-        #     f"SC: {len(self.playersHand[score[1]])}  -  {self.playersHand[score[1]]} "
-        # )
-        # print(f"C: {len(self.playersHand[score[0]])}  -  {self.playersHand[score[0]]} ")
 
         dishwasherCards = sorted(self.playersHand[score[3]])[
             0:2
@@ -307,6 +320,7 @@ class ChefsHatEnv(gym.Env):
         self.start_match_define_order()
 
     def logNewRoles(self):
+        """Add the new roles to log"""
         self.logger.newLogSession("Changind roles!")
         self.logger.write("- Waiter: Player " + str(self.currentRoles[3] + 1))
         self.logger.write("- Dishwasher Player:" + str(self.currentRoles[2] + 1))
@@ -434,11 +448,17 @@ class ChefsHatEnv(gym.Env):
                 'isPizzaReady': (bool),
                 'boardBefore': (ndarray),
                 'boardAfter': (ndarray),
+                'board': (ndarray),
                 'possibleActions': (list),
                 'action': (ndarray),
                 'thisPlayerPosition': (int),
-                'thisPlayerPosition': (ndarray),
+                'lastPlayerAction': (int),
+                'lastActionPlayers': (ndarray),
+                'lastActionTypes': (ndarray),
+                'RemainingCardsPerPlayer': (ndarray),
                 'players': (list),
+                'currentRoles': (list),
+                'currentPlayer': (int),
                 }
 
         :rtype: tuple
@@ -934,6 +954,11 @@ class ChefsHatEnv(gym.Env):
         return originalCardDiscarded
 
     def list_players_with_special_actions(self):
+        """list players that are allowed to do a specialk action
+
+        Returns:
+            _type_: list()
+        """
         players_special_action = []
         for i in range(len(self.playersHand)):
             if (

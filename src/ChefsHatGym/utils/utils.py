@@ -9,6 +9,12 @@ logging.basicConfig(
 
 
 def threaded(fn):
+    """A wrapper for a threaded function
+
+    Args:
+        fn (function): function to be threaded
+    """
+
     def wrapper(*args, **kwargs):
         thread = threading.Thread(target=fn, args=args, kwargs=kwargs)
         thread.start()

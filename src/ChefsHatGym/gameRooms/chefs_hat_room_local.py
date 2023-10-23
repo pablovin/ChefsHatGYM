@@ -9,17 +9,41 @@ import numpy as np
 import ChefsHatGym.utils.utils as utils
 
 class ChefsHatRoomLocal:
+    """
+    Room environment where a game will be played locally.
+    """
 
-    def get_room_id(self):
+    def get_room_id(self) -> str:
+        """ ge the room id
+
+        Returns:
+            str: room id
+        """
         return self.room_id
     
-    def get_log_directory(self):
+    def get_log_directory(self) -> str:
+        """get the directory where the log is saved
+
+        Returns:
+            str: log directory
+        """
         return self.log_directory
     
-    def get_number_players(self):
+    def get_number_players(self) -> int:
+        """ get the number of players in the room
+
+        Returns:
+            int: number of players
+        """
         return len(self.players_names)
     
-    def get_room_finished(self):
+
+    def get_room_finished(self)->bool:
+        """Is the game finished
+
+        Returns:
+            bool: is the game finished
+        """
         return self.room_finished
     
     def __init__( 
@@ -33,7 +57,19 @@ class ChefsHatRoomLocal:
         log_directory : str =None,       
         timeout_player_response : int = 5,
     ) -> None:
-        
+        """Initialize the room
+
+        Args:
+            room_name (str): name of the room, no special character is allowed.
+            game_type (str, optional): game type, defined as ChefsHatEnv.GAMETYPE. Defaults to ChefsHatEnv.GAMETYPE["MATCHES"].
+            stop_criteria (int, optional): stop criteria for the game. Defaults to 10.
+            max_rounds (int, optional): maximum rounds of the game, if -1 the game will play until it ends. Defaults to -1.
+            verbose (bool, optional): room verbose. Defaults to True.
+            save_dataset (bool, optional): save the game dataset .pkl. Defaults to True.
+            save_game_log (bool, optional): save the game log. Defaults to True.
+            log_directory (str, optional): directory to save the log. Defaults to None.
+            timeout_player_response (int, optional): timeout for the player responses. Defaults to 5.
+        """
         #game type parameters
         self.room_name = room_name
         self.game_type = game_type
@@ -71,16 +107,34 @@ class ChefsHatRoomLocal:
         #Create a room
         self.room_id = room_name          
 
-    def log(self, message):
+    def log(self, message:str):
+        """log messages
+
+        Args:
+            message (str): message
+        """
         if self.verbose:
             self.logger.info(f"[Room]: {message}")
 
-    def error(self, message):
+    def error(self, message:str):
+        """log errors
+
+        Args:
+            message (str): error
+        """
         if self.verbose:
             self.logger.critical(f"[Room]: {message}")
 
 
-    def add_player(self, player:ChefsHatAgent):        
+    def add_player(self, player:ChefsHatAgent):     
+        """Add a player to the room
+
+        Args:
+            player (ChefsHatAgent): a Player that has to implement the ChefsHatAgent class
+
+        Raises:
+            Exception: the room cannot have two players with the same name
+        """
         
         if len(self.players) <4:            
             
@@ -95,7 +149,16 @@ class ChefsHatRoomLocal:
                 self.error(f"[Room][ERROR]: Room is full!! Player not added! Current players: {self.players_names}!")          
             
                     
-    def start_new_game(self, game_verbose=False):      
+    def start_new_game(self, game_verbose : bool =False) -> dict:     
+        """Start the game in the room
+
+        Args:
+            game_verbose (bool): Verbose of the game environment
+
+        Returns:
+            dict: the game info
+        """
+        
 
         if len(self.players) <4:            
             self.error(f"[Room][ERROR]: Not enough players to start the game! Total current players: {len(self.players_names)}")  
@@ -137,9 +200,11 @@ class ChefsHatRoomLocal:
                     if not info["validAction"]:
                         self.error(f"[Room][ERROR]: ---- Invalid action!")      
 
-                #Send action update to the current agent
+                #Send action update to the current agent                              
                 currentPlayer.actionUpdate(info)                
 
+                info["actionIsRandom"] = ""
+                info["possibleActions"] = ""  
                 # Observe others
                 for p in self.players:
                     if p != currentPlayer:

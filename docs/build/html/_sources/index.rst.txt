@@ -1,17 +1,30 @@
-.. ChefsHatGym2 documentation master file, created by
-   sphinx-quickstart on Mon Oct 23 12:28:09 2023.
+.. ChefsHatGym documentation master file, created by
+   sphinx-quickstart on Mon Oct 23 16:01:00 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ChefsHatGym2's documentation!
-========================================
+Welcome to Chef's Hat Gym documentation!
+===========================================
+
+.. image:: ../../gitImages/ChefsHat_GYM_-_Example_Random_Agent.gif
+	:alt: Chef's Hat Card Game
+	:align: center
+   
+This project aims at providing a multi-agent competitive card game for training and evaluating different learning agents.
+The Chef's Hat Environment provides a simple and easy-to-use API, based on the OpenAI GYM interface, for implementing, embedding, deploying, and evaluating reinforcement learning agents.
 
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
-   
-   api
 
+   01_quickstart
+   02_intro
+   03_environment
+   04_rooms
+   05_agents
+   ChefsHatGym
+   license
+   contact
 
 
 Indices and tables

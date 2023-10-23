@@ -164,6 +164,7 @@ Get more information here: https://www.whisperproject.eu/chefshat#competition
 ## Contact
 
 Pablo Barros - pablovin@gmail.com
+
 Alexandre Rodolfo - armp@ecomp.poli.br
 
 - [Twitter](https://twitter.com/PBarros_br)

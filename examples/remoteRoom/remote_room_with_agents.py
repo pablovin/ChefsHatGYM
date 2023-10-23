@@ -4,10 +4,6 @@ from ChefsHatGym.env import ChefsHatEnv
 import redis
 from ChefsHatGym.agents.agent_random import AgentRandon
 
-
-# Room parameters
-room_name = "Testing_1"
-
 # Create the players
 p1 = AgentRandon(name="01")
 p2 = AgentRandon(name="02")

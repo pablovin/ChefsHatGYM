@@ -12,15 +12,17 @@ import ChefsHatGym.utils.utils as utils
 
 
 class ChefsHatAgent:
-    """This is the Agent class interface. Every new Agent must inherit from this class and implement the methods below."""
+    """This is the Agent class interface. Every new Agent must inherit from this class and implement the methods below.
+
+    The class is ready to be used in both local and remote rooms. When using a remote room, the agent must be initialized, and the .join() method must be called.
+
+
+    """
 
     __metaclass__ = ABCMeta
 
     name = ""  #: Class attribute to store the name of the agent
     saveModelIn = ""  #: Class attribute path to a folder acessible by this agent to save/load from
-
-    def get_name(self):
-        return self.name
 
     def __init__(
         self,
@@ -28,7 +30,7 @@ class ChefsHatAgent:
         name,
         saveModelIn: str = "",
     ):
-        """Constructor method.
+        """Constructor method. Initializes the agent name.
 
         :param agent_suffix: The name suffix of the agent name.
         :type agent_suffix: str
@@ -36,20 +38,8 @@ class ChefsHatAgent:
         :param name: The name of the Agent (must be a unique name).
         :type name: str
 
-        :param room_id: The id of the room the agent will send/get data from.
-        :type room_id: str
-
         :param saveModelIn: a folder acessible by this agent to save/load from
         :type saveModelIn: str
-
-        :param redis_url: URL of the redis server
-        :type redis_url: str: obj
-
-        :param redis_port: URL of the redis port
-        :type redis_port: str: obj
-
-        :param agent_log_directory: Directory to save the agent log
-        :type agent_log_directory: str: obj
 
         """
         self.name = f"{agent_suffix}_{name}"
@@ -58,8 +48,23 @@ class ChefsHatAgent:
         self.verbose = False
         self.stop_actions = False
 
+    def get_name(self):
+        """Get the agent name.
+
+        :return: The agent name
+        :rtype: ndarray
+        """
+
+        return self.name
+
     # Logging functions
     def startLogging(self, logDirectory):
+        """Start the logging function
+
+        Args:
+            logDirectory (_type_): _description_
+        """
+
         self.agent_log_directory = logDirectory
         self.updateLogDirectory()
         self.verbose = True
@@ -67,6 +72,7 @@ class ChefsHatAgent:
     def updateLogDirectory(
         self,
     ):
+        """Update the log directory, generating the correct log file."""
         self.logger = logging.getLogger(f"Agent_{self.name}")
 
         self.logger.addHandler(
@@ -78,6 +84,11 @@ class ChefsHatAgent:
         )
 
     def log(self, message):
+        """Log a certain message, if the verbose is True
+
+        Args:
+            message (_type_): _description_
+        """
         if self.verbose:
             self.logger.info(f"[Agent {self.name}]:  {message}")
 
@@ -89,6 +100,16 @@ class ChefsHatAgent:
         redis_port: str = "6379",
         verbose=False,
     ):
+        """
+        Allows an agent to enter a remote room, using a specific url and port to a redis server.
+
+        Args:
+            room_id (str): _description_
+            redis_url (str, optional): _description_. Defaults to "localhost".
+            redis_port (str, optional): _description_. Defaults to "6379".
+            verbose (bool, optional): _description_. Defaults to False.
+        """
+
         self.room_id = room_id
         self.redis_url = redis_url
         self.redis_port = redis_port
@@ -115,6 +136,8 @@ class ChefsHatAgent:
         self._prepare_to_receive_request()
 
     def _connect_to_redis(self):
+        """Connect to a redis server"""
+
         self.log("---------------------------")
         self.log("Connecting with Redis")
         self.log(f"  - Connecting to Redis Server: {self.redis_url}:{self.redis_port}")
@@ -125,6 +148,7 @@ class ChefsHatAgent:
         self.log(f"--------------     -------------")
 
     def _subscribe_in_room(self):
+        """Send a subscriber message to the room channel"""
         self.log("---------------------------")
         self.log("Connecting to the room")
 
@@ -136,6 +160,10 @@ class ChefsHatAgent:
 
     @utils.threaded
     def _prepare_to_receive_request(self):
+        """
+        threaded listener to the communication room.
+
+        """
         self.log("---------------------------")
         self.log("Waiting requests from the room...")
 
@@ -145,6 +173,11 @@ class ChefsHatAgent:
                 break
 
     def _read_request(self, message: str):
+        """Handler to parse a received message, and call the specific method.
+
+        Args:
+            message (str): _description_
+        """
         data = json.loads(message["data"])
         type = data["type"]
 
@@ -198,6 +231,12 @@ class ChefsHatAgent:
             self._send_message_to_server(cards)
 
     def _send_message_to_server(self, agent_action):
+        """Send a message to the communication channel.
+
+        Args:
+            agent_action (_type_): _description_
+        """
+
         sendAction = {}
         sendAction["agent_action"] = agent_action
         self.redis_server.publish(
@@ -205,6 +244,7 @@ class ChefsHatAgent:
         )
 
     def close(self):
+        """Close the receive message handler"""
         self.stop_actions = True
 
     @abstractmethod
@@ -223,7 +263,6 @@ class ChefsHatAgent:
     @abstractmethod
     def exchangeCards(self, cards, amount):
         """This method returns the selected cards when exchanging them at the begining of the match.
-
 
         :param envInfo: [description]
         :type envInfo: [type]

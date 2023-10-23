@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "ChefsHatGym2"
+project = "ChefsHatGym"
 copyright = "2023, Pablo Barros"
 author = "Pablo Barros"
 release = "2"
@@ -16,7 +16,6 @@ release = "2"
 
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
 ]
 
 templates_path = ["_templates"]

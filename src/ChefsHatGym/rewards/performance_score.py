@@ -1,3 +1,15 @@
-class RewardPerformanceScore():
+from ChefsHatGym.rewards.reward import Reward
+
+
+class RewardPerformanceScore(Reward):
+    """A reward that is weighted based on the agent`s performance at the end of a match"""
+
     rewardName = "PerformanceScore"
-    getReward = lambda self, thisPlayerPosition, performanceScore, matchFinished: (((3 - thisPlayerPosition) / 3) + performanceScore) if matchFinished else -0.001
+
+    def getReward(self, thisPlayerPosition, performanceScore, matchFinished):
+        reward = -0.001
+        if matchFinished:
+            finalPoints = (3 - thisPlayerPosition) / 3
+            reward = finalPoints + performanceScore
+
+        return reward

@@ -13,17 +13,41 @@ import ChefsHatGym.utils.utils as utils
 REQUEST_TYPE ={"requestAction" : "GetAction", "sendAction" : 1, "actionUpdate":"UpdateAgent", "updateOthers":"ObserveOthers", "matchOver":"MatchOver", "gameOver":"GameOver", "doSpecialAction":"DoSpecialAction", "exchangeCards":"ExchangeCards"}
 
 class ChefsHatRoomRemote:
+    """
+    Room environment where a game will be played with agents in different processes.
+    """
 
-    def get_room_id(self):
+    def get_room_id(self) -> str:
+        """ ge the room id
+
+        Returns:
+            str: room id
+        """
         return self.room_id
     
-    def get_log_directory(self):
+    def get_log_directory(self) -> str:
+        """get the directory where the log is saved
+
+        Returns:
+            str: log directory
+        """
         return self.log_directory
     
-    def get_number_players(self):
+    def get_number_players(self) -> int:
+        """ get the number of players in the room
+
+        Returns:
+            int: number of players
+        """
         return len(self.players_names)
     
-    def get_room_finished(self):
+
+    def get_room_finished(self)->bool:
+        """Is the game finished
+
+        Returns:
+            bool: is the game finished
+        """
         return self.room_finished
     
     def __init__( 
@@ -38,7 +62,23 @@ class ChefsHatRoomRemote:
         timeout_player_subscribers : int = 30,
         timeout_player_response : int = 5,
     ) -> None:
-        
+        """Initialize the room
+
+        Args:
+            room_name (str): _description_
+            redis_url (str, optional): url of the redis server. Defaults to "localhost".
+            redis_port (str, optional): port of the redis server. Defaults to "6379".
+            room_name (str): name of the room, no special character is allowed.
+            game_type (str, optional): game type, defined as ChefsHatEnv.GAMETYPE. Defaults to ChefsHatEnv.GAMETYPE["MATCHES"].
+            stop_criteria (int, optional): stop criteria for the game. Defaults to 10.
+            max_rounds (int, optional): maximum rounds of the game, if -1 the game will play until it ends. Defaults to -1.
+            verbose (bool, optional): room verbose. Defaults to True.
+            save_dataset (bool, optional): save the game dataset .pkl. Defaults to True.
+            save_game_log (bool, optional): save the game log. Defaults to True.
+            log_directory (str, optional): directory to save the log. Defaults to None.            
+            timeout_player_subscribers (int, optional): timeout of the player subscriptions to the room. Defaults to 30.
+            timeout_player_response (int, optional): timeout of the player response. Defaults to 5.
+        """
         #Redis parameters
         self.redis_url = redis_url
         self.redis_port = redis_port
@@ -272,13 +312,15 @@ class ChefsHatRoomRemote:
             self._send_message_agent(info, currentPlayer, REQUEST_TYPE["actionUpdate"], False)
 
 
+            info["actionIsRandom"] = ""
+            info["possibleActions"] = "" 
             # Observe others
             for p in self.players_names:
                 if p != currentPlayer:
                     # self._send_update_others(p, info)
                     self._send_message_agent(info, p, REQUEST_TYPE["updateOthers"], False)
 
-            #Match is over
+            #Match is over            
             if isMatchOver:
                 self.log(f"[Room]:  -- Match over!")       
                 for p in self.players_names:

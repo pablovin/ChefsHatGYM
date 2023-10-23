@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ChefsHatGym.KEF package &#8212; ChefsHatGym2 2 documentation</title>
+    <title>ChefsHatGym.KEF package &#8212; ChefsHatGym 2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
     <script src="_static/documentation_options.js?v=1e5e4989"></script>
@@ -13,6 +13,8 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ChefsHatGym.agents package" href="ChefsHatGym.agents.html" />
+    <link rel="prev" title="ChefsHatGym package" href="ChefsHatGym.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -491,8 +493,154 @@ Last Update: 12.03.2020</p>
 </dd></dl>
 
 </section>
-<section id="chefshatgym-kef-rendermanager-module">
-<h2>ChefsHatGym.KEF.RenderManager module<a class="headerlink" href="#chefshatgym-kef-rendermanager-module" title="Link to this heading">¶</a></h2>
+<section id="module-ChefsHatGym.KEF.RenderManager">
+<span id="chefshatgym-kef-rendermanager-module"></span><h2>ChefsHatGym.KEF.RenderManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.RenderManager" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ChefsHatGym.KEF.RenderManager.</span></span><span class="sig-name descname"><span class="pre">RenderManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">saveVideoDirectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resourcesFolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.actionCardsDirectory">
+<span class="sig-name descname"><span class="pre">actionCardsDirectory</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'actionCards'</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.actionCardsDirectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.blackCard">
+<span class="sig-name descname"><span class="pre">blackCard</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.blackCard" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.cards">
+<span class="sig-name descname"><span class="pre">cards</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.cards" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.cardsDirectory">
+<span class="sig-name descname"><span class="pre">cardsDirectory</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'deck'</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.cardsDirectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.createVideo">
+<span class="sig-name descname"><span class="pre">createVideo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamesToRender</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.createVideo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.currentFrameNumber">
+<span class="sig-name descname"><span class="pre">currentFrameNumber</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.currentFrameNumber" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.currentGameDirectory">
+<span class="sig-name descname"><span class="pre">currentGameDirectory</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.currentGameDirectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.drawBoard">
+<span class="sig-name descname"><span class="pre">drawBoard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">board</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawBoard" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.drawFinishingPosition">
+<span class="sig-name descname"><span class="pre">drawFinishingPosition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">playerStatus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawFinishingPosition" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.drawPassCard">
+<span class="sig-name descname"><span class="pre">drawPassCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">playerCurrentStatus</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawPassCard" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayField">
+<span class="sig-name descname"><span class="pre">drawPlayField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayField" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayers">
+<span class="sig-name descname"><span class="pre">drawPlayers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playerHands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agentsNames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawPlayers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.drawRoleCards">
+<span class="sig-name descname"><span class="pre">drawRoleCards</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roles</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.drawRoleCards" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.fps">
+<span class="sig-name descname"><span class="pre">fps</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.fps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.getImages">
+<span class="sig-name descname"><span class="pre">getImages</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.getImages" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.getImagesSeconds">
+<span class="sig-name descname"><span class="pre">getImagesSeconds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.getImagesSeconds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.getMoodPlots">
+<span class="sig-name descname"><span class="pre">getMoodPlots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">intrinsicDataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gameNumber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currentLine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.getMoodPlots" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.imageSize">
+<span class="sig-name descname"><span class="pre">imageSize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(2160,</span> <span class="pre">3840,</span> <span class="pre">3)</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.imageSize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.passCard">
+<span class="sig-name descname"><span class="pre">passCard</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.passCard" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.playField">
+<span class="sig-name descname"><span class="pre">playField</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.playField" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.playingFieldDirectory">
+<span class="sig-name descname"><span class="pre">playingFieldDirectory</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'playingField.png'</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.playingFieldDirectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.renderDirectory">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">renderDirectory</span></span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.renderDirectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.renderGameStatus">
+<span class="sig-name descname"><span class="pre">renderGameStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsicData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamesToRender</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">createVideo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.renderGameStatus" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.resourcesFolder">
+<span class="sig-name descname"><span class="pre">resourcesFolder</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.resourcesFolder" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.roleCards">
+<span class="sig-name descname"><span class="pre">roleCards</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.roleCards" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.saveImages">
+<span class="sig-name descname"><span class="pre">saveImages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.saveImages" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.saveVideoDirectory">
+<span class="sig-name descname"><span class="pre">saveVideoDirectory</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.saveVideoDirectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ChefsHatGym.KEF.RenderManager.RenderManager.writeHeader">
+<span class="sig-name descname"><span class="pre">writeHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">originalImage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detailedMessage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ChefsHatGym.KEF.RenderManager.RenderManager.writeHeader" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-ChefsHatGym.KEF.StatisticsManager">
 <span id="chefshatgym-kef-statisticsmanager-module"></span><h2>ChefsHatGym.KEF.StatisticsManager module<a class="headerlink" href="#module-ChefsHatGym.KEF.StatisticsManager" title="Link to this heading">¶</a></h2>
@@ -585,7 +733,7 @@ Last Update: 12.03.2020</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">ChefsHatGym2</a></h1>
+<h1 class="logo"><a href="index.html">ChefsHatGym</a></h1>
 
 
 
@@ -596,14 +744,23 @@ Last Update: 12.03.2020</p>
 
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evalEnv.html">The Tournament Environment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="ChefsHatGym.html">ChefsHatGym package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="ChefsHatGym.html">ChefsHatGym package</a><ul>
+      <li>Previous: <a href="ChefsHatGym.html" title="previous chapter">ChefsHatGym package</a></li>
+      <li>Next: <a href="ChefsHatGym.agents.html" title="next chapter">ChefsHatGym.agents package</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

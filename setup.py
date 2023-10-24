@@ -18,11 +18,11 @@ DESCRIPTION = """A python interface for training Reinforcement Learning agents t
 URL = "https://github.com/pablovin/ChefsHatGYM"
 EMAIL = "pablovin@gmail.com"
 AUTHOR = "Pablo Barros"
-REQUIRES_PYTHON = ">=3.10.0"
-VERSION = "2.0.002"
+REQUIRES_PYTHON = ">=3.10"
+VERSION = "2.0.004"
 
 # What packages are required for this module to be executed?
-with open("E:\workspace\ChefsHatGYM\Requirements.txt") as requirements:
+with open(r"Requirements.txt") as requirements:
     REQUIRED = requirements.read().split("\n")
 
 # What packages are optional?

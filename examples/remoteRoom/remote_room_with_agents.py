@@ -19,11 +19,11 @@ r.flushall()
 room_name = "Testing_1_Remote"
 timeout_player_subscribers = 200
 timeout_player_response = 5
-verbose = False
+verbose = True
 
 # Game parameters
 game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
-stop_criteria = 3
+stop_criteria = 2
 maxRounds = 10
 
 # Start the room

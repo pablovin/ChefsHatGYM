@@ -28,7 +28,7 @@ class ChefsHatAgent:
         self,
         agent_suffix,
         name,
-        saveModelIn: str = "",
+        saveModelIn: str = "",        
     ):
         """Constructor method. Initializes the agent name.
 
@@ -64,7 +64,9 @@ class ChefsHatAgent:
         Args:
             logDirectory (_type_): _description_
         """
-
+        if logDirectory =="":
+            logDirectory = "temp/"
+            
         self.agent_log_directory = logDirectory
         self.updateLogDirectory()
         self.verbose = True
@@ -229,6 +231,18 @@ class ChefsHatAgent:
             self.log(f"-- Exchanging {amount} cards: {cards}")
 
             self._send_message_to_server(cards)
+        
+         # If the received message is a update the begining of the match
+        elif type == REQUEST_TYPE["updateMatchStart"]:
+
+            cards = data["cards"]
+            players = data["players"]
+            starting_player = data["starting_player"]
+            cards = self.update_start_match(cards, players, starting_player)
+
+            self.log(f"-- Updating the start of the match")
+
+            self._send_message_to_server(cards)
 
     def _send_message_to_server(self, agent_action):
         """Send a message to the communication channel.
@@ -248,7 +262,25 @@ class ChefsHatAgent:
         self.stop_actions = True
 
 
-    #Abstract methods
+    #Abstract methods that need to be implemented
+ 
+    @abstractmethod
+    def update_start_match(self, cards, players, starting_player):
+        """This method updates the agent about the begining of the match. It contains the cards that the player has at hand.
+
+        :param cards: Cards at hand at the begining of the match
+        :type cards: list[float]
+
+        
+        :param starting_player: the names of the starting players
+        :type starting_player: list[str]        
+
+        :param starting_player: the index of the starting player
+        :type starting_player: list[float]        
+
+        """
+        pass
+
     @abstractmethod
     def get_exhanged_cards(self, cards, amount):
         """This method returns the selected cards when exchanging them at the begining of the match.
@@ -327,11 +359,3 @@ class ChefsHatAgent:
 
         pass
 
-    @abstractmethod
-    def update_start_game(self, envInfo):
-        """This method that is called by the end of each match. This is an oportunity to update the Agent with information gathered in the match.
-
-        :param envInfo: [description]
-        :type envInfo: [type]
-        """
-        pass

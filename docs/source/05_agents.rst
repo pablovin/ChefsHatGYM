@@ -18,6 +18,25 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 
+	def update_start_match(cards: list[float], players : list[str] , starting_player : int):
+	"""
+
+		This will be called everytime the gamee is starting. You might use to update yourself about the game start.
+
+		:param cards: Cards at hand at the begining of the match
+        :type cards: list[float]
+
+        
+        :param starting_player: the names of the starting players
+        :type starting_player: list[str]        
+
+        :param starting_player: the index of the starting player
+        :type starting_player: list[float]    
+
+	"""
+
+.. code-block:: python
+
 	def update_start_game(cards : envInfo):
 	"""
 

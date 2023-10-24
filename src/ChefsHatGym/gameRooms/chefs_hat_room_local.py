@@ -92,7 +92,7 @@ class ChefsHatRoomLocal:
         if not log_directory:
             log_directory = "temp/"
 
-        self.log_directory = os.path.join(log_directory, f"{datetime.now().strftime("%H-%M%S")}_{room_name}")
+        self.log_directory = os.path.join(log_directory, f"{datetime.now().strftime('%H-%M%S')}_{room_name}")
         os.makedirs(self.log_directory)
         
         #Creating logger
@@ -182,6 +182,10 @@ class ChefsHatRoomLocal:
 
             self.log(" - Environment initialized!")
             observations = self.env.reset()
+
+            #Update each player about the begining of the match
+            for p_index, p in enumerate(self.players):
+                p.update_start_match(self.env.playersHand[p_index], self.players_names, self.env.currentPlayer)
                             
             while not self.env.gameFinished:
 
@@ -201,7 +205,14 @@ class ChefsHatRoomLocal:
                         self.error(f"[Room][ERROR]: ---- Invalid action!")      
 
                 #Send action update to the current agent                              
-                currentPlayer.update_my_action(info)                
+                info["observation"] = observations.tolist()
+                info["nextObservation"] = nextobs.tolist()
+                currentPlayer.update_my_action(info)     
+
+                info["observation"] = ""
+                info["nextObservation"] = ""           
+
+
 
                 info["actionIsRandom"] = ""
                 info["possibleActions"] = ""  
@@ -238,7 +249,6 @@ class ChefsHatRoomLocal:
                                             
                         #Once the cards are handled again, the chef and sous-chef have to choose which cards to give
                         player_sourchef, sc_cards, player_chef, chef_cards = self.env.get_chef_souschef_roles_cards()
-
                         souschefCard = self.players[player_sourchef].get_exhanged_cards(sc_cards, 1)
                         chefCards = self.players[player_chef].get_exhanged_cards(chef_cards, 2)
                         self.env.exchange_cards(souschefCard, chefCards, doSpecialAction, playerSpecialAction)

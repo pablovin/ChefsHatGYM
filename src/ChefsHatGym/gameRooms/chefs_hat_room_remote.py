@@ -10,7 +10,7 @@ import numpy as np
 
 import ChefsHatGym.utils.utils as utils
 
-REQUEST_TYPE ={"requestAction" : "GetAction", "sendAction" : 1, "actionUpdate":"UpdateAgent", "updateOthers":"ObserveOthers", "matchOver":"MatchOver", "gameOver":"GameOver", "doSpecialAction":"DoSpecialAction", "exchangeCards":"ExchangeCards"}
+REQUEST_TYPE ={"requestAction" : "GetAction", "sendAction" : "sendAction", "actionUpdate":"UpdateAgent", "updateOthers":"ObserveOthers", "matchOver":"MatchOver", "gameOver":"GameOver", "doSpecialAction":"DoSpecialAction", "exchangeCards":"ExchangeCards", "updateMatchStart":"UpdateMatchStart"}
 
 class ChefsHatRoomRemote:
     """
@@ -105,7 +105,7 @@ class ChefsHatRoomRemote:
         if not log_directory:
             log_directory = "temp/"
 
-        self.log_directory = os.path.join(log_directory, f"{datetime.now().strftime("%H-%M%S")}_{room_name}")
+        self.log_directory = os.path.join(log_directory, f"{datetime.now().strftime('%H%M%S')}_{room_name}")
         os.makedirs(self.log_directory)        
 
         #Creating logger
@@ -288,6 +288,14 @@ class ChefsHatRoomRemote:
 
         observations = self.env.reset()
                         
+        #Update each player about the begining of the match 
+        for p_index, p in enumerate(self.players_names):                
+                sendInfo = {}
+                sendInfo["cards"] = self.env.playersHand[p_index]
+                sendInfo["players"] = self.players_names
+                sendInfo["starting_player"] = p
+                action = self._send_message_agent(sendInfo, p, REQUEST_TYPE["updateMatchStart"], True)
+
         while not self.env.gameFinished:
 
             currentPlayer = self.players_names[self.env.currentPlayer]
@@ -297,8 +305,9 @@ class ChefsHatRoomRemote:
             info = {"validAction":False}
             while not info["validAction"]:
 
-                info["observations"] = observations.tolist()
-                action = self._send_message_agent(info, currentPlayer, REQUEST_TYPE["requestAction"], True)
+                sendInfo = {}
+                sendInfo["observations"] = observations.tolist()
+                action = self._send_message_agent(sendInfo, currentPlayer, REQUEST_TYPE["requestAction"], True)
 
                 # action = self._request_action(currentPlayer, observations)
                 self.log(f"[Room]:  ---- Action: {np.argmax(action)}")
@@ -309,7 +318,12 @@ class ChefsHatRoomRemote:
 
             #Send action update to the current agent
             # self._send_action_update(currentPlayer, info)
+            info["observation"] = observations.tolist()
+            info["nextObservation"] = nextobs.tolist()
             self._send_message_agent(info, currentPlayer, REQUEST_TYPE["actionUpdate"], False)
+
+            info["observation"] = ""
+            info["nextObservation"] = ""             
 
 
             info["actionIsRandom"] = ""

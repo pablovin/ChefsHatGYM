@@ -80,6 +80,8 @@ class ChefsHatEnv(gym.Env):
         self.playersInvalidActions = [0, 0, 0, 0]
         self.playersPassAction = [0, 0, 0, 0]
 
+        
+
     def reset(self, seed=None, options=None):
         """This method increments episodeNumber, start a new game and return the first observation
 
@@ -90,6 +92,7 @@ class ChefsHatEnv(gym.Env):
         self.episodeNumber += 1
         self.startNewGame()
         return (numpy.array(self.getObservation()).astype(numpy.float32), {})
+
 
     def startNewGame(self):
         """Starts a new game using the parameters defined by the method startExperiment.
@@ -144,6 +147,10 @@ class ChefsHatEnv(gym.Env):
 
     def start_match_handle_cards(self):
         """Handle the cards to the players."""
+
+        #Stop by round set to false
+        self.stoppedByRound = False
+
         # Create a deck
         flat = lambda l: [item for sublist in l for item in sublist]
         self.cards = flat(
@@ -503,8 +510,10 @@ class ChefsHatEnv(gym.Env):
 
             # Verify if the player has finished this match
             if self.hasPlayerFinished(self.currentPlayer):
-                if not self.currentPlayer in self.finishingOrder:
-                    self.finishingOrder.append(self.currentPlayer)
+                if not self.currentPlayer in self.finishingOrder or self.stoppedByRound:
+                   
+                    if not self.stoppedByRound:
+                        self.finishingOrder.append(self.currentPlayer)
 
                     actionComplete = (DataSetManager.actionFinish, cardsDiscarded)
 
@@ -512,9 +521,14 @@ class ChefsHatEnv(gym.Env):
                     playerFinishingPosition = self.finishingOrder.index(
                         self.currentPlayer
                     )
+
+                    print (f"THIS PLAYER FINISHING POSITION: {playerFinishingPosition}")
                     points = self.calculateScore(playerFinishingPosition)
+                    print (f"THIS PLAYER POINTS: {points}")
 
                     self.score[self.currentPlayer] += points
+
+                    print (f"CURRENT SCORE: { self.score}")
 
                     pScore = (points * 10) / self.rounds
                     # self.performanceScore[self.currentPlayer] += pScore
@@ -1059,6 +1073,8 @@ class ChefsHatEnv(gym.Env):
 
         self.exchangedCards = dishwasherCards, waiterCard, souschefCard, chefCards
 
+        self.logNewRoles()
+
     def dealCards(self):
         """Deal the cards at the begining of a match"""
         self.numberOfCardsPerPlayer = int(len(self.cards) / len(self.playersHand))
@@ -1101,8 +1117,28 @@ class ChefsHatEnv(gym.Env):
         :rtype: bool
         """
 
-        if self.maxRounds > -1 and self.rounds >= self.maxRounds:
-            self.playersHand[player] = numpy.zeros(len(self.playersHand[player]))
+        if self.maxRounds > -1 and self.rounds >= self.maxRounds and not self.stoppedByRound:
+            
+            self.stoppedByRound = True
+            positions = {}
+
+            
+            amountOfCardsByPlayer = [numpy.count_nonzero(a) for a in self.playersHand]
+
+            for a, count in zip(self.playerNames,amountOfCardsByPlayer) :
+                positions[a] = count    
+
+            sortedPositions = dict(sorted(positions.items(), key=lambda x:x[1]))
+
+            playerIndex = [self.playerNames.index(a) for a in sortedPositions.keys()]
+
+            for i in playerIndex:
+                self.finishingOrder.append(i)
+
+            for p in range(len(self.playersHand)):
+                self.playersHand[p] = numpy.zeros(len(self.playersHand[player]))
+
+            
             return True
 
         return numpy.array(self.playersHand[player]).sum() <= 0

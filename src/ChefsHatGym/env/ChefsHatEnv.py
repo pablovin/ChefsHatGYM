@@ -66,7 +66,7 @@ class ChefsHatEnv(gym.Env):
         # Start all game variables
         self.gameType = gameType
         self.stopCriteria = stopCriteria
-        self.maxRounds = maxRounds
+        self.maxRounds = maxRounds if maxRounds > 0 else 999999
         self.playerNames = playerNames
         self.saveDataset = saveDataset
 
@@ -80,8 +80,6 @@ class ChefsHatEnv(gym.Env):
         self.playersInvalidActions = [0, 0, 0, 0]
         self.playersPassAction = [0, 0, 0, 0]
 
-        
-
     def reset(self, seed=None, options=None):
         """This method increments episodeNumber, start a new game and return the first observation
 
@@ -92,7 +90,6 @@ class ChefsHatEnv(gym.Env):
         self.episodeNumber += 1
         self.startNewGame()
         return (numpy.array(self.getObservation()).astype(numpy.float32), {})
-
 
     def startNewGame(self):
         """Starts a new game using the parameters defined by the method startExperiment.
@@ -148,7 +145,7 @@ class ChefsHatEnv(gym.Env):
     def start_match_handle_cards(self):
         """Handle the cards to the players."""
 
-        #Stop by round set to false
+        # Stop by round set to false
         self.stoppedByRound = False
 
         # Create a deck
@@ -303,6 +300,7 @@ class ChefsHatEnv(gym.Env):
         self.playersHand[score[1]][cardIndex] = waiterCard
 
         # Logging new cards exchanged!
+        self.logNewRoles()
         self.logger.newLogSession("Changing cards!")
         self.logger.write("--- Dishwasher gave:" + str(dishwasherCards))
         self.logger.write("--- Waiter gave:" + str(waiterCard))
@@ -508,11 +506,43 @@ class ChefsHatEnv(gym.Env):
                 actionComplete = (DataSetManager.actionDiscard, cardsDiscarded)
                 self.lastToDiscard = self.currentPlayer
 
+            thisPlayerStopByRound = False
+            if self.rounds > self.maxRounds:
+                thisPlayerStopByRound = True
+
             # Verify if the player has finished this match
-            if self.hasPlayerFinished(self.currentPlayer):
-                if not self.currentPlayer in self.finishingOrder or self.stoppedByRound:
-                   
-                    if not self.stoppedByRound:
+            if self.hasPlayerFinished(self.currentPlayer) or thisPlayerStopByRound:
+                if (
+                    not self.currentPlayer in self.finishingOrder
+                ) or thisPlayerStopByRound:
+                    # If the game stops by rounds, calculate the position based on the amount of cards at hand
+                    if thisPlayerStopByRound:
+                        if not self.stoppedByRound:
+                            positions = {}
+                            amountOfCardsByPlayer = [
+                                numpy.count_nonzero(a) for a in self.playersHand
+                            ]
+
+                            for a, count in zip(
+                                self.playerNames, amountOfCardsByPlayer
+                            ):
+                                positions[a] = count
+
+                            sortedPositions = dict(
+                                sorted(positions.items(), key=lambda x: x[1])
+                            )
+
+                            playerIndex = [
+                                self.playerNames.index(a)
+                                for a in sortedPositions.keys()
+                            ]
+                            self.finishingOrder = playerIndex
+                            self.stoppedByRound = True
+
+                        self.playersHand[self.currentPlayer] = numpy.zeros(
+                            len(self.playersHand[self.currentPlayer])
+                        )
+                    else:
                         self.finishingOrder.append(self.currentPlayer)
 
                     actionComplete = (DataSetManager.actionFinish, cardsDiscarded)
@@ -521,14 +551,9 @@ class ChefsHatEnv(gym.Env):
                     playerFinishingPosition = self.finishingOrder.index(
                         self.currentPlayer
                     )
-
-                    print (f"THIS PLAYER FINISHING POSITION: {playerFinishingPosition}")
                     points = self.calculateScore(playerFinishingPosition)
-                    print (f"THIS PLAYER POINTS: {points}")
 
                     self.score[self.currentPlayer] += points
-
-                    print (f"CURRENT SCORE: { self.score}")
 
                     pScore = (points * 10) / self.rounds
                     # self.performanceScore[self.currentPlayer] += pScore
@@ -575,7 +600,7 @@ class ChefsHatEnv(gym.Env):
                 )
             # Verify if it is end of match
 
-            if self.makePizza():
+            if not thisPlayerStopByRound and self.makePizza():
                 isPizzaReady = True
                 self.currentPlayer = self.lastToDiscard
                 if self.currentPlayer in self.finishingOrder:
@@ -1117,28 +1142,29 @@ class ChefsHatEnv(gym.Env):
         :rtype: bool
         """
 
-        if self.maxRounds > -1 and self.rounds >= self.maxRounds and not self.stoppedByRound:
-            
-            self.stoppedByRound = True
-            positions = {}
+        # if (
+        #     self.maxRounds > -1
+        #     and self.rounds >= self.maxRounds
+        #     and not self.stoppedByRound
+        # ):
+        #     self.stoppedByRound = True
+        #     positions = {}
 
-            
-            amountOfCardsByPlayer = [numpy.count_nonzero(a) for a in self.playersHand]
+        #     amountOfCardsByPlayer = [numpy.count_nonzero(a) for a in self.playersHand]
 
-            for a, count in zip(self.playerNames,amountOfCardsByPlayer) :
-                positions[a] = count    
+        #     for a, count in zip(self.playerNames, amountOfCardsByPlayer):
+        #         positions[a] = count
 
-            sortedPositions = dict(sorted(positions.items(), key=lambda x:x[1]))
+        #     sortedPositions = dict(sorted(positions.items(), key=lambda x: x[1]))
 
-            playerIndex = [self.playerNames.index(a) for a in sortedPositions.keys()]
+        #     playerIndex = [self.playerNames.index(a) for a in sortedPositions.keys()]
 
-            for i in playerIndex:
-                self.finishingOrder.append(i)
+        #     for i in playerIndex:
+        #         self.finishingOrder.append(i)
 
-            for p in range(len(self.playersHand)):
-                self.playersHand[p] = numpy.zeros(len(self.playersHand[player]))
+        #     for p in range(len(self.playersHand)):
+        #         self.playersHand[p] = numpy.zeros(len(self.playersHand[player]))
 
-            
-            return True
+        #     return True
 
         return numpy.array(self.playersHand[player]).sum() <= 0

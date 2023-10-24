@@ -24,7 +24,7 @@ verbose = True
 # Game parameters
 game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
 stop_criteria = 2
-maxRounds = 10
+maxRounds = 5
 
 # Start the room
 room = ChefsHatRoomRemote(

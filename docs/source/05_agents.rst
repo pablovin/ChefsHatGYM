@@ -18,7 +18,19 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 
-	def getAction(observation : list[float]):
+	def update_start_game(cards : envInfo):
+	"""
+
+		This will be called everytime the gane is starting. You might use to update yourself about the game start.
+
+		:param info: the info dictionary
+        :type info: dict
+
+	"""
+
+.. code-block:: python
+
+	def get_action(observation : list[float]):
 	"""
 
 		Given a certain observation, produce an action.
@@ -38,7 +50,7 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 
-	def exchangeCards(cards : list[float], amount:int):
+	def get_exhanged_cards(cards : list[float], amount:int):
 	"""
 
 		Given the cards at your hand, chose a given number of cards to be exchanged with other player.W
@@ -57,7 +69,7 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 	
-	def doSpecialAction(cards : info, specialAction):
+	def do_special_action(cards : info, specialAction):
 	"""
 
 		You are able to perform an special action, decide if you want to do it.
@@ -75,7 +87,7 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 	
-	def actionUpdate(cards : envInfo):
+	def update_my_action(cards : envInfo):
 	"""
 
 		This will be called everytime the consequences of your action are calculated by the environment. You might use this to update yourself about them.
@@ -87,7 +99,7 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 	
-	def observeOthers(cards : envInfo):
+	def update_action_others(cards : envInfo):
 	"""
 
 		This will be called everytime the consequences of the actions of another player are calculated by the environment. You might use this to update yourself about them.
@@ -99,7 +111,7 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 	
-	def matchUpdate(cards : envInfo):
+	def update_end_match(cards : envInfo):
 	"""
 
 		This will be called everytime the match is over. You might use this to update youself about the game.
@@ -111,7 +123,7 @@ An agent must implement a series of functions, which are called from the room an
 
 .. code-block:: python
 	
-	def getReward(cards : envInfo):
+	def get_reward(cards : envInfo):
 	"""
 
 		Calculate your reward.

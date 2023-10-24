@@ -20,7 +20,7 @@ class AgentRandon(ChefsHatAgent):
 
         self.reward = RewardOnlyWinning()
 
-    def getAction(self, observations):
+    def get_action(self, observations):
         possibleActions = observations[28:]
 
         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[
@@ -34,23 +34,27 @@ class AgentRandon(ChefsHatAgent):
 
         return a
 
-    def exchangeCards(self, cards, amount):
+    def get_exhanged_cards(self, cards, amount):
         selectedCards = sorted(cards[-amount:])
         return selectedCards
 
-    def doSpecialAction(self, info, specialAction):
+    def do_special_action(self, info, specialAction):
         return True
 
-    def actionUpdate(self, envInfo):
+    def update_my_action(self, envInfo):
         pass
 
-    def observeOthers(self, envInfo):
+    def update_action_others(self, envInfo):
         pass
 
-    def matchUpdate(self, envInfo):
+    def update_end_match(self, envInfo):
+        pass
+    
+    
+    def update_start_game(self, envInfo):
         pass
 
-    def getReward(self, envInfo):
+    def get_reward(self, envInfo):
         thisPlayer = envInfo["thisPlayerPosition"]
         matchFinished = envInfo["thisPlayerFinished"]
 

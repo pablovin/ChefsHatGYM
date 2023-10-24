@@ -192,7 +192,7 @@ class ChefsHatRoomLocal:
                 info = {"validAction":False}
                 while not info["validAction"]:
                     timeNow = datetime.now()                    
-                    action = currentPlayer.getAction(observations)
+                    action = currentPlayer.get_action(observations)
 
                     self.log(f"[Room]:  ---- Round {self.env.rounds} Action: {np.argmax(action)}")
                     nextobs, reward, isMatchOver, truncated, info = self.env.step(action)            
@@ -201,14 +201,14 @@ class ChefsHatRoomLocal:
                         self.error(f"[Room][ERROR]: ---- Invalid action!")      
 
                 #Send action update to the current agent                              
-                currentPlayer.actionUpdate(info)                
+                currentPlayer.update_my_action(info)                
 
                 info["actionIsRandom"] = ""
                 info["possibleActions"] = ""  
                 # Observe others
                 for p in self.players:
                     if p != currentPlayer:
-                        p.observeOthers(info)
+                        p.update_action_others(info)
 
                 #Match is over
                 if isMatchOver:
@@ -216,7 +216,7 @@ class ChefsHatRoomLocal:
 
                     #Players are updated that the match is over
                     for p in self.players:
-                        p.matchUpdate(info)
+                        p.update_end_match(info)
 
                     #A new match is started, with the cards at hand being reshuffled
                     # Check if any player is capable of doing a special action
@@ -230,7 +230,7 @@ class ChefsHatRoomLocal:
                             for player_action in players_actions:
                                 player = player_action[0]
                                 action = player_action[1]
-                                doSpecialAction = self.playersp[player].doSpecialAction(info, action)
+                                doSpecialAction = self.playersp[player].do_special_action(info, action)
                                 if doSpecialAction:
                                     self.env.doSpecialAction(player, action)                                
                                     playerSpecialAction = player
@@ -239,8 +239,8 @@ class ChefsHatRoomLocal:
                         #Once the cards are handled again, the chef and sous-chef have to choose which cards to give
                         player_sourchef, sc_cards, player_chef, chef_cards = self.env.get_chef_souschef_roles_cards()
 
-                        souschefCard = self.players[player_sourchef].exchangeCards(sc_cards, 1)
-                        chefCards = self.players[player_chef].exchangeCards(chef_cards, 2)
+                        souschefCard = self.players[player_sourchef].get_exhanged_cards(sc_cards, 1)
+                        chefCards = self.players[player_chef].get_exhanged_cards(chef_cards, 2)
                         self.env.exchange_cards(souschefCard, chefCards, doSpecialAction, playerSpecialAction)
 
                     

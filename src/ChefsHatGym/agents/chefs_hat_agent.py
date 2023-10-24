@@ -185,7 +185,7 @@ class ChefsHatAgent:
         # If the received message is a request for an action, do the action and return it
         if type == REQUEST_TYPE["requestAction"]:
             observations = data["observations"]
-            action = self.getAction(observations)
+            action = self.get_action(observations)
 
             self.log(f"-- Sending action: {numpy.argmax(action)}")
 
@@ -194,17 +194,17 @@ class ChefsHatAgent:
         # If the received message is a request for updating the agent, update the agent
         elif type == REQUEST_TYPE["actionUpdate"]:
             self.log(f"-- Updating the agent after the action was performed!")
-            self.actionUpdate(data)
+            self.update_my_action(data)
 
         # If the received message is a request for observing others, call the observe others function
         elif type == REQUEST_TYPE["updateOthers"]:
             self.log(f"-- Updating the agent based on other player turn!")
-            self.observeOthers(data)
+            self.update_action_others(data)
 
         # If the received message is an information that the match is over, update the agent
         elif type == REQUEST_TYPE["matchOver"]:
             self.log(f"-- Match over! Updating the agent.")
-            self.matchUpdate(data)
+            self.update_end_match(data)
 
         # If the received message is an information that the match is over, update the agent
         elif type == REQUEST_TYPE["gameOver"]:
@@ -214,7 +214,7 @@ class ChefsHatAgent:
         # If the received message is a request for special action
         elif type == REQUEST_TYPE["doSpecialAction"]:
             special_action = data["special_action"]
-            action = self.doSpecialAction(data, action)
+            action = self.do_special_action(data, action)
 
             self.log(f"-- Doing Special action {special_action}: {action}")
 
@@ -224,7 +224,7 @@ class ChefsHatAgent:
         elif type == REQUEST_TYPE["exchangeCards"]:
             cards = data["cards"]
             amount = data["amount"]
-            cards = self.exchangeCards(cards, amount)
+            cards = self.get_exhanged_cards(cards, amount)
 
             self.log(f"-- Exchanging {amount} cards: {cards}")
 
@@ -247,21 +247,10 @@ class ChefsHatAgent:
         """Close the receive message handler"""
         self.stop_actions = True
 
+
+    #Abstract methods
     @abstractmethod
-    def doSpecialAction(self, info, specialAction):
-        """This method returns a boolean to represent if the player want to do the special action or not.
-
-
-        :param envInfo: [description]
-        :type envInfo: [type]
-
-        :return: The decision to do or not the special action
-        :rtype: ndarray
-        """
-        pass
-
-    @abstractmethod
-    def exchangeCards(self, cards, amount):
+    def get_exhanged_cards(self, cards, amount):
         """This method returns the selected cards when exchanging them at the begining of the match.
 
         :param envInfo: [description]
@@ -273,7 +262,20 @@ class ChefsHatAgent:
         pass
 
     @abstractmethod
-    def getAction(self, observations):
+    def do_special_action(self, info, specialAction):
+        """This method returns a boolean to represent if the player want to do the special action or not.
+
+        :param envInfo: [description]
+        :type envInfo: [type]
+
+        :return: The decision to do or not the special action
+        :rtype: ndarray
+        """
+        pass
+
+
+    @abstractmethod
+    def get_action(self, observations):
         """This method returns one action given the observation parameter.
 
         :
@@ -285,7 +287,7 @@ class ChefsHatAgent:
         pass
 
     @abstractmethod
-    def getReward(self, info):
+    def get_reward(self, info):
         """The Agent reward method, called inside each evironment step.
 
         :param info: [description]
@@ -295,9 +297,18 @@ class ChefsHatAgent:
         """
 
         pass
+    
+    @abstractmethod
+    def update_end_match(self, envInfo):
+        """This method that is called by the end of each match. This is an oportunity to update the Agent with information gathered in the match.
+
+        :param envInfo: [description]
+        :type envInfo: [type]
+        """
+        pass
 
     @abstractmethod
-    def observeOthers(self, envInfo):
+    def update_action_others(self, envInfo):
         """This method gives the agent information of other playes actions. It is called after each other player action.
 
         :param envInfo: [description]
@@ -307,7 +318,7 @@ class ChefsHatAgent:
         pass
 
     @abstractmethod
-    def actionUpdate(self, envInfo):
+    def update_my_action(self, envInfo):
         """This method that is called after the Agent's action.
 
         :param envInfo: [description]
@@ -317,7 +328,7 @@ class ChefsHatAgent:
         pass
 
     @abstractmethod
-    def matchUpdate(self, envInfo):
+    def update_start_game(self, envInfo):
         """This method that is called by the end of each match. This is an oportunity to update the Agent with information gathered in the match.
 
         :param envInfo: [description]

@@ -600,6 +600,8 @@ class ChefsHatEnv(gym.Env):
                 )
             # Verify if it is end of match
 
+            boardAfter = self.getObservation()[0:11].tolist()
+
             if not thisPlayerStopByRound and self.makePizza():
                 isPizzaReady = True
                 self.currentPlayer = self.lastToDiscard
@@ -636,7 +638,7 @@ class ChefsHatEnv(gym.Env):
         ]
         info["isPizzaReady"] = isPizzaReady
         info["boardBefore"] = observationBefore[0:11].tolist()
-        info["boardAfter"] = self.getObservation()[0:11].tolist()
+        info["boardAfter"] = boardAfter
         info["board"] = numpy.array(self.getObservation() * 13, dtype=int).tolist()[:11]
         info["possibleActions"] = possibleActions
         info["action"] = action

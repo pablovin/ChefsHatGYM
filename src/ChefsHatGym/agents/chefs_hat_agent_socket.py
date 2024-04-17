@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 import os
 
+import redis
 import json
 import numpy
 
@@ -10,10 +11,11 @@ from ChefsHatGym.gameRooms.chefs_hat_room_server import REQUEST_TYPE, MESSAGE_TY
 import ChefsHatGym.utils.utils as utils
 
 import socket
+import sys
 import json
 
 
-class ChefsHatAgent:
+class ChefsHatAgent_Server:
     """This is the Agent class interface. Every new Agent must inherit from this class and implement the methods below.
 
     The class is ready to be used in both local and remote rooms. When using a remote room, the agent must be initialized, and the .join() method must be called.

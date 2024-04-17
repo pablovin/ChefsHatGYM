@@ -3,7 +3,7 @@ from ChefsHatGym.env import ChefsHatEnv
 from ChefsHatGym.agents.agent_random import AgentRandon
 
 # Room parameters
-room_name = "Testing_1_Local"
+room_name = "Testing_2_Local"
 timeout_player_response = 5
 verbose = True
 
@@ -20,6 +20,7 @@ room = ChefsHatRoomLocal(
     stop_criteria=stop_criteria,
     max_rounds=maxRounds,
     verbose=verbose,
+    save_dataset=True,
 )
 
 

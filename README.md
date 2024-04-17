@@ -8,7 +8,8 @@ With this library, you will be able to:
 
 * Encapsulate existing agents into the game
 * Run the game locally, on your machine
-* Connect the game to remote agents (using a pub/sub architecture powered by a Redis server)
+* Run the game room as a server
+* Connect agents to a server room and run games
 * Export experimental results, game summaries and agents behavior on a easy-to-read format
 * Evaluate agents using different evaluation tools and visualizations
 
@@ -20,7 +21,8 @@ We also provide a list of existing plugins and extensions for this library:
 
 The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersClub) is a collection of ready-to-use artificial agents. Each of these agents were implemented, evaluated, and discussed in specific peer-reviewed publications and can be used at any time. If you want your agent to be included in the Player’s Club, send us a message.
 
-### Chef`s Hat Play With a Human Plugin
+### Chef`s Hat Play
+
 Comming soon...
 
 ## The Chef's Hat Card game
@@ -49,11 +51,6 @@ You can use our pip installation:
    pip install chefshatgym
 
 ```
-
-To use the **remote communication**, you need access to a redis server. To install your own redis server, please follow: https://redis.io/docs/getting-started/installation/
-
-For Windows users, [Memurai](https://www.memurai.com/) is an alternative.
-
 Refer to our full [documentation](https://chefshatgym.readthedocs.io/en/latest/) for a complete usage and development guide.
  
 
@@ -87,18 +84,17 @@ For a more detailed example, check the [examples folder.](https://github.com/pab
 
 ### Running a game remotely
 
-ChefsHatGym2 allows for communication with remote agents. It uses a pub/sub architecture, powered by a Redis server.
-A remote room structure is provided by the library, as shown in our [examples folder](https://github.com/pablovin/ChefsHatGYM/tree/master/examples/remoteRoom).
+ChefsHatGym2 allows the creation of a gameroom server. Agents running in different machines can connect to the room server via simple TCP connection. A server room structure and remote agents is supported by the library, as shown in our [examples folder](https://github.com/pablovin/ChefsHatGYM/tree/master/examples/remoteRoom).
 
 ### Chefs Hat Agents
 
 ChefsHatGym2 provides an interface to encapsulate agents. It allows the extension of existing agents, but also the creation of new agents. Implementing from this interface, allow your agents to be inserted in any Chef`s Hat game run by the simulator.
 
-Runing an agent from another machine is supported, by the ChefsHatRemote agent interface.
+Runing an agent from another machine is supported directly by the ChefsHat agent interface. By implementing this interface, your agent gets all the local and remote agent functionality and can be used by the Chef`s Hat simulator. 
 
-Here are examples of an agent that only select random actions, implementing both local and remote interfaces:
-* [local ChefsHatAgent](https://github.com/pablovin/ChefsHatGYM/blob/master/src/ChefsHatGym/agents/local/random_agent_local.py)
-* [local ChefsHatAgent](https://github.com/pablovin/ChefsHatGYM/tree/master/src/ChefsHatGym/agents/remote)
+
+Here is an example of an agent that only select random actions:
+* [Random Agent](https://github.com/pablovin/ChefsHatGYM/blob/master/src/ChefsHatGym/agents/agent_random.py)
 
 
 ## Legacy Plugins and Extensions
@@ -140,7 +136,6 @@ All the examples in this repository are distributed under a Non-Comercial licens
 
 - Barros, P., Sciutti, A., Bloem, A. C., Hootsmans, I. M., Opheij, L. M., Toebosch, R. H., & Barakova, E. (2021, March). It's food fight! Designing the chef's hat card game for affective-aware HRI. In Companion of the 2021 ACM/IEEE International Conference on Human-Robot Interaction (pp. 524-528).
 
-
 ## Events
 
 ### Chef`s Hat Cup: Revenge of the Agent!
@@ -149,12 +144,9 @@ Get more information here: https://www.chefshatcup.poli.br/home
 ### The First Chef's Hat Cup is online!
 Get more information here: https://www.whisperproject.eu/chefshat#competition
 
-
 ## Contact
 
 Pablo Barros - pablovin@gmail.com
-
-Alexandre Rodolfo - armp@ecomp.poli.br
 
 - [Twitter](https://twitter.com/PBarros_br)
 - [Google Scholar](https://scholar.google.com/citations?user=LU9tpkMAAAAJ)

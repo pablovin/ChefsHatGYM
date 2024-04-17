@@ -103,76 +103,82 @@ When initializing a local room, the room parameters have to be passed. As that i
 In this example, both dataset and gamelog will be generated from the game environment. A log for the room will also be generated. After the game is played, a game summary dictionary is passed.
 
 
-Remote Rooms
+Server Rooms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 	
- .. image:: ../../gitImages/GameCommunicationDiagram_Remote.png
-	:alt: Chef's Hat Environment Diagram Remote room
-	:align: center
+ 
+To setup a server room, besides using the room parameters, you have to set a url and port for the TCP/IP connection.
 
-To setup a remote room, besides using the room parameters, you have to set a url and port for the redis server, that will be responsible for controlling the communication between the room and the agents.
+The remote room uses sockets to communicate with the agents, mantaining an open channel during the entire game.
 
-The remote room uses a pub/sub architecture to register players and send/request information from the agents. 
+The messages shared between the agents and the room follow a standard protocol, and are encapsulated in a dictionary.
 
-The remote room setup two channels for each agent connected to it, one to send and one to receive messages.
+The messages from the room are send on a broadcast manner, that updates the agent about the different events that happen during the game, 
+or in a response request manner, where the room requires an action from a specific agent. 
 
-Before runing the remote room, guarantee that the Redis server is up and runing.
+For more information on the communication prtocol, please check:
+
+* [Server Room](https://github.com/pablovin/ChefsHatGYM/blob/master/src/ChefsHatGym/gameRooms/chefs_hat_room_server.py)
+* [Random Agent](https://github.com/pablovin/ChefsHatGYM/blob/master/src/ChefsHatGym/agents/agent_random.py)
+
+
+Here is an example of a server room, that will wait for connections on a specified url and port:
 
 
 .. code-block:: python
 
 	
-	import time
-	import redis
-	from ChefsHatGym.gameRooms.chefs_hat_room_remote import ChefsHatRoomRemote
+	from ChefsHatGym.gameRooms.chefs_hat_room_server import ChefsHatRoomServer
 	from ChefsHatGym.env import ChefsHatEnv
-	from ChefsHatGym.agents.agent_random import AgentRandon
 
-	
 	# Room parameters
-	room_name = "Testing_1_Remote"
-	timeout_player_subscribers = 200
+	room_name = "server_room1"
+	room_password = "password"
+	timeout_player_subscribers = 5
 	timeout_player_response = 5
-	verbose = False
-	redis_url= "localhost"
-	redis_port = "6379"
+	verbose = True
+
 
 	# Game parameters
 	game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
-	stop_criteria = 3
-	maxRounds = 10
+	stop_criteria = 50
+	maxRounds = -1
 
-	# Start the room
-	room = ChefsHatRoomRemote(
+
+	# Create the room
+	room = ChefsHatRoomServer(
 		room_name,
-		redis_url=redis_url,
-		redis_port=redis_port,
+		room_pass=room_password,
 		timeout_player_subscribers=timeout_player_subscribers,
 		timeout_player_response=timeout_player_response,
 		game_type=game_type,
 		stop_criteria=stop_criteria,
 		max_rounds=maxRounds,
 		verbose=verbose,
+		save_dataset=True,
+		save_game_log=True,
 	)
 
-	# Give enought time for the room to setup
-	time.sleep(1)
+And here an example of agents connecting to the room. Once the room has four valid agents connected, it will start the game.
+
+
+.. code-block:: python
+
+	from ChefsHatGym.agents.agent_random import AgentRandon
+	room_pass = "password"
+	room_url = "localhost"
+	room_port = 10000
+
 
 	# Create the players
-	p1 = AgentRandon(name="01")
-	p2 = AgentRandon(name="02")
-	p3 = AgentRandon(name="03")
-	p4 = AgentRandon(name="04")
+	p1 = AgentRandon(name="01", verbose=True)
+	p2 = AgentRandon(name="02", verbose=True)
+	p3 = AgentRandon(name="03", verbose=True)
+	p4 = AgentRandon(name="04", verbose=True)
 
 	# Join agents
-	for p in [p1, p2, p3, p4]:
-		p.joinGame(room_name, redis_url=redis_url, redis_port=redis_port, verbose=False)
 
-	# Start the game
-	room.start_new_game(game_verbose=True)
-	while not room.get_room_finished():
-		time.sleep(1)
-
-
-By using the agent.join() method, we are able to register the agent to the room, by passing the room_id. The remote room runs as a threaded method, in order to allow continuous communication with the agents, and will turn off as soon as the game is over.
-The agent.join() also triggers the agent remote agent functionalities, allowing them to communicate with the redis pub/sub server. The agents will raise threaded listeners to allow communication with the room.
+	p1.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)
+	p2.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)
+	p3.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)
+	p4.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)

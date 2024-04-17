@@ -9,7 +9,7 @@ from copy import copy
 actionDeal = "DEAL"
 actionDiscard = "DISCARD"
 actionPizzaReady = "PIZZA_READY"
-actionChangeRole ="ROLE_CHANGE"
+actionChangeRole = "ROLE_CHANGE"
 actionPass = "PASS"
 actionFinish = "FINISH"
 actionInvalid = "INVALID"
@@ -51,6 +51,7 @@ class DataSetManager:
         return self._verbose
 
     dataFrame = ""
+
     def __init__(self, dataSetDirectory=None, verbose=True):
         # sys.stdout = open(logDirectory+"2.txt",'w')
         """
@@ -65,72 +66,172 @@ class DataSetManager:
         self._verbose = verbose
         self._actions = []
 
-    def addDataFrame(self, gameNumber ="", roundNumber ="", player="", actionType="", playersHand=[], board=[],
-                     cardsAction="", reward="", qvalues="", loss="", wrongActions="", totalActions="",
-                     score=[], roles="", playersStatus=[], agentNames="", possibleActions=[], performanceScore = []):
+    def addDataFrame(
+        self,
+        gameNumber="",
+        roundNumber="",
+        player="",
+        actionType="",
+        playersHand=[],
+        board=[],
+        cardsAction="",
+        reward="",
+        qvalues="",
+        loss="",
+        wrongActions="",
+        totalActions="",
+        score=[],
+        roles="",
+        playersStatus=[],
+        agentNames="",
+        possibleActions=[],
+        performanceScore=[],
+    ):
 
-        #Guarantee is a copy
+        # Guarantee is a copy
         score = copy(score)
         playersHand = copy(playersHand)
         board = copy(board)
         reward = copy(reward)
         qvalues = copy(qvalues)
         loss = copy(loss)
-        roles= copy(roles)
+        roles = copy(roles)
         playersStatus = copy(playersStatus)
+        possibleActions = copy(possibleActions)
 
-        date =  str(datetime.datetime.now()).replace(" ", "_")
-        dataframe= [date, gameNumber,roundNumber,player,actionType,playersHand,board,possibleActions, cardsAction,reward,qvalues,loss,wrongActions,totalActions,
-                    score,roles,playersStatus,agentNames, performanceScore]
+        date = str(datetime.datetime.now()).replace(" ", "_")
+        dataframe = [
+            date,
+            gameNumber,
+            roundNumber,
+            player,
+            actionType,
+            playersHand,
+            board,
+            possibleActions,
+            cardsAction,
+            reward,
+            qvalues,
+            loss,
+            wrongActions,
+            totalActions,
+            score,
+            roles,
+            playersStatus,
+            agentNames,
+            performanceScore,
+        ]
 
         self.dataFrame.loc[-1] = dataframe
         self.dataFrame.index = self.dataFrame.index + 1
 
     def startNewGame(self):
-        self._currentDataSetFile = self._dataSetDirectory+"/Dataset.pkl"
+        self._currentDataSetFile = self._dataSetDirectory + "/Dataset.pkl"
 
-        columns = ["Time", "Game Number", "Round Number", "Player", "Action Type", "Player Hand",  "Board", "Possible Actions","Cards Action", "Reward",
-                   "Qvalues", "Loss", "Wrong Actions", "Total Actions", # Current turn actions
-                     "Scores", "Roles", "Players Status", "Agent Names", "Performance Score" # Game status
-                         ]
+        columns = [
+            "Time",
+            "Game Number",
+            "Round Number",
+            "Player",
+            "Action Type",
+            "Player Hand",
+            "Board",
+            "Possible Actions",
+            "Cards Action",
+            "Reward",
+            "Qvalues",
+            "Loss",
+            "Wrong Actions",
+            "Total Actions",  # Current turn actions
+            "Scores",
+            "Roles",
+            "Players Status",
+            "Agent Names",
+            "Performance Score",  # Game status
+        ]
 
-        self.dataFrame = pd.DataFrame(columns = columns)
-
+        self.dataFrame = pd.DataFrame(columns=columns)
 
     def startNewMatch(self, gameNumber, agentsNames):
         self.addDataFrame(gameNumber=gameNumber, agentNames=agentsNames)
 
     def dealAction(self, playersHand, game):
         actionType = actionDeal
-        self.addDataFrame(actionType=actionType, playersHand=playersHand, gameNumber=game)
+        self.addDataFrame(
+            actionType=actionType, playersHand=playersHand, gameNumber=game
+        )
 
-    def doActionPizzaReady(self, roundNumber, board, playersHand, roles, score, playersStatus, game):
+    def doActionPizzaReady(
+        self, roundNumber, board, playersHand, roles, score, playersStatus, game
+    ):
 
         actionType = actionPizzaReady
 
-        self.addDataFrame(actionType=actionType, playersHand=playersHand, score=score,
-                                      roundNumber=roundNumber, board=board,
-                                      roles=roles, playersStatus=playersStatus, gameNumber=game)
+        self.addDataFrame(
+            actionType=actionType,
+            playersHand=playersHand,
+            score=score,
+            roundNumber=roundNumber,
+            board=board,
+            roles=roles,
+            playersStatus=playersStatus,
+            gameNumber=game,
+        )
 
-    def doActionAction(self, game, player, roundNumber, action, board, wrongActions, reward,
-                       playersHand, roles, score, playersStatus, qValue, loss, totalActions, possibleActions):
+    def doActionAction(
+        self,
+        game,
+        player,
+        roundNumber,
+        action,
+        board,
+        wrongActions,
+        reward,
+        playersHand,
+        roles,
+        score,
+        playersStatus,
+        qValue,
+        loss,
+        totalActions,
+        possibleActions,
+    ):
 
         actionCards = ""
         actionType = action[0]
         actionCards = action[1]
 
-        self.addDataFrame(gameNumber=game, roundNumber=roundNumber, player=player,
-                                      actionType=actionType, playersHand=playersHand,
-                                      board=board, cardsAction=actionCards, reward=reward,
-                                      qvalues=qValue, loss=loss, wrongActions=wrongActions,
-                                      totalActions=totalActions, score=score, roles=roles, playersStatus=playersStatus, possibleActions=possibleActions
-                                      )
+        self.addDataFrame(
+            gameNumber=game,
+            roundNumber=roundNumber,
+            player=player,
+            actionType=actionType,
+            playersHand=playersHand,
+            board=board,
+            cardsAction=actionCards,
+            reward=reward,
+            qvalues=qValue,
+            loss=loss,
+            wrongActions=wrongActions,
+            totalActions=totalActions,
+            score=score,
+            roles=roles,
+            playersStatus=playersStatus,
+            possibleActions=possibleActions,
+        )
 
     def exchangeRolesAction(self, playersHand, roles, cardsAction, game):
         actionType = actionChangeRole
-        self.addDataFrame(actionType=actionType, playersHand=playersHand, cardsAction=cardsAction, roles=roles, gameNumber=game)
+        self.addDataFrame(
+            actionType=actionType,
+            playersHand=playersHand,
+            cardsAction=cardsAction,
+            roles=roles,
+            gameNumber=game,
+        )
 
     def saveFile(self):
         self.dataFrame.to_pickle(self.currentDataSetFile)
-        self.dataFrame.to_csv(self.currentDataSetFile+".csv", index=False, header=True)
-
+        self.dataFrame.to_csv(
+            self.currentDataSetFile + ".csv", index=False, header=True
+        )

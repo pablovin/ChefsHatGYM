@@ -265,6 +265,10 @@ class ChefsHatRoomLocal:
                                 if doSpecialAction:
                                     self.env.doSpecialAction(player, action)
                                     playerSpecialAction = player
+
+                                    for p in self.players:
+                                        p.observe_special_action(action, player)
+
                                     break
 
                         # Once the cards are handled again, the chef and sous-chef have to choose which cards to give

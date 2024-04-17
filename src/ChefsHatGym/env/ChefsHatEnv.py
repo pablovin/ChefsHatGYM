@@ -203,9 +203,9 @@ class ChefsHatEnv(gym.Env):
 
         self.currentPlayer = playerTurn[index[0]]
 
-        # verify if this player has a 11 in its hand, otherwise iterate to the next player
+        # verify if this player has a 12 in its hand, otherwise iterate to the next player
 
-        while not (self.maxCardNumber in self.playersHand[self.currentPlayer]):
+        while not (self.maxCardNumber + 1 in self.playersHand[self.currentPlayer]):
             self.currentPlayer = self.currentPlayer + 1
             if self.currentPlayer >= self.numberPlayers:
                 self.currentPlayer = 0
@@ -596,7 +596,7 @@ class ChefsHatEnv(gym.Env):
                     action,
                     0,
                     0,
-                    validAction,
+                    possibleActions,
                 )
             # Verify if it is end of match
 
@@ -623,6 +623,7 @@ class ChefsHatEnv(gym.Env):
         else:
             self.playersInvalidActions[thisPlayer] += 1
             isMatchOver = False
+            boardAfter = self.getObservation()[0:11].tolist()
 
         info = {}
         info["actionIsRandom"] = actionIsRandom
@@ -995,7 +996,7 @@ class ChefsHatEnv(gym.Env):
         return originalCardDiscarded
 
     def list_players_with_special_actions(self):
-        """list players that are allowed to do a specialk action
+        """list players that are allowed to do a special actions
 
         Returns:
             _type_: list()

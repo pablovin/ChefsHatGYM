@@ -102,15 +102,15 @@ class ChefsHatAgent:
         room_pass: str = "",
         room_url: str = "localhost",
         room_port: int = 10000,
-        connection_timeout: int = 10,
+        connection_timeout: int = 300,
     ):
         """
-        Allows an agent to enter a remote room, using a specific url and port to a redis server.
+        Allows an agent to enter a remote room, using a specific url and port.
 
         Args:
             room_pass (str): Password fo the room you wanna conntect to
             redis_url (str, optional): _description_. Defaults to "localhost".
-            redis_port (str, optional): _description_. Defaults to "6379".
+            redis_port (str, optional): _description_. Defaults to "10000".
         """
 
         self.room_url = room_url

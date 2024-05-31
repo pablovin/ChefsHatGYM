@@ -25,7 +25,7 @@ REQUEST_TYPE = {
     "updateMatchStart": "updateMatchStart",
 }
 
-MESSAGE_TYPE = {"OK": 0, "ERROR": 1}
+MESSAGE_TYPE = {"OK": "OK", "ERROR": "ERROR"}
 
 
 class ChefsHatRoomServer:
@@ -97,8 +97,8 @@ class ChefsHatRoomServer:
             save_dataset (bool, optional): save the game dataset .pkl. Defaults to True.
             save_game_log (bool, optional): save the game log. Defaults to True.
             log_directory (str, optional): directory to save the log. Defaults to None.
-            timeout_player_subscribers (int, optional): timeout of the player subscriptions to the room. Defaults to 30.
-            timeout_player_response (int, optional): timeout of the player response. Defaults to 5.
+            timeout_player_subscribers (int, optional): timeout of the player subscriptions to the room in seconds. Defaults to 30.
+            timeout_player_response (int, optional): timeout of the player response in seconds. Defaults to 5.
         """
         # Room parameters
         self.room_url = room_url
@@ -197,6 +197,9 @@ class ChefsHatRoomServer:
                 break
 
         player_message = json.loads(player_message.decode())
+
+        print(f"Received MEssage: {player_message}")
+
         player_name = player_message.get("playerName")
 
         room_message = {}
@@ -243,7 +246,6 @@ class ChefsHatRoomServer:
 
         self.server_socket.listen(4)
 
-        timenow = datetime.now()
         while len(self.players) < 4:
             try:
                 connection, client_address = self.server_socket.accept()
@@ -256,8 +258,8 @@ class ChefsHatRoomServer:
                 self.error(
                     f"[Room][ERROR]: Players subscription timeout! Current playes: {self.players.keys()}"
                 )
+
                 raise Exception("Player subscription timeout!")
-            break
 
         self.log(f"[Room]: - All four players online, starting the game!")
         self.ready_to_start = True
@@ -351,6 +353,7 @@ class ChefsHatRoomServer:
 
         # Update each player about the begining of the match
         self.log("[Room]:  - Informing players about game start!")
+
         for p_index, p in enumerate(self.players.keys()):
             sendInfo = {}
             sendInfo["type"] = "updateMatchStart"
@@ -375,6 +378,9 @@ class ChefsHatRoomServer:
 
                 sendInfo = {}
                 sendInfo["observations"] = observations.tolist()
+                sendInfo["possibleActionsDecoded"] = self.env.decode_possible_actions(
+                    sendInfo["observations"][28:]
+                )
                 sendInfo["type"] = REQUEST_TYPE["requestAction"]
                 action, time = self._request_message(currentPlayer, sendInfo)
 
@@ -386,6 +392,7 @@ class ChefsHatRoomServer:
                 if not info["validAction"]:
                     self.error(f"[Room][ERROR]: ---- Invalid action!")
 
+            # break
             # Send action update to the current agent
             # self._send_action_update(currentPlayer, info)
             info["observation"] = observations.tolist()
@@ -403,6 +410,7 @@ class ChefsHatRoomServer:
 
             info["actionIsRandom"] = ""
             info["possibleActions"] = ""
+            info["possibleActionsDecoded"] = ""
             info["type"] = REQUEST_TYPE[
                 "updateOthers"
             ]  # Update the othe players after the action was done

@@ -341,7 +341,7 @@ class ChefsHatEnv(gym.Env):
                     The first 11 elements represent the board game card placeholder (the pizza area).
                     The game cards are represented by an integer, where 0 (zero) means no card.
                     The following 17 elements (from index 11 to 27) represent the current player hand cards in the sequence.
-                    By the end, the last 200 elements (from index 28 to 227) represent all possible actions in the game.
+                    By the end, the last 200 elements (from index 27 to 227) represent all possible actions in the game.
                     The allowed actions for the current player are filled with one, while invalid actions are filled with 0.
         :rtype: ndarray
         """
@@ -432,6 +432,16 @@ class ChefsHatEnv(gym.Env):
 
         return a.tolist()
 
+    def decode_possible_actions(self, possibleActions):
+
+        nonzeroElements = numpy.nonzero(possibleActions)
+
+        currentlyAllowedActions = list(
+            numpy.copy(numpy.array(self.highLevelActions)[nonzeroElements,])[0]
+        )
+
+        return currentlyAllowedActions
+
     def step(self, action):
         """Execute an action in the game.
 
@@ -475,6 +485,13 @@ class ChefsHatEnv(gym.Env):
         actionIsRandom = False
 
         possibleActions = self.getPossibleActions(self.currentPlayer)
+        # Calculate the currentlyAllowedActions in a high-level
+        nonzeroElements = numpy.nonzero(possibleActions)
+
+        currentlyAllowedActions = list(
+            numpy.copy(numpy.array(self.highLevelActions)[nonzeroElements,])[0]
+        )
+
         thisPlayer = copy.copy(self.currentPlayer)
         boardBefore = copy.copy(self.board)
 
@@ -597,6 +614,7 @@ class ChefsHatEnv(gym.Env):
                     0,
                     0,
                     possibleActions,
+                    currentlyAllowedActions,
                 )
             # Verify if it is end of match
 
@@ -642,6 +660,7 @@ class ChefsHatEnv(gym.Env):
         info["boardAfter"] = boardAfter
         info["board"] = numpy.array(self.getObservation() * 13, dtype=int).tolist()[:11]
         info["possibleActions"] = possibleActions
+        info["possibleActionsDecoded"] = currentlyAllowedActions
         info["action"] = action
         info["thisPlayerPosition"] = int(thisPlayerPosition)
         info["lastActionPlayers"] = self.lastActionPlayers
@@ -656,8 +675,6 @@ class ChefsHatEnv(gym.Env):
         info["currentRoles"] = self.currentRoles
         info["currentPlayer"] = int(self.currentPlayer)
 
-        # stateAfter = copy.copy(self.getObservation())
-        # reward = self.rewardFunctions[thisPlayer](info, stateBefore, stateAfter)
         reward = 0
         return (
             numpy.array(self.getObservation()).astype(numpy.float32),
@@ -666,7 +683,6 @@ class ChefsHatEnv(gym.Env):
             False,
             info,
         )
-        # observation, reward, isMatchOver, {}
 
     def render(self, mode="human", close=False):
         pass
@@ -807,6 +823,10 @@ class ChefsHatEnv(gym.Env):
             :rtype: (ndarray)
         """
         firstAction = self.playerStartedGame == self.currentPlayer and self.rounds == 1
+
+        # print(
+        #     f"First action = {firstAction} - Player started game ({self.playerStartedGame}) == currentPlayer ({self.currentPlayer}) and self.rounds({self.rounds}) == 1"
+        # )
 
         # print ("Player:", player)
         possibleActions = []

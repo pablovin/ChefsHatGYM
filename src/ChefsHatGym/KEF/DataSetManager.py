@@ -86,6 +86,7 @@ class DataSetManager:
         agentNames="",
         possibleActions=[],
         performanceScore=[],
+        currentlyAllowedActions=[],
     ):
 
         # Guarantee is a copy
@@ -98,6 +99,7 @@ class DataSetManager:
         roles = copy(roles)
         playersStatus = copy(playersStatus)
         possibleActions = copy(possibleActions)
+        currentlyAllowedActions = copy(currentlyAllowedActions)
 
         date = str(datetime.datetime.now()).replace(" ", "_")
         dataframe = [
@@ -109,6 +111,7 @@ class DataSetManager:
             playersHand,
             board,
             possibleActions,
+            currentlyAllowedActions,
             cardsAction,
             reward,
             qvalues,
@@ -137,6 +140,7 @@ class DataSetManager:
             "Player Hand",
             "Board",
             "Possible Actions",
+            "Possible Actions Decoded",
             "Cards Action",
             "Reward",
             "Qvalues",
@@ -195,6 +199,7 @@ class DataSetManager:
         loss,
         totalActions,
         possibleActions,
+        currentlyAllowedActions,
     ):
 
         actionCards = ""
@@ -218,6 +223,7 @@ class DataSetManager:
             roles=roles,
             playersStatus=playersStatus,
             possibleActions=possibleActions,
+            currentlyAllowedActions=currentlyAllowedActions,
         )
 
     def exchangeRolesAction(self, playersHand, roles, cardsAction, game):

@@ -19,15 +19,15 @@ We also provide a list of existing plugins and extensions for this library:
 
 ### Chef`s Hat Players Club
 
-The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersClub) is a collection of ready-to-use artificial agents. Each of these agents were implemented, evaluated, and discussed in specific peer-reviewed publications and can be used at any time. If you want your agent to be included in the Player’s Club, send us a message.
+The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersClub) is a collection of ready-to-use artificial agents. These agents were implemented, evaluated, and discussed in specific peer-reviewed publications and can be used anytime. If you want your agent to be included in the Player’s Club, message us.
 
 ### Nova
 
-[Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment a Chef`s Hat game.
+[Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment on a Chef`s Hat game.
 
 ### Chef`s Hat Play
 
-Comming soon...
+[Chef`s Hat Play](https://github.com/pablovin/ChefsHat_Play) is a Unity interface that allows humans to play the game against other humans or artificial agents.
 
 ## The Chef's Hat Card game
 

@@ -428,6 +428,7 @@ class ChefsHatRoomServer:
                 info["type"] = REQUEST_TYPE[
                     "matchOver"
                 ]  # Update all players informing that the match is over!
+                # print (f"Match over! Current roles: {info["currentRoles"]}")
                 for p in self.players.keys():
                     self._broadcast_message(p, info)
 

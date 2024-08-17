@@ -158,6 +158,7 @@ class ChefsHatEnv(gym.Env):
         if numpy.max(self.score) > 0:
             # Chef, sous-Chef, waiter and dishwasher
             self.currentRoles = [self.finishingOrder[i] for i in range(4)]
+            print(f"Setting new roles: {self.currentRoles}")
 
         self.lastActionPlayers = ["", "", "", ""]
 
@@ -769,10 +770,13 @@ class ChefsHatEnv(gym.Env):
         """
         isMatchOver = True
 
+        players_finished = 0
         for i in range(len(self.playersHand)):
-            if numpy.array(self.playersHand[i]).sum() > 0:
-                isMatchOver = False
-                break
+            if numpy.array(self.playersHand[i]).sum() == 0:
+                players_finished += 1
+
+        if players_finished < 3:
+            isMatchOver = False
 
         if isMatchOver:
             if not self.experimentManager == None:

@@ -8,11 +8,7 @@ class AgentRandon(ChefsHatAgent):
     suffix = "RANDOM"
 
     def __init__(
-        self,
-        name,
-        saveModelIn: str = "",
-        verbose: bool = False,
-        savelogDirectory : str = ""
+        self, name, saveModelIn: str = "", verbose: bool = False, logDirectory: str = ""
     ):
         super().__init__(
             self.suffix,
@@ -23,7 +19,7 @@ class AgentRandon(ChefsHatAgent):
         self.reward = RewardOnlyWinning()
 
         if verbose:
-            self.startLogging(savelogDirectory)
+            self.startLogging(logDirectory)
 
     def get_action(self, observations):
         possibleActions = observations[28:]
@@ -54,7 +50,7 @@ class AgentRandon(ChefsHatAgent):
 
     def update_end_match(self, envInfo):
         pass
-    
+
     def update_start_match(self, cards, players, starting_player):
         pass
 

@@ -2,7 +2,7 @@ from ChefsHatGym.agents.agent_random import AgentRandon
 
 room_pass = "password"
 room_url = "localhost"
-room_port = 10000
+room_port = 10003
 
 
 # Create the players

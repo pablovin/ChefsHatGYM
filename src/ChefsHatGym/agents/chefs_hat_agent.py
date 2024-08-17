@@ -26,6 +26,8 @@ class ChefsHatAgent:
     name = ""  #: Class attribute to store the name of the agent
     saveModelIn = ""  #: Class attribute path to a folder acessible by this agent to save/load from
 
+    messages_q = []
+
     def __init__(
         self, agent_suffix, name, saveModelIn: str = "", verbose: bool = False
     ):
@@ -78,14 +80,20 @@ class ChefsHatAgent:
     ):
         """Update the log directory, generating the correct log file."""
         self.logger = logging.getLogger(f"Agent_{self.name}")
-
-        self.logger.addHandler(
-            logging.FileHandler(
-                os.path.join(self.agent_log_directory, f"Agent_{self.name}_log.log"),
-                mode="w",
-                encoding="utf-8",
-            )
+        self.logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            fmt="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y %m %d %H:%M:%S"
         )
+
+        file_handler = logging.FileHandler(
+            os.path.join(self.agent_log_directory, f"Agent_{self.name}_log.log"),
+            mode="w",
+            encoding="utf-8",
+        )
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.INFO)
+
+        self.logger.addHandler(file_handler)
 
     def log(self, message):
         """Log a certain message, if the verbose is True
@@ -183,7 +191,14 @@ class ChefsHatAgent:
             room_message = self.socket.recv(6144)
 
             if room_message:
-                self._read_message(room_message)
+                # Decode the message string to a regular string
+
+                room_message = room_message.decode()
+                # Split the string into separate JSON objects
+                received_messages = [f"{{{s}}}" for s in room_message.split("}{")]
+                for message in received_messages:
+                    message = message.replace("{{", "{").replace("}}", "}")
+                    self._read_message(message)
 
     def _read_message(self, room_message: str):
         """Handler to parse a received message, and call the specific method.
@@ -193,7 +208,7 @@ class ChefsHatAgent:
         """
 
         # print(f"Received message: {room_message}")
-        room_message = json.loads(room_message.decode())
+        room_message = json.loads(room_message)
         type = room_message["type"]
 
         # print(f"All request types: {REQUEST_TYPE[type]} ")

@@ -777,6 +777,12 @@ class ChefsHatEnv(gym.Env):
 
         if players_finished < 3:
             isMatchOver = False
+        else:
+            # Add the last player on the finishing order
+            for i in range(len(self.playersHand)):
+                if not i in self.finishingOrder:
+                    self.finishingOrder.append(i)
+                    break
 
         if isMatchOver:
             if not self.experimentManager == None:

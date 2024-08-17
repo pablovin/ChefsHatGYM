@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import sys
+import logging
 
 
 class Logger:
@@ -29,17 +30,18 @@ class Logger:
     def verbose(self):
         return self._verbose
 
-    def __init__(self, logDirectory=None, saveLog = True, verbose=True):
-
-        # sys.stdout = open(logDirectory+"2.txt",'w')
-
+    def __init__(
+        self, logDirectory=None, saveLog=True, verbose=True, experimentName=""
+    ):
         """
         Constructor function, which basically verifies if the logdirectory is correct,
         and if so, or creates or loads the log file.
 
         Args:
             logDirectory (String): the directory where the log is / will be is saved
-            verbose(Boolean): Indicates if the log will also be printed in the console
+            saveLog(Boolean): Indicates if the log will be created or not
+            verbose(Boolean): Indicates if the log will be displayed on the console or not
+            experimentName(Boolean): Indicates the experiment name, to be used as log name
 
         Raises:
 
@@ -47,130 +49,167 @@ class Logger:
 
         """
 
-        if saveLog:
-            try:
-                self.isLogDirectoryValid(logDirectory)
-            except:
-                raise Exception("Log file not found!")
+        # if saveLog:
+        #     try:
+        #         self.isLogDirectoryValid(logDirectory)
+        #     except:
+        #         raise Exception("Log file not found!")
 
-            else:
-                self._logDirectory = logDirectory
+        #     else:
+        #         self._logDirectory = logDirectory
 
         self._verbose = verbose
 
         self._saveLog = saveLog
 
-    def isLogDirectoryValid(self, logDirectory):
-        """
-            Function that verifies if the log directory is valid and is an openable document.
+        # Creating logger
 
-            Args:
-                logDirectory (String): the directory where the log is / will be is saved
+        logger = logging.getLogger(experimentName)
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            fmt="%(asctime)s %(levelname)-8s %(message)s",
+            datefmt="%Y %m %d %H:%M:%S",
+        )
+        # print(f"Game Log: {experimentName} - {logger}")
 
-            Raises:
+        # print(f"Save Log: {saveLog}")
+        if saveLog:
 
-                Exception: if the logDirectory is invalid.
+            file_handler = logging.FileHandler(
+                logDirectory,
+                mode="w",
+                encoding="utf-8",
+            )
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
 
-            Returns:
-                True if succesfull, raises the exception otherwise.
+        print(f"Verbose: {verbose}")
+        if verbose:
+            # Create a stream handler to print logs to the console
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
 
-        """
-        try:
-            open(logDirectory, "a")
-        except:
-            raise Exception("Log file not found!")
-        return True
+        self.logger = logger
 
     def write(self, message):
         """
-            Function that writes messages in the log.
+        Function that writes messages in the log.
 
-            Args:
-                message (String): The message which will be written in the log.
+        Args:
+            message (String): The message which will be written in the log.
 
-            Raises:
+        Raises:
 
-                Exception: if the logDirectory is invalid.
+            Exception: if the logDirectory is invalid.
 
         """
 
-        try:
-            logFile = open(self.logDirectory, "a")
-        except:
-            raise Exception("Log file not found!")
+        self.logger.info(message)
 
-        else:
-            if self._saveLog:
-                logFile.write(str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message) + "\n")
-                logFile.close
+        # try:
+        #     logFile = open(self.logDirectory, "a")
+        # except:
+        #     raise Exception("Log file not found!")
 
-            if self._verbose:
-                print(
-                str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message))
+        # else:
+        #     if self._saveLog:
+        #         logFile.write(
+        #             str(datetime.datetime.now()).replace(" ", "_")
+        #             + "-"
+        #             + str(message)
+        #             + "\n"
+        #         )
+        #         logFile.close
+
+        #     if self._verbose:
+        #         print(
+        #             str(datetime.datetime.now()).replace(" ", "_") + "-" + str(message)
+        #         )
 
     def newLogSession(self, sessionName):
         """
-            Function that writes a new session in the Log.
+        Function that writes a new session in the Log.
 
-            Args:
-                sessionName (String): The name of the new session
+        Args:
+            sessionName (String): The name of the new session
 
-            Raises:
+        Raises:
 
-                Exception: if the logDirectory is invalid.
+            Exception: if the logDirectory is invalid.
 
         """
+        self.write(
+            "-----------------------------------------------------------------------------------------------------"
+        )
+        self.write(sessionName)
+        self.write(
+            "-----------------------------------------------------------------------------------------------------"
+        )
 
-        try:
-            logFile = open(self.logDirectory, "a")
-        except:
-            raise Exception("Log file not found! Looked at:", self.logDirectory)
+        # try:
+        #     logFile = open(self.logDirectory, "a")
+        # except:
+        #     raise Exception("Log file not found! Looked at:", self.logDirectory)
 
-        else:
-            if self._saveLog:
-                logFile.write(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                logFile.write(str(sessionName + "\n"))
-                logFile.write(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                logFile.close
+        # else:
+        #     if self._saveLog:
+        #         logFile.write(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
+        #         logFile.write(str(sessionName + "\n"))
+        #         logFile.write(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
+        #         logFile.close
 
-            if self._verbose:
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                print(
-                str(sessionName))
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
+        #     if self._verbose:
+        #         print(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
+        #         print(str(sessionName))
+        #         print(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
 
     def endLogSession(self):
         """
-            Function that writes the end of a session in the Log.
+        Function that writes the end of a session in the Log.
 
-            Args:
-                sessionName (String): The name of the new session
+        Args:
+            sessionName (String): The name of the new session
 
-            Raises:
+        Raises:
 
-                Exception: if the logDirectory is invalid.
+            Exception: if the logDirectory is invalid.
 
         """
+        self.write(
+            "-----------------------------------------------------------------------------------------------------"
+        )
+        self.write(
+            "-----------------------------------------------------------------------------------------------------"
+        )
 
-        try:
-            logFile = open(self.logDirectory, "a")
-        except:
-            raise Exception("Log file not found! Looked at:", self.logDirectory)
+        # try:
+        #     logFile = open(self.logDirectory, "a")
+        # except:
+        #     raise Exception("Log file not found! Looked at:", self.logDirectory)
 
-        else:
-            if self._saveLog:
-                logFile.write(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                logFile.write(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                logFile.close
+        # else:
+        #     if self._saveLog:
+        #         logFile.write(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
+        #         logFile.write(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
+        #         logFile.close
 
-            if self._verbose:
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
-                print(
-                    "-----------------------------------------------------------------------------------------------------\n")
+        #     if self._verbose:
+        #         print(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )
+        #         print(
+        #             "-----------------------------------------------------------------------------------------------------\n"
+        #         )

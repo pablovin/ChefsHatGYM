@@ -99,12 +99,18 @@ class ChefsHatEnv(gym.Env):
         if not self.logDirectory == "":
             _path = os.path.split(self.logDirectory)
             self.experimentManager = ExperimentManager.ExperimentManager(
-                _path[0], _path[1], verbose=self.verbose, saveLog=self.saveLog
+                _path[0],
+                _path[1],
+                verbose=self.verbose,
+                saveLog=self.saveLog,
             )
             self.logger = self.experimentManager.logManager
             self.logger.newLogSession("Starting new Episode:" + str(self.episodeNumber))
             self.logger.write("Players :" + str(self.playerNames))
-            self.logger.write("Stop Criteria :" + str(self.stopCriteria))
+            self.logger.write(
+                "Stop Criteria :" + str(self.stopCriteria) + " " + str(self.gameType)
+            )
+            self.logger.write("Max Rounds :" + str(self.maxRounds))
         else:
             self.logger = None
             self.experimentManager = None
@@ -372,7 +378,8 @@ class ChefsHatEnv(gym.Env):
             if self.matches >= self.stopCriteria:
                 gameFinished = True
 
-        if self.experimentManager == None:
+        if not self.experimentManager == None and gameFinished:
+            print(f"Adding to the log!")
             self.logger.newLogSession(
                 "Game Over! Final Score:"
                 + str(self.score)

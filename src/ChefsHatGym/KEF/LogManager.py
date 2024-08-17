@@ -64,6 +64,8 @@ class Logger:
 
         # Creating logger
 
+        print(f"Log Name: {experimentName}")
+        print(f"Log Directory: {logDirectory}")
         logger = logging.getLogger(experimentName)
         logger.setLevel(logging.INFO)
         formatter = logging.Formatter(
@@ -81,6 +83,8 @@ class Logger:
                 encoding="utf-8",
             )
             file_handler.setFormatter(formatter)
+            file_handler.setLevel(logging.INFO)
+
             logger.addHandler(file_handler)
 
         print(f"Verbose: {verbose}")
@@ -88,6 +92,7 @@ class Logger:
             # Create a stream handler to print logs to the console
             console_handler = logging.StreamHandler()
             console_handler.setFormatter(formatter)
+            console_handler.setLevel(logging.INFO)
             logger.addHandler(console_handler)
 
         self.logger = logger

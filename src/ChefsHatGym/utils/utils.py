@@ -12,6 +12,7 @@ import os
 def get_logger(logger_name, log_directory, log_name, verbose_console, verbose_log):
 
     # Creating logger
+
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
     # Create a formatter with the specified format and date format

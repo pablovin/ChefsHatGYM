@@ -188,7 +188,7 @@ class ChefsHatAgent:
         self.log("Waiting requests from the room...")
 
         while not self.stop_actions:
-            room_message = self.socket.recv(6144)
+            room_message = self.socket.recv(12288)
 
             if room_message:
                 # Decode the message string to a regular string

@@ -29,3 +29,5 @@ room = ChefsHatRoomServer(
     save_dataset=True,
     save_game_log=True,
 )
+
+room.start_room()

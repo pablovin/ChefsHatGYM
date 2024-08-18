@@ -75,10 +75,12 @@ The environment comes with a Spectator implementation that generates a high-leve
 
 You can add spectators to a room very similarly to Players:
 
-In a Local room:
+Here is an example of adding a Spectator in a local room:
 
 
 .. code-block:: python
+
+	
 	from ChefsHatGym.agents.spectator_logger import SpectatorLogger
 
 	# Create spectators
@@ -89,18 +91,22 @@ In a Local room:
 	for s in [s1, s2]:
 		room.add_spectator(s)
 
-.. In a Server room:
-.. .. code-block:: python
-.. 	from ChefsHatGym.agents.spectator_logger import SpectatorLogger
 
-.. 	room_pass = "password"
-.. 	room_url = "localhost"
-.. 	room_port = 10003
+And here an example of adding an Spectator in a server room:
 
-.. 	# Create the players
-.. 	s1 = SpectatorLogger(name="01", verbose_console=True, verbose_log=True)
-.. 	s2 = SpectatorLogger(name="02", verbose_console=True, verbose_log=True)
 
-.. 	# Join spectators
-.. 	s1.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)
-.. 	s2.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)
+.. code-block:: python
+
+	from ChefsHatGym.agents.spectator_logger import SpectatorLogger
+
+	room_pass = "password"
+	room_url = "localhost"
+	room_port = 10003
+
+	# Create the players
+	s1 = SpectatorLogger(name="01", verbose_console=True, verbose_log=True)
+	s2 = SpectatorLogger(name="02", verbose_console=True, verbose_log=True)
+
+	# Join spectators
+	s1.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)
+	s2.joinGame(room_pass=room_pass, room_url=room_url, room_port=room_port)

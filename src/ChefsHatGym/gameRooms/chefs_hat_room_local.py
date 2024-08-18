@@ -2,8 +2,8 @@ from datetime import datetime
 import os
 import time
 from ChefsHatGym.env import ChefsHatEnv
-from ChefsHatGym.agents.chefs_hat_player import ChefsHatPlayer
-from ChefsHatGym.agents.chefs_hat_spectator import ChefsHatSpectator
+from ChefsHatGym.agents.base_classes.chefs_hat_player import ChefsHatPlayer
+from ChefsHatGym.agents.base_classes.chefs_hat_spectator import ChefsHatSpectator
 import gym
 import numpy as np
 

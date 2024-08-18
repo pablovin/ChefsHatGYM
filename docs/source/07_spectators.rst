@@ -76,7 +76,9 @@ The environment comes with a Spectator implementation that generates a high-leve
 You can add spectators to a room very similarly to Players:
 
 In a Local room:
-.. code-block:: python	
+
+
+.. code-block:: python
 	from ChefsHatGym.agents.spectator_logger import SpectatorLogger
 
 	# Create spectators
@@ -89,7 +91,8 @@ In a Local room:
 
 In a Server room:
 
-.. code-block:: python		
+
+.. code-block:: python
 	from ChefsHatGym.agents.spectator_logger import SpectatorLogger
 
 	room_pass = "password"

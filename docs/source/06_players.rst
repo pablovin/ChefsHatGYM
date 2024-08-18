@@ -137,7 +137,7 @@ Chef`s Hat Players Club
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We also provide a large amount of different agents, in the form of an agent collection:
-`Players Club` <https://github.com/pablovin/ChefsHatGYM/blob/master/src/ChefsHatGym/agents/agent_random.py>`_
+`Players Club` <https://github.com/pablovin/ChefsHatPlayersClub>`_
 
 
 This collection contains more than 30 different agents, implemented using a various techniques: from traditional machine learning, to game-based heuristic methods. All these agents are fully compatible with the Chef`s Hat simulator.

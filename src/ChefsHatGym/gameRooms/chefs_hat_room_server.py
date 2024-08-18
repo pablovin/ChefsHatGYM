@@ -401,7 +401,7 @@ class ChefsHatRoomServer:
                 timenow = datetime.now()
                 try:
                     player_message = connection.recv(3072)
-                    time.sleep(0.01)
+                    time.sleep(0.0001)
                     if player_message:
                         player_message = json.loads(player_message.decode())
                         agent_action = player_message.get("agent_action")
@@ -691,3 +691,4 @@ class ChefsHatRoomServer:
             )
 
         self.log(f"[Room]:  -- Closing the Room!")
+        self.server_socket.close()

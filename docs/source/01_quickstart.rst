@@ -13,11 +13,6 @@ To install ChefsHatGym, you will need python >= 3.10. The environment has a list
     pip install chefshatgym
 
 
-To use the remote room, which allow you to run your agents from different processes, you need access to a redis server. To install your own redis server, please follow: `Redis instalation page. <https://redis.io/docs/getting-started/installation/>`_ 
-
-For Windows users, `Memurai <https://www.memurai.com/>`_  is an alternative.
-
-
 Understanding Chef's Hat
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -41,18 +36,23 @@ To start a game, you can quickly implement a room from the ChefsHatGYM.gameRooms
     
     from ChefsHatGym.gameRooms.chefs_hat_room_local import ChefsHatRoomLocal
 
-    room_name = "test_local_room"
+    # Room parameters
+    room_name = "Testing_2_Local"
 
+
+    # Game parameters
+    game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
+    stop_criteria = 3
+
+
+    # Start the room
     room = ChefsHatRoomLocal(
         room_name,
-        timeout_player_response=timeout_player_response,
         game_type=game_type,
         stop_criteria=stop_criteria,
-        max_rounds=maxRounds,
-        verbose=verbose,
     )
 
-Once the room is created, you have to add players to it. The Chef`s Hat Gym environment provides a simple random player, that only selects random actions.
+This example will run a game composed of three matches. Once the room is created, you have to add players to it. The Chef`s Hat Gym environment provides a simple random player, that only selects random actions.
 Using the ChefsHatGym.agents interface, you will be able to create your own agents, and use it in the simulator.
 
 Each agent must have a unique name to be able to play the game.
@@ -75,7 +75,7 @@ Once all the players are added to the room, you just have to start the game.
 .. code-block:: python
 
    # Start the game
-    info = room.start_new_game(game_verbose=True)
+    info = room.start_new_game()
 
     print(f"Performance score: {info['performanceScore']}")
     print(f"Scores: {info['score']}")

@@ -1,24 +1,24 @@
 from ChefsHatGym.gameRooms.chefs_hat_room_server import ChefsHatRoomServer
 from ChefsHatGym.env import ChefsHatEnv
 
+
 # Room parameters
 room_name = "server_room1"
 room_password = "password"
 room_port = 10003
-timeout_player_subscribers = 30  # In seconds
+timeout_player_subscribers = 5  # In seconds
 timeout_player_response = 5  # In seconds
 
-verbose_console = False
+verbose_console = True
 verbose_log = True
 game_verbose_console = False
 game_verbose_log = True
-
 save_dataset = True
 
 
 # Game parameters
 game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
-stop_criteria = 10
+stop_criteria = 3
 maxRounds = -1
 
 

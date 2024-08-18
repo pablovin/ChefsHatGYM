@@ -2,7 +2,8 @@ from datetime import datetime
 import os
 import time
 from ChefsHatGym.env import ChefsHatEnv
-from ChefsHatGym.agents.chefs_hat_agent import ChefsHatAgent
+from ChefsHatGym.agents.chefs_hat_player import ChefsHatPlayer
+from ChefsHatGym.agents.chefs_hat_spectator import ChefsHatSpectator
 import gym
 import numpy as np
 
@@ -52,9 +53,11 @@ class ChefsHatRoomLocal:
         game_type: str = ChefsHatEnv.GAMETYPE["MATCHES"],
         stop_criteria: int = 10,
         max_rounds: int = -1,
-        verbose: bool = True,
         save_dataset: bool = True,
-        save_game_log: bool = True,
+        verbose_console: bool = True,
+        verbose_log: bool = True,
+        game_verbose_console: bool = True,
+        game_verbose_log: bool = True,
         log_directory: str = None,
         timeout_player_response: int = 5,
     ) -> None:
@@ -76,13 +79,14 @@ class ChefsHatRoomLocal:
         self.game_type = game_type
         self.stop_criteria = stop_criteria
         self.max_rounds = max_rounds
-        self.verbose = verbose
+        self.game_verbose_console = game_verbose_console
         self.save_dataset = save_dataset
-        self.save_game_log = save_game_log
+        self.game_verbose_log = game_verbose_log
 
         self.timeout_player_response = timeout_player_response
 
         # In-game parameters
+        self.spectators = {}
         self.players = []
         self.players_names = []
         self.receive_messages_subs = {}
@@ -99,13 +103,12 @@ class ChefsHatRoomLocal:
         os.makedirs(self.log_directory)
 
         # Creating logger
-        self.logger = utils.logging.getLogger("ROOM")
-        self.logger.addHandler(
-            utils.logging.FileHandler(
-                os.path.join(self.log_directory, "rom_log.log"),
-                mode="w",
-                encoding="utf-8",
-            )
+        self.logger = utils.get_logger(
+            f"ROOM_{room_name}",
+            self.log_directory,
+            "room_log.log",
+            verbose_console,
+            verbose_log,
         )
 
         self.log("---------------------------")
@@ -121,8 +124,7 @@ class ChefsHatRoomLocal:
         Args:
             message (str): message
         """
-        if self.verbose:
-            self.logger.info(f"[Room]: {message}")
+        self.logger.info(f"[Room]: {message}")
 
     def error(self, message: str):
         """log errors
@@ -133,11 +135,33 @@ class ChefsHatRoomLocal:
         if self.verbose:
             self.logger.critical(f"[Room]: {message}")
 
-    def add_player(self, player: ChefsHatAgent):
+    def add_spectator(self, spectator: ChefsHatSpectator):
+        """Add a spectator to the room
+
+        Args:
+            spectator (ChefsHatSpectator): a Spectator that has to implement the ChefsHatSpectator class
+
+        Raises:
+            Exception: the room cannot have two players with the same name
+        """
+
+        if spectator.get_name() in self.spectators:
+            self.error(
+                f"[Room][ERROR]: Spectator names must be unique! Trying to add {spectator.get_name()} to existing spectators: {self.spectators}!"
+            )
+            raise Exception(f"Duplicated spectator name: {spectator.get_name()} !")
+
+        self.spectators[spectator.get_name()] = spectator
+
+        self.log(
+            f"[Room]:  - Spectator {spectator.get_name()} connected! Current spectators: {self.spectators}"
+        )
+
+    def add_player(self, player: ChefsHatPlayer):
         """Add a player to the room
 
         Args:
-            player (ChefsHatAgent): a Player that has to implement the ChefsHatAgent class
+            player (ChefsHatPlayer): a Player that has to implement the ChefsHatPlayer class
 
         Raises:
             Exception: the room cannot have two players with the same name
@@ -148,7 +172,7 @@ class ChefsHatRoomLocal:
                 self.error(
                     f"[Room][ERROR]: Player names must be unique! Trying to add {[player.get_name()]} to existing players: {self.players_names}!"
                 )
-                raise Exception("Players with the same name!")
+                raise Exception("Duplicated player name!")
 
             self.players.append(player)
             self.players_names.append(player.get_name())
@@ -160,11 +184,8 @@ class ChefsHatRoomLocal:
                 f"[Room][ERROR]: Room is full!! Player not added! Current players: {self.players_names}!"
             )
 
-    def start_new_game(self, game_verbose: bool = False) -> dict:
+    def start_new_game(self) -> dict:
         """Start the game in the room
-
-        Args:
-            game_verbose (bool): Verbose of the game environment
 
         Returns:
             dict: the game info
@@ -175,6 +196,7 @@ class ChefsHatRoomLocal:
                 f"[Room][ERROR]: Not enough players to start the game! Total current players: {len(self.players_names)}"
             )
         else:
+            time_start = datetime.now()
             self.log("---------------------------")
             self.log("Initializing a game")
 
@@ -186,9 +208,9 @@ class ChefsHatRoomLocal:
                 maxRounds=self.max_rounds,
                 playerNames=self.players_names,
                 logDirectory=self.log_directory,
-                verbose=game_verbose,
+                verbose=self.game_verbose_console,
                 saveDataset=self.save_dataset,
-                saveLog=self.save_game_log,
+                saveLog=self.game_verbose_log,
             )
 
             self.log(" - Environment initialized!")
@@ -199,7 +221,14 @@ class ChefsHatRoomLocal:
                 p.update_start_match(
                     self.env.playersHand[p_index],
                     self.players_names,
-                    self.env.currentPlayer,
+                    self.players_names[self.env.currentPlayer],
+                )
+
+                # Update each spectator about the begining of the match
+            for name, spectator in self.spectators.items():
+                spectator.update_start_match(
+                    self.players_names,
+                    self.players_names[self.env.currentPlayer],
                 )
 
             while not self.env.gameFinished:
@@ -239,6 +268,10 @@ class ChefsHatRoomLocal:
                     if p != currentPlayer:
                         p.update_action_others(info)
 
+                # Update spectators
+                for name, spectator in self.spectators.items():
+                    spectator.update_action_others(info)
+
                 # Match is over
                 if isMatchOver:
                     self.log(f"[Room]:  -- Match over! Total rounds: {self.env.rounds}")
@@ -246,6 +279,10 @@ class ChefsHatRoomLocal:
                     # Players are updated that the match is over
                     for p in self.players:
                         p.update_end_match(info)
+
+                    # Update spectators that the match is over
+                    for name, spectator in self.spectators.items():
+                        spectator.update_end_match(info)
 
                     # A new match is started, with the cards at hand being reshuffled
                     # Check if any player is capable of doing a special action
@@ -266,9 +303,13 @@ class ChefsHatRoomLocal:
                                     self.env.doSpecialAction(player, action)
                                     playerSpecialAction = player
 
+                                    # Update players about a special action
                                     for p in self.players:
                                         p.observe_special_action(action, player)
 
+                                    # Update spectators about a special action
+                                    for name, spectator in self.spectators.items():
+                                        spectator.observe_special_action(action, player)
                                     break
 
                         # Once the cards are handled again, the chef and sous-chef have to choose which cards to give
@@ -292,5 +333,19 @@ class ChefsHatRoomLocal:
                         )
 
             # Game over!
+
             self.room_finished = True
+            # inform agents that the game is over
+            for p in self.players:
+                p.update_game_over()
+
+            # inform spectators that the game is over
+            for name, spectator in self.spectators.items():
+                spectator.update_game_over()
+
+            timeElapsed = (datetime.now() - time_start).total_seconds()
+
+            self.log(
+                f"[Room]:  -- Game over! Total game duration: {timeElapsed} seconds!"
+            )
             return info

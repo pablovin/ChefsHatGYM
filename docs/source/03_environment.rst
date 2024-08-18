@@ -22,6 +22,9 @@ While the gaming is happening, the environment communicates with the Rooms and A
    * - actionIsRandom
      - bool
      - If the action performed by the agent was randomly selected - usually True when the action performed by the agent was invalid.
+   * validAction
+     - bool
+     - If the action performed by the agent was a valid action based on the game rules.
    * - matches
      - int
      - The current number of matches
@@ -33,7 +36,7 @@ While the gaming is happening, the environment communicates with the Rooms and A
      - the current score for all players
    * - performanceScore
      - list
-     - the current performanceScore for all players  
+     - the current performanceScore for all players. See bellow the performance score formula.
    * - thisPlayer
      - int  
      - the index of the player that did the action
@@ -55,6 +58,9 @@ While the gaming is happening, the environment communicates with the Rooms and A
    * - possibleActions
      - list
      - the indices of all possible actions that the player could have done during this action
+   * - possibleActionsDecoded
+     - list
+     - all the possible actions writen in the format: CQJ (ex. C1Q2J0 = two cards of value 1 and 9 jokers)
    * - action
      - list
      - the action the player did

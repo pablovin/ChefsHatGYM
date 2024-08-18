@@ -27,19 +27,26 @@ REQUEST_TYPE = {
 
 MESSAGE_TYPE = {"OK": "OK", "ERROR": "ERROR"}
 
+ROOM_STATUS = {
+    "waiting_players": "waiting_players",
+    "ready_to_start": "ready_to_start",
+    "game_started": "game_started",
+    "game_finished": "game_finished",
+}
+
 
 class ChefsHatRoomServer:
     """
     Room environment where a game will be played with agents in different processes.
     """
 
-    def get_room_id(self) -> str:
+    def get_room_name(self) -> str:
         """ge the room id
 
         Returns:
             str: room id
         """
-        return self.room_id
+        return self.room_name
 
     def get_log_directory(self) -> str:
         """get the directory where the log is saved
@@ -74,10 +81,11 @@ class ChefsHatRoomServer:
         game_type: str = ChefsHatEnv.GAMETYPE["MATCHES"],
         stop_criteria: int = 10,
         max_rounds: int = -1,
-        verbose: bool = True,
-        game_verbose: bool = True,
+        verbose_console: bool = True,
+        verbose_log: bool = True,
+        game_verbose_console: bool = True,
+        game_verbose_log: bool = True,
         save_dataset: bool = True,
-        save_game_log: bool = True,
         log_directory: str = None,
         timeout_player_subscribers: int = 30,
         timeout_player_response: int = 5,
@@ -92,8 +100,10 @@ class ChefsHatRoomServer:
             game_type (str, optional): game type, defined as ChefsHatEnv.GAMETYPE. Defaults to ChefsHatEnv.GAMETYPE["MATCHES"].
             stop_criteria (int, optional): stop criteria for the game. Defaults to 10.
             max_rounds (int, optional): maximum rounds of the game, if -1 the game will play until it ends. Defaults to -1.
-            verbose (bool, optional): room verbose. Defaults to True.
-            verbose (bool, optional): game verbose. Defaults to True.
+            verbose_console (bool, optional): room verbose on the console. Defaults to True.
+            verbose_log (bool, optional): room verbose on the log file. Defaults to True.
+            game_verbose_console (bool, optional): game verbose on the console. Defaults to True.
+            game_verbose_log (bool, optional): game verbose on the log. Defaults to True.
             save_dataset (bool, optional): save the game dataset .pkl. Defaults to True.
             save_game_log (bool, optional): save the game log. Defaults to True.
             log_directory (str, optional): directory to save the log. Defaults to None.
@@ -110,19 +120,20 @@ class ChefsHatRoomServer:
         self.game_type = game_type
         self.stop_criteria = stop_criteria
         self.max_rounds = max_rounds
-        self.verbose = verbose
-        self.game_verbose = game_verbose
+        self.game_verbose_console = game_verbose_console
         self.save_dataset = save_dataset
-        self.save_game_log = save_game_log
+        self.game_verbose_log = game_verbose_log
 
         self.timeout_player_subscribers = timeout_player_subscribers
         self.timeout_player_response = timeout_player_response
 
-        # In-game parameters
+        # In-room parameters
         self.players = {}
+        self.spectators = {}
         self.receive_messages_subs = {}
         self.room_finished = False
         self.ready_to_start = False
+        self.room_status = ROOM_STATUS["waiting_players"]
 
         # Create the log directory
         if not log_directory:
@@ -131,16 +142,15 @@ class ChefsHatRoomServer:
         self.log_directory = os.path.join(
             log_directory, f"{datetime.now().strftime('%H%M%S')}_{room_name}"
         )
+
         os.makedirs(self.log_directory)
 
-        # Creating logger
-        self.logger = utils.logging.getLogger("ROOM")
-        self.logger.addHandler(
-            utils.logging.FileHandler(
-                os.path.join(self.log_directory, "rom_log.log"),
-                mode="w",
-                encoding="utf-8",
-            )
+        self.logger = utils.get_logger(
+            f"ROOM_{room_name}",
+            self.log_directory,
+            "room_log.log",
+            verbose_console,
+            verbose_log,
         )
 
         self.log("[Room]: ---------------------------")
@@ -150,123 +160,204 @@ class ChefsHatRoomServer:
         # Create the room server
         self._create_server()
 
-        # Wait players to connect
+    def log(self, message):
+        self.logger.info(f"[Room]: {message}")
+
+    def error(self, message):
+        self.logger.critical(f"[Room]: {message}")
+
+    def start_room(self):
+        # Change the room status to expecting players to connect
         self._prepare_connect_player()
 
-        # Start the game
+        # Keep listening for connections
+        self._receiving_connections()
+
+        # # Start the game when there are 4 players connected
         self._start_new_game()
 
     def _create_server(self):
         self.log("[Room]: ---------------------------")
-        self.log(f"[Room]: Creating room at: {self.room_url}:{self.room_port}")
+        self.log(
+            f"[Room]: Creating room {self.room_name} at: {self.room_url}:{self.room_port}"
+        )
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (self.room_url, self.room_port)
         self.server_socket.bind(server_address)
         self.server_socket.settimeout(self.timeout_player_subscribers)
         self.log(f"[Room]: --- Room up and running!")
 
-    def log(self, message):
-        if self.verbose:
-            self.logger.info(f"[Room]: {message}")
-
-    def error(self, message):
-        if self.verbose:
-            self.logger.critical(f"[Room]: {message}")
-
-    def _create_room(self):
-
-        self.log("[Room]: ---------------------------")
-        self.log("[Room]: Creating a room")
-        self.log(f"[Room]:  - Room created with sucess: {self.room_id}!")
-        self.log("[Room]: --------------     -------------")
-
     def _prepare_connect_player(self):
         self.log("[Room]: ---------------------------")
-        self.log("[Room]: Connecting players")
+        self.log("[Room]: Waiting for players and spectators to connect...")
 
-        self._wait_for_players()
+        self.room_status = ROOM_STATUS["waiting_players"]
 
-    @utils.threaded
-    def _add_player(self, connection):
+        # self._wait_for_players()
 
+    def _ready_to_start_game(self):
+        self.log("[Room]: ---------------------------")
+        self.log(f"[Room]: - All four players online, starting the game!")
+
+        self.room_status = ROOM_STATUS["ready_to_start"]
+
+        # self._wait_for_players()
+
+    def _process_connection_request(self, connection):
         # Receive the data in small chunks and retransmit it
         while True:
-            player_message = connection.recv(1024)
+            agent_message = connection.recv(3076)
 
-            if player_message:
+            if agent_message:
                 break
 
-        player_message = json.loads(player_message.decode())
+        agent_message = agent_message.decode()
+        json_response = json.loads(agent_message)
+        return json_response
 
-        print(f"Received MEssage: {player_message}")
+    @utils.threaded
+    def _receiving_connections(self):
 
-        player_name = player_message.get("playerName")
-
-        room_message = {}
-        if player_message["password"] == self.room_pass:
-
-            if len(self.players) >= 4:
-                room_message["type"] = MESSAGE_TYPE["ERROR"]
-                room_message["message"] = "The room is full!"
-
-                self.error(
-                    f"[Room]: - Player {player_name} not conntected: Room is full!"
-                )
-
-            else:
-
-                if player_name in self.players.keys():
-                    room_message["type"] = MESSAGE_TYPE["ERROR"]
-                    room_message["message"] = "Player Name Already Used!"
-
-                    self.error(
-                        f"[Room]: - Player {player_name} not conntected: Player Name Already Used!"
-                    )
-
-                else:
-                    self.players[player_name] = connection
-                    room_message["type"] = MESSAGE_TYPE["OK"]
-                    self.log(
-                        f"[Room]: - Player {len(self.players)} ({player_name}) connected!"
-                    )
-
-        else:
-            room_message["type"] = MESSAGE_TYPE["ERROR"]
-            room_message["message"] = "Wrong password!"
-
-            self.error(
-                f"[Room]: - Player {player_name} not conntected: wrong password!"
-            )
-
-        room_message = json.dumps(room_message)
-        connection.sendall(bytes(room_message, encoding="utf-8"))
-
-    def _wait_for_players(self):
-        self.log("[Room]: - Waiting for players to connect...")
-
+        self.log("[Room]: Receiving connections...")
         self.server_socket.listen(4)
-
-        while len(self.players) < 4:
+        while not self.room_status == ROOM_STATUS["game_finished"]:
+            self.log(f"[Room]: Room Status: {self.room_status}")
             try:
+
                 connection, client_address = self.server_socket.accept()
                 self.log(
                     f"[Room]: - Received a connection request from {client_address}"
                 )
-                self._add_player(connection)
+
+                message = self._process_connection_request(connection)
+                if "author" in message.keys():
+                    if message["author"] == "Player":
+                        self._add_player(connection, message)
+                    elif message["author"] == "Spectator":
+                        self._add_spectator(connection, message)
+
                 time.sleep(0.001)
             except socket.timeout:
                 self.error(
-                    f"[Room][ERROR]: Players subscription timeout! Current playes: {self.players.keys()}"
+                    f"[Room][ERROR]: Agent subscription timeout! Current playes: {self.players.keys()}. Current spectators: {self.spectators.keys()}"
                 )
 
-                raise Exception("Player subscription timeout!")
+        # self.log(f"[Room]: - All four players online, starting the game!")
+        # self.ready_to_start = True
 
-        self.log(f"[Room]: - All four players online, starting the game!")
-        self.ready_to_start = True
+    @utils.threaded
+    def _add_spectator(self, connection, spectator_message):
 
-    def _broadcast_message(self, player, info):
+        if "spectatorName" in spectator_message.keys():
+            spectator_name = spectator_message.get("spectatorName")
 
-        connection = self.players[player]
+            room_message = {}
+            if spectator_message["password"] == self.room_pass:
+
+                if spectator_name in self.spectators.keys():
+                    room_message["type"] = MESSAGE_TYPE["ERROR"]
+                    room_message["message"] = "Spectator Name Already Used!"
+
+                    self.error(
+                        f"[Room]: - Spectator {spectator_name} not conntected: Spectator Name Already Used!"
+                    )
+
+                else:
+                    self.spectators[spectator_name] = connection
+                    room_message["type"] = MESSAGE_TYPE["OK"]
+                    self.log(
+                        f"[Room]: - Spectator {len(self.players)} ({spectator_name}) connected!"
+                    )
+
+            else:
+                room_message["type"] = MESSAGE_TYPE["ERROR"]
+                room_message["message"] = "Wrong password!"
+
+                self.error(
+                    f"[Room]: - Spectator {spectator_name} not conntected: wrong password!"
+                )
+
+            room_message = json.dumps(room_message)
+            connection.sendall(bytes(room_message, encoding="utf-8"))
+
+    @utils.threaded
+    def _add_player(self, connection, player_message):
+
+        if "playerName" in player_message.keys():
+            player_name = player_message.get("playerName")
+
+            room_message = {}
+            if player_message["password"] == self.room_pass:
+
+                if len(self.players) >= 4:
+                    room_message["type"] = MESSAGE_TYPE["ERROR"]
+                    room_message["message"] = "The room is full!"
+
+                    self.error(
+                        f"[Room]: - Player {player_name} not conntected: Room is full!"
+                    )
+
+                else:
+
+                    if player_name in self.players.keys():
+                        room_message["type"] = MESSAGE_TYPE["ERROR"]
+                        room_message["message"] = "Player Name Already Used!"
+
+                        self.error(
+                            f"[Room]: - Player {player_name} not conntected: Player Name Already Used!"
+                        )
+
+                    else:
+                        self.players[player_name] = connection
+                        room_message["type"] = MESSAGE_TYPE["OK"]
+                        self.log(
+                            f"[Room]: - Player {len(self.players)} ({player_name}) connected!"
+                        )
+
+                        # Indicate that the game is ready to start if we have 4 players!
+                        if len(self.players) == 4:
+                            self._ready_to_start_game()
+
+            else:
+                room_message["type"] = MESSAGE_TYPE["ERROR"]
+                room_message["message"] = "Wrong password!"
+
+                self.error(
+                    f"[Room]: - Player {player_name} not conntected: wrong password!"
+                )
+
+            room_message = json.dumps(room_message)
+            connection.sendall(bytes(room_message, encoding="utf-8"))
+
+    # def _wait_for_players(self):
+    #     self.log("[Room]: - Waiting for players to connect...")
+
+    #     self.server_socket.listen(4)
+
+    #     while len(self.players) < 4:
+    #         try:
+    #             connection, client_address = self.server_socket.accept()
+    #             self.log(
+    #                 f"[Room]: - Received a connection request from {client_address}"
+    #             )
+
+    #             # verify if message comes from players
+
+    #             self._add_player(connection)
+    #             time.sleep(0.001)
+    #         except socket.timeout:
+    #             self.error(
+    #                 f"[Room][ERROR]: Players subscription timeout! Current playes: {self.players.keys()}"
+    #             )
+
+    #             raise Exception("Player subscription timeout!")
+
+    #     self.log(f"[Room]: - All four players online, starting the game!")
+    #     self.ready_to_start = True
+
+    def _broadcast_message(self, list, player, info):
+
+        connection = list[player]
         info = json.dumps(info)
 
         try:
@@ -274,7 +365,7 @@ class ChefsHatRoomServer:
         except:
             self.error(f"[Room]: - Player {[player]} Disconnected!")
 
-        time.sleep(0.001)
+        time.sleep(0.0001)
 
     def _get_random_action(self, info):
 
@@ -302,14 +393,14 @@ class ChefsHatRoomServer:
                 f"[Room]: - Player {[player]} Disconnected! Doing random actions!"
             )
 
-        time.sleep(0.001)
+        time.sleep(0.0001)
 
         time_start = datetime.now()
         if player_online:
             while True:
                 timenow = datetime.now()
                 try:
-                    player_message = connection.recv(1024)
+                    player_message = connection.recv(3072)
                     time.sleep(0.01)
                     if player_message:
                         player_message = json.loads(player_message.decode())
@@ -323,12 +414,13 @@ class ChefsHatRoomServer:
 
     def _start_new_game(self):
 
-        while not self.ready_to_start:
+        while not self.room_status == ROOM_STATUS["ready_to_start"]:
             time.sleep(5)
             self.error(
-                f"[Room][ERROR]: Not enough players to start the game! Total current players: {len(self.players_names)}"
+                f"[Room][ERROR]: Not enough players to start the game! Total current players: {len(self.players)}. Will try again in 5 seconds!"
             )
 
+        self.room_status = ROOM_STATUS["game_started"]
         time_start = datetime.now()
 
         self.log("[Room]: ---------------------------")
@@ -342,9 +434,9 @@ class ChefsHatRoomServer:
             maxRounds=self.max_rounds,
             playerNames=list(self.players.keys()),
             logDirectory=self.log_directory,
-            verbose=self.game_verbose,
+            verbose=self.game_verbose_console,
             saveDataset=self.save_dataset,
-            saveLog=self.save_game_log,
+            saveLog=self.game_verbose_log,
         )
 
         self.log("[Room]:  - Environment initialized!")
@@ -364,7 +456,22 @@ class ChefsHatRoomServer:
             ]
             self.log(f"[Room]:  ---- Player {p} informed!")
 
-            self._broadcast_message(p, sendInfo)
+            self._broadcast_message(self.players, p, sendInfo)
+
+        # Update the spectators about the game start
+        if len(self.spectators) > 0:
+            self.log("[Room]:  - Informing spectators about game start!")
+
+        for p_index, p in enumerate(self.spectators.keys()):
+            sendInfo = {}
+            sendInfo["type"] = "updateMatchStart"
+            sendInfo["players"] = list(self.players.keys())
+            sendInfo["starting_player"] = list(self.players.keys())[
+                self.env.currentPlayer
+            ]
+            self.log(f"[Room]:  ---- Spectator {p} informed!")
+
+            self._broadcast_message(self.spectators, p, sendInfo)
 
         while not self.env.gameFinished:
 
@@ -382,10 +489,10 @@ class ChefsHatRoomServer:
                     sendInfo["observations"][28:]
                 )
                 sendInfo["type"] = REQUEST_TYPE["requestAction"]
-                action, time = self._request_message(currentPlayer, sendInfo)
+                action, time_action = self._request_message(currentPlayer, sendInfo)
 
                 self.log(
-                    f"[Room]:  ---- Action (duration: {time}s): {np.argmax(action)}"
+                    f"[Room]:  ---- Action (duration: {time_action}s): {np.argmax(action)}"
                 )
                 nextobs, reward, isMatchOver, truncated, info = self.env.step(action)
 
@@ -400,9 +507,9 @@ class ChefsHatRoomServer:
             info["type"] = REQUEST_TYPE[
                 "actionUpdate"
             ]  # Update the agents after the action was done
-
+            self.log("[Room]:  - Informing the agent about his own action!")
             self._broadcast_message(
-                currentPlayer, info
+                self.players, currentPlayer, info
             )  # update the current player, with the information about his hand
 
             info["observation"] = ""
@@ -415,11 +522,21 @@ class ChefsHatRoomServer:
                 "updateOthers"
             ]  # Update the othe players after the action was done
             # Observe others
+            self.log("[Room]:  - Informing other players about this action!")
             for p in self.players.keys():
                 if p != currentPlayer:
+                    self.log(f"[Room]:  ---- Player {p} informed!")
                     self._broadcast_message(
-                        p, info
+                        self.players, p, info
                     )  # Update the other players removing the information about the current player`s hand
+
+            # Update the spectators about the game start
+            if len(self.spectators) > 0:
+                self.log("[Room]:  - Informing spectators about this action!")
+
+            for p_index, p in enumerate(self.spectators.keys()):
+                self.log(f"[Room]:  ---- Spectator {p} informed!")
+                self._broadcast_message(self.spectators, p, info)
 
             # Match is over
             if isMatchOver:
@@ -429,9 +546,18 @@ class ChefsHatRoomServer:
                     "matchOver"
                 ]  # Update all players informing that the match is over!
                 # print (f"Match over! Current roles: {info["currentRoles"]}")
+                self.log("[Room]:  - Informing players about match over!")
                 for p in self.players.keys():
-                    self._broadcast_message(p, info)
+                    self.log(f"[Room]:  ---- Player {p} informed!")
+                    self._broadcast_message(self.players, p, info)
 
+                # Update the spectators about the game start
+                if len(self.spectators) > 0:
+                    self.log("[Room]:  - Informing spectators about match over!")
+
+                for p_index, p in enumerate(self.spectators.keys()):
+                    self.log(f"[Room]:  ---- Spectator {p} informed!")
+                    self._broadcast_message(self.spectators, p, info)
                 # A new match is started, with the cards at hand being reshuffled
                 # Check if any player is capable of doing a special action
                 # Sinalize the player that he can do a special action, wait for reply
@@ -452,7 +578,10 @@ class ChefsHatRoomServer:
 
                             player_name = list(self.players.keys())[player_special]
 
-                            doSpecialAction, time = self._request_message(
+                            self.log(
+                                f"[Room]:  - Requesting special action from: {player_name}!"
+                            )
+                            doSpecialAction, time_action = self._request_message(
                                 player_name, sendInfo
                             )
 
@@ -468,8 +597,26 @@ class ChefsHatRoomServer:
                                     "specialActionUpdate"
                                 ]
 
+                                self.log(
+                                    "[Room]:  - Informing players about special action!"
+                                )
                                 for p in self.players.keys():
-                                    self._broadcast_message(p, info_special_did)
+                                    self._broadcast_message(
+                                        self.players, p, info_special_did
+                                    )
+                                    self.log(f"[Room]:  ---- Player {p} informed!")
+
+                                # Update the spectators about the game start
+                                if len(self.spectators) > 0:
+                                    self.log(
+                                        "[Room]:  - Informing spectators about special action!"
+                                    )
+
+                                for p_index, p in enumerate(self.spectators.keys()):
+                                    self.log(f"[Room]:  ---- Spectator {p} informed!")
+                                    self._broadcast_message(
+                                        self.spectators, p, info_special_did
+                                    )
                                 break
                     if not action_type == "Dinner served!":
                         # Once the cards are handled again, the chef and sous-chef have to choose which cards to give
@@ -482,7 +629,8 @@ class ChefsHatRoomServer:
                         info_special["amount"] = 1
                         info_special["type"] = REQUEST_TYPE["exchangeCards"]
 
-                        souschefCard, time = self._request_message(
+                        self.log("[Room]:  - Requesting card exchange from souschef!")
+                        souschefCard, time_action = self._request_message(
                             list(self.players.keys())[player_sourchef],
                             info_special,
                         )
@@ -492,7 +640,9 @@ class ChefsHatRoomServer:
                         info_special["amount"] = 2
                         info_special["type"] = REQUEST_TYPE["exchangeCards"]
 
-                        chefCards, time = self._request_message(
+                        self.log("[Room]:  - Requesting card exchange from chef!")
+
+                        chefCards, time_action = self._request_message(
                             list(self.players.keys())[player_chef],
                             info_special,
                         )
@@ -509,12 +659,23 @@ class ChefsHatRoomServer:
         info_end = {}
         info_end["type"] = REQUEST_TYPE["gameOver"]
 
+        self.log("[Room]:  - Updating players about game over!")
         for p in self.players.keys():
-            self._broadcast_message(p, info_end)
+            self._broadcast_message(self.players, p, info_end)
+            self.log(f"[Room]:  ---- Player {p} informed!")
+
+        # Update the spectators about the game start
+        if len(self.spectators) > 0:
+            self.log("[Room]:  - Updating spectators about game over!")
+
+        for p_index, p in enumerate(self.spectators.keys()):
+            self.log(f"[Room]:  ---- Spectator {p} informed!")
+            self._broadcast_message(self.spectators, p, info_end)
 
         timeElapsed = (datetime.now() - time_start).total_seconds()
 
         self.log(f"[Room]:  -- Game over! Total game duration: {timeElapsed} seconds!")
+        self.room_status = ROOM_STATUS["game_finished"]
 
         player_names = list(self.players.keys())
 
@@ -528,3 +689,5 @@ class ChefsHatRoomServer:
             self.log(
                 f"[Room]:  ---- {p[0]}: Score: {p[1][0]} (Performance Score: {p[1][1]})"
             )
+
+        self.log(f"[Room]:  -- Closing the Room!")

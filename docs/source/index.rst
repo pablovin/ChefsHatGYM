@@ -22,6 +22,8 @@ The Chef's Hat Environment provides a simple and easy-to-use API, based on the O
    03_environment
    04_rooms
    05_agents
+   06_players
+   07_spectators
    ChefsHatGym
    license
    contact   

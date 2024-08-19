@@ -61,7 +61,9 @@ The action flow within the dataset is as follows:
   action_type = "NEW_EXPERIMENT"# Information saved in this row: match_number, game_score, current_roles
   
   while (not stop_criteria):
-      action_type ="NEW_MATCH" # Information saved in this row: match_number, player_hands
+      action_type ="NEW_MATCH" # Information saved in this row: current_roles, game_score
+      action_type ="DEAL_CARDS" # Information saved in this row:  match_number, player_hands
+      action_type ="DECLARE_SPECIAL_ACTION"# (only if someone declare it). match_number, source, current_roles, action_description (which special action was declared)
       action_type = "CARD_EXCHANGE"# (only after the first match). Information saved in this row: match_number, action_description (who gave cards to who), and updated players_hand
       ...
       while players not finished:

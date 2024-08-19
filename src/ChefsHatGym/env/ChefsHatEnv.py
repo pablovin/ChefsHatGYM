@@ -8,6 +8,7 @@ from gym import spaces
 import os
 
 GAMETYPE = {"POINTS": "POINTS", "MATCHES": "MATCHES"}
+ROLES = {0: "Dishwasher", 1: "Waiter", 2: "Souschef", 3: "Chef"}
 
 
 class ChefsHatEnv(gym.Env):
@@ -189,7 +190,7 @@ class ChefsHatEnv(gym.Env):
         self.experimentManager.dataSetManager.startNewMatch(
             match_number=self.matches,
             game_score=self.score,
-            current_roles=self.currentRoles,
+            current_roles=[ROLES[a] for a in self.currentRoles],
         )
 
         # deal the cards
@@ -262,7 +263,7 @@ class ChefsHatEnv(gym.Env):
         self.experimentManager.dataSetManager.do_special_action(
             match_number=self.matches,
             source=self.playerNames[player],
-            current_roles=self.currentRoles,
+            current_roles=[ROLES[a] for a in self.currentRoles],
             action_description=action,
         )
 
@@ -661,7 +662,7 @@ class ChefsHatEnv(gym.Env):
                     match_number=self.matches,
                     round_number=log_round,
                     match_score=points_position,
-                    current_roles=self.currentRoles,
+                    current_roles=[ROLES[a] for a in self.currentRoles],
                 )
 
                 if self.isGameOver():
@@ -669,7 +670,7 @@ class ChefsHatEnv(gym.Env):
                     self.experimentManager.dataSetManager.end_experiment(
                         match_number=self.matches,
                         round_number=log_round,
-                        current_roles=self.currentRoles,
+                        current_roles=[ROLES[a] for a in self.currentRoles],
                         game_score=self.score,
                         game_performance=self.performanceScore,
                     )

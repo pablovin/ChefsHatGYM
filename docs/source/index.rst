@@ -24,6 +24,7 @@ The Chef's Hat Environment provides a simple and easy-to-use API, based on the O
    05_agents
    06_players
    07_spectators
+   08_dataset
    ChefsHatGym
    license
    contact   

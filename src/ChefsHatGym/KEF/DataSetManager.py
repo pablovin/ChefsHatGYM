@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
-import sys
-import csv
+import numpy as np
 import pandas as pd
 from copy import copy
+from typing import Literal
 
 # Action types
 actionDeal = "DEAL"
@@ -17,6 +17,19 @@ actionInvalid = "INVALID"
 actionNewGame = "New_Game"
 
 
+ACTION_TYPES = {
+    "START_EXPERIMENT": "START_EXPERIMENT",
+    "NEW_MATCH": "NEW_MATCH",
+    "DEAL_CARDS": "DEAL_CARDS",
+    "DISCARD": "DISCARD",
+    "DECLARE_PIZZA": "DECLARE_PIZZA",
+    "END_MATCH": "END_MATCH",
+    "CARD_EXCHANGE": "CARD_EXCHANGE",
+    "DECLARE_SPECIAL_ACTION": "DECLARE_SPECIAL_ACTION",
+    "END_EXPERIMENT": "END_EXPERIMENT",
+}
+
+
 class DataSetManager:
     """DataSet Manager Class
 
@@ -28,7 +41,7 @@ class DataSetManager:
 
     Author: Pablo Barros
     Created on: 26.02.2020
-    Last Update: 26.02.2020
+    Last Update: 19.08.2024
 
     Todo:
         * Create functions to log images and graphs as well.
@@ -46,13 +59,13 @@ class DataSetManager:
     def currentDataSetFile(self):
         return self._currentDataSetFile
 
-    @property
-    def verbose(self):
-        return self._verbose
+    # @property
+    # def verbose(self):
+    #     return self._verbose
 
     dataFrame = ""
 
-    def __init__(self, dataSetDirectory=None, verbose=True):
+    def __init__(self, dataSetDirectory=None):
         # sys.stdout = open(logDirectory+"2.txt",'w')
         """
         Constructor function, which basically verifies if the dataSetdirectory is correct,
@@ -62,179 +75,227 @@ class DataSetManager:
             logDirectory (String): the directory where the dataSet will be is saved
             verbose(Boolean): Indicates if the log will also be printed in the console
         """
-        self._dataSetDirectory = dataSetDirectory
-        self._verbose = verbose
-        self._actions = []
+        self._save_dataset = False
+        if dataSetDirectory:
+            self._dataSetDirectory = dataSetDirectory
+            self._currentDataSetFile = self._dataSetDirectory + "/Dataset.pkl"
+            self._save_dataset = True
 
-    def addDataFrame(
+    def _create_row(
         self,
-        gameNumber="",
-        roundNumber="",
-        player="",
-        actionType="",
-        playersHand=[],
-        board=[],
-        cardsAction="",
-        reward="",
-        qvalues="",
-        loss="",
-        wrongActions="",
-        totalActions="",
-        score=[],
-        roles="",
-        playersStatus=[],
-        agentNames="",
-        possibleActions=[],
-        performanceScore=[],
-        currentlyAllowedActions=[],
+        match_number: int = 0,
+        round_number: int = 0,
+        agent_names: list = np.nan,
+        source: str = "SYSTEM",
+        action_type: str = np.nan,
+        action_description: str = np.nan,
+        player_finished: bool = np.nan,
+        player_hands: list = np.nan,
+        board_before: list = np.nan,
+        board_after: list = np.nan,
+        possible_actions: list = np.nan,
+        current_roles: list = np.nan,
+        match_score: list = np.nan,
+        game_score: list = np.nan,
+        game_performance_score: list = np.nan,
     ):
 
-        # Guarantee is a copy
-        score = copy(score)
-        playersHand = copy(playersHand)
-        board = copy(board)
-        reward = copy(reward)
-        qvalues = copy(qvalues)
-        loss = copy(loss)
-        roles = copy(roles)
-        playersStatus = copy(playersStatus)
-        possibleActions = copy(possibleActions)
-        currentlyAllowedActions = copy(currentlyAllowedActions)
+        player_hands = copy(player_hands)
+        board_before = copy(board_before)
+        board_after = copy(board_after)
+        possible_actions = copy(possible_actions)
+        current_roles = copy(current_roles)
+        match_score = copy(match_score)
+        game_score = copy(game_score)
+        game_performance_score = copy(game_performance_score)
 
+        this_row = {}
+        this_row["Match"] = match_number
+        this_row["Round"] = round_number
+        this_row["Agent_Names"] = [agent_names]
+        this_row["Source"] = source
+        this_row["Action_Type"] = action_type
+        this_row["Action_Description"] = action_description
+        this_row["Player_Finished"] = player_finished
+        this_row["Player_Hands"] = [player_hands]
+        this_row["Board_Before"] = [board_before]
+        this_row["Board_After"] = [board_after]
+        this_row["Possible_Actions"] = [possible_actions]
+        this_row["Current_Roles"] = [current_roles]
+        this_row["Match_Score"] = [match_score]
+        this_row["Game_Score"] = [game_score]
+        this_row["Game_Performance_Score"] = [game_performance_score]
+        # print(this_row)
         date = str(datetime.datetime.now()).replace(" ", "_")
-        dataframe = [
-            date,
-            gameNumber,
-            roundNumber,
-            player,
-            actionType,
-            playersHand,
-            board,
-            possibleActions,
-            currentlyAllowedActions,
-            cardsAction,
-            reward,
-            qvalues,
-            loss,
-            wrongActions,
-            totalActions,
-            score,
-            roles,
-            playersStatus,
-            agentNames,
-            performanceScore,
-        ]
+        return pd.DataFrame(this_row, index=[date])
 
-        self.dataFrame.loc[-1] = dataframe
-        self.dataFrame.index = self.dataFrame.index + 1
+    def addDataFrame(self, row_df):
 
-    def startNewGame(self):
-        self._currentDataSetFile = self._dataSetDirectory + "/Dataset.pkl"
+        self.dataFrame = pd.concat([self.dataFrame, row_df])
 
-        columns = [
-            "Time",
-            "Game Number",
-            "Round Number",
-            "Player",
-            "Action Type",
-            "Player Hand",
-            "Board",
-            "Possible Actions",
-            "Possible Actions Decoded",
-            "Cards Action",
-            "Reward",
-            "Qvalues",
-            "Loss",
-            "Wrong Actions",
-            "Total Actions",  # Current turn actions
-            "Scores",
-            "Roles",
-            "Players Status",
-            "Agent Names",
-            "Performance Score",  # Game status
-        ]
+    def startNewGame(self, agent_names):
+        if self._save_dataset:
+            self.dataFrame = self._create_row(
+                match_number=0,
+                round_number=0,
+                agent_names=agent_names,
+                source="SYSTEM",
+                action_type=ACTION_TYPES["START_EXPERIMENT"],
+            )
 
-        self.dataFrame = pd.DataFrame(columns=columns)
-
-    def startNewMatch(self, gameNumber, agentsNames):
-        self.addDataFrame(gameNumber=gameNumber, agentNames=agentsNames)
-
-    def dealAction(self, playersHand, game):
-        actionType = actionDeal
-        self.addDataFrame(
-            actionType=actionType, playersHand=playersHand, gameNumber=game
-        )
-
-    def doActionPizzaReady(
-        self, roundNumber, board, playersHand, roles, score, playersStatus, game
-    ):
-
-        actionType = actionPizzaReady
-
-        self.addDataFrame(
-            actionType=actionType,
-            playersHand=playersHand,
-            score=score,
-            roundNumber=roundNumber,
-            board=board,
-            roles=roles,
-            playersStatus=playersStatus,
-            gameNumber=game,
-        )
-
-    def doActionAction(
+    def startNewMatch(
         self,
-        game,
-        player,
-        roundNumber,
-        action,
-        board,
-        wrongActions,
-        reward,
-        playersHand,
-        roles,
-        score,
-        playersStatus,
-        qValue,
-        loss,
-        totalActions,
-        possibleActions,
-        currentlyAllowedActions,
+        match_number,
+        game_score,
+        current_roles,
     ):
+        if self._save_dataset:
+            if len(current_roles) == 0:
+                current_roles = np.nan
 
-        actionCards = ""
-        actionType = action[0]
-        actionCards = action[1]
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=0,
+                source="SYSTEM",
+                game_score=game_score,
+                action_type=ACTION_TYPES["NEW_MATCH"],
+                current_roles=current_roles,
+            )
 
-        self.addDataFrame(
-            gameNumber=game,
-            roundNumber=roundNumber,
-            player=player,
-            actionType=actionType,
-            playersHand=playersHand,
-            board=board,
-            cardsAction=actionCards,
-            reward=reward,
-            qvalues=qValue,
-            loss=loss,
-            wrongActions=wrongActions,
-            totalActions=totalActions,
-            score=score,
-            roles=roles,
-            playersStatus=playersStatus,
-            possibleActions=possibleActions,
-            currentlyAllowedActions=currentlyAllowedActions,
-        )
+            self.addDataFrame(this_row)
 
-    def exchangeRolesAction(self, playersHand, roles, cardsAction, game):
-        actionType = actionChangeRole
-        self.addDataFrame(
-            actionType=actionType,
-            playersHand=playersHand,
-            cardsAction=cardsAction,
-            roles=roles,
-            gameNumber=game,
-        )
+    def end_match(
+        self,
+        match_number,
+        round_number,
+        match_score,
+        current_roles,
+    ):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=round_number,
+                source="SYSTEM",
+                match_score=match_score,
+                action_type=ACTION_TYPES["END_MATCH"],
+                current_roles=current_roles,
+            )
+
+            self.addDataFrame(this_row)
+
+    def end_experiment(
+        self,
+        match_number,
+        round_number,
+        current_roles,
+        game_score,
+        game_performance,
+    ):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=round_number,
+                source="SYSTEM",
+                game_score=game_score,
+                game_performance_score=game_performance,
+                action_type=ACTION_TYPES["END_EXPERIMENT"],
+                current_roles=current_roles,
+            )
+
+            self.addDataFrame(this_row)
+
+    def dealAction(self, match_number, player_hands):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=0,
+                source="SYSTEM",
+                player_hands=player_hands,
+                action_type=ACTION_TYPES["DEAL_CARDS"],
+            )
+
+            self.addDataFrame(this_row)
+        # actionType = actionDeal
+        # self.addDataFrame(
+        #     actionType=actionType, playersHand=playersHand, gameNumber=game
+        # )
+
+    def declare_pizza(
+        self,
+        match_number,
+        round_number,
+        source,
+    ):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=round_number,
+                source=source,
+                action_type=ACTION_TYPES["DECLARE_PIZZA"],
+            )
+
+            self.addDataFrame(this_row)
+
+    def doDiscard(
+        self,
+        match_number,
+        round_number,
+        source,
+        action_description,
+        player_hands,
+        board_before,
+        board_after,
+        possible_actions,
+        player_finished,
+    ):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=round_number,
+                source=source,
+                player_hands=player_hands,
+                action_type=ACTION_TYPES["DISCARD"],
+                action_description=action_description,
+                board_before=board_before,
+                board_after=board_after,
+                possible_actions=possible_actions,
+                player_finished=bool(player_finished),
+            )
+
+            self.addDataFrame(this_row)
+
+    def do_card_exchange(
+        self,
+        match_number,
+        action_description,
+        player_hands,
+    ):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=0,
+                source="SYSTEM",
+                player_hands=player_hands,
+                action_type=ACTION_TYPES["CARD_EXCHANGE"],
+                action_description=[action_description],
+            )
+
+            self.addDataFrame(this_row)
+
+    def do_special_action(
+        self, match_number, source, current_roles, action_description
+    ):
+        if self._save_dataset:
+            this_row = self._create_row(
+                match_number=match_number,
+                round_number=0,
+                source=source,
+                action_type=ACTION_TYPES["DECLARE_SPECIAL_ACTION"],
+                current_roles=current_roles,
+                action_description=action_description,
+            )
+
+            self.addDataFrame(this_row)
 
     def saveFile(self):
         self.dataFrame.to_pickle(self.currentDataSetFile)

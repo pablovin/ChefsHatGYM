@@ -103,6 +103,7 @@ class ChefsHatEnv(gym.Env):
                 _path[1],
                 verbose=self.verbose,
                 saveLog=self.saveLog,
+                save_dataset=self.saveDataset,
             )
             self.logger = self.experimentManager.logManager
             self.logger.newLogSession("Starting new Episode:" + str(self.episodeNumber))
@@ -140,8 +141,9 @@ class ChefsHatEnv(gym.Env):
         self.rounds = 0
         self.lastToDiscard = 0
 
-        if self.saveDataset:
-            self.experimentManager.dataSetManager.startNewGame()
+        self.experimentManager.dataSetManager.startNewGame(
+            agent_names=self.playerNames,
+        )
 
         # self.startNewmatch()  # Initiate all the match parameters
 
@@ -164,7 +166,6 @@ class ChefsHatEnv(gym.Env):
         if numpy.max(self.score) > 0:
             # Chef, sous-Chef, waiter and dishwasher
             self.currentRoles = [self.finishingOrder[i] for i in range(4)]
-            print(f"Setting new roles: {self.currentRoles}")
 
         self.lastActionPlayers = ["", "", "", ""]
 
@@ -185,13 +186,14 @@ class ChefsHatEnv(gym.Env):
 
         self.matches += 1
 
+        self.experimentManager.dataSetManager.startNewMatch(
+            match_number=self.matches,
+            game_score=self.score,
+            current_roles=self.currentRoles,
+        )
+
         # deal the cards
         self.dealCards()
-
-        if self.saveDataset:
-            self.experimentManager.dataSetManager.startNewMatch(
-                self.matches, str(self.playerNames)
-            )
 
         if not self.experimentManager == None:
             self.logger.newLogSession("Match Number %f Starts!" % self.matches)
@@ -257,6 +259,13 @@ class ChefsHatEnv(gym.Env):
 
             self.logNewRoles()
 
+        self.experimentManager.dataSetManager.do_special_action(
+            match_number=self.matches,
+            source=self.playerNames[player],
+            current_roles=self.currentRoles,
+            action_description=action,
+        )
+
     def get_chef_souschef_roles_cards(self):
         """returns the cards at hand of the chef and souschef.
 
@@ -314,20 +323,18 @@ class ChefsHatEnv(gym.Env):
         self.logger.write("--- Souschef gave:" + str(souschefCard))
         self.logger.write("--- Chef gave:" + str(chefCards))
 
-        if self.saveDataset:
-            self.experimentManager.dataSetManager.exchangeRolesAction(
-                self.playersHand,
-                self.currentRoles,
-                (
-                    specialAction,
-                    playerDeclared,
-                    dishwasherCards,
-                    waiterCard,
-                    souschefCard,
-                    chefCards,
-                ),
-                self.matches,
-            )
+        self.experimentManager.dataSetManager.do_card_exchange(
+            match_number=self.matches,
+            action_description=[
+                specialAction,
+                playerDeclared,
+                dishwasherCards,
+                waiterCard,
+                souschefCard,
+                chefCards,
+            ],
+            player_hands=self.playersHand,
+        )
 
         self.start_match_define_order()
 
@@ -605,31 +612,34 @@ class ChefsHatEnv(gym.Env):
                 self.logger.write(" --- Action: " + str(actionComplete))
                 self.logger.write(" --- Board After: " + str(self.board))
 
-            if self.saveDataset:
-                self.experimentManager.dataSetManager.doActionAction(
-                    self.matches,
-                    thisPlayer,
-                    self.rounds,
-                    actionComplete,
-                    self.board,
-                    0,
-                    0,
-                    self.playersHand,
-                    self.currentRoles,
-                    self.score,
-                    self.lastActionPlayers,
-                    action,
-                    0,
-                    0,
-                    possibleActions,
-                    currentlyAllowedActions,
-                )
-            # Verify if it is end of match
-
             boardAfter = self.getObservation()[0:11].tolist()
 
+            self.experimentManager.dataSetManager.doDiscard(
+                match_number=self.matches,
+                round_number=self.rounds,
+                source=self.playerNames[thisPlayer],
+                action_description=self.highLevelActions[numpy.argmax(action)],
+                player_hands=self.playersHand,
+                board_before=[int(b * 13) for b in boardBefore],
+                board_after=[int(b * 13) for b in boardAfter],
+                possible_actions=currentlyAllowedActions,
+                player_finished=(
+                    bool(thisPlayer in self.finishingOrder)
+                    if len(self.finishingOrder) > 0
+                    else False
+                ),
+            )
+
+            isPizzaReady = False
             if not thisPlayerStopByRound and self.makePizza():
                 isPizzaReady = True
+
+                self.experimentManager.dataSetManager.declare_pizza(
+                    match_number=self.matches,
+                    round_number=self.rounds - 1,
+                    source=self.playerNames[self.lastToDiscard],
+                )
+
                 self.currentPlayer = self.lastToDiscard
                 if self.currentPlayer in self.finishingOrder:
                     self.nextPlayer()
@@ -638,10 +648,32 @@ class ChefsHatEnv(gym.Env):
 
             if self.isMatchover():
                 isMatchOver = True
+                if isPizzaReady:
+                    log_round = self.rounds - 1
+                else:
+                    log_round = self.rounds
+
+                points_position = [
+                    self.calculateScore(position) for position in self.finishingOrder
+                ]
+
+                self.experimentManager.dataSetManager.end_match(
+                    match_number=self.matches,
+                    round_number=log_round,
+                    match_score=points_position,
+                    current_roles=self.currentRoles,
+                )
+
                 if self.isGameOver():
                     self.gameFinished = True
+                    self.experimentManager.dataSetManager.end_experiment(
+                        match_number=self.matches,
+                        round_number=log_round,
+                        current_roles=self.currentRoles,
+                        game_score=self.score,
+                        game_performance=self.performanceScore,
+                    )
                 else:
-                    # self.startNewmatch()
                     self.start_match_handle_cards()
 
             if self.gameFinished:
@@ -736,18 +768,6 @@ class ChefsHatEnv(gym.Env):
 
             if not self.experimentManager == None:
                 self.logger.newLogSession("Pizza ready!!!")
-
-            if self.saveDataset:
-                #     # print ("Pizza!")
-                self.experimentManager.dataSetManager.doActionPizzaReady(
-                    self.rounds,
-                    self.board,
-                    self.playersHand,
-                    self.currentRoles,
-                    self.score,
-                    self.lastActionPlayers,
-                    self.matches,
-                )
 
             self.nextRound()
 
@@ -1155,10 +1175,24 @@ class ChefsHatEnv(gym.Env):
                 ]
             )
 
-        if self.saveDataset:
-            self.experimentManager.dataSetManager.dealAction(
-                self.playersHand, self.matches
-            )
+        # match_number: int = 0,
+        # round_number: int = 0,
+        # agent_names: list = np.nan,
+        # source: str = "SYSTEM",
+        # action_type: str = np.nan,
+        # action_description: str = np.nan,
+        # player_hands: list = np.nan,
+        # board_before: list = np.nan,
+        # board_after: list = np.nan,
+        # possible_actions: list = np.nan,
+        # current_roles: list = np.nan,
+        # match_score: list = np.nan,
+        # game_score: list = np.nan,
+        # game_performance_score: list = np.nan,
+
+        self.experimentManager.dataSetManager.dealAction(
+            match_number=self.matches, player_hands=self.playersHand
+        )
 
     def restartBoard(self):
         """restart the board"""

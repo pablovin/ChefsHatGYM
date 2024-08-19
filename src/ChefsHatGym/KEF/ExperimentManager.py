@@ -88,7 +88,14 @@ class ExperimentManager:
                 os.path.join(self.baseDirectory, self.experimentName, directoryName)
             )
 
-    def __init__(self, baseDirectory, experimentName, verbose=True, saveLog=False):
+    def __init__(
+        self,
+        baseDirectory,
+        experimentName,
+        verbose=True,
+        saveLog=False,
+        save_dataset=False,
+    ):
         """
         Function that creates a new experiment. A new folder structure will be created, with a new log file.
 
@@ -109,11 +116,16 @@ class ExperimentManager:
         self._baseDirectory = baseDirectory
         self._experimentName = experimentName
         """Creating the dataset folder"""
-        self._dataSetDirectory = os.path.join(
-            self.baseDirectory, self.experimentName, "Datasets"
-        )
+        if save_dataset:
+            self._dataSetDirectory = os.path.join(
+                self.baseDirectory, self.experimentName, "Datasets"
+            )
+        else:
+            self._dataSetDirectory = None
 
-        self._dataSetManager = DataSetManager.DataSetManager(self._dataSetDirectory)
+        self._dataSetManager = DataSetManager.DataSetManager(
+            self._dataSetDirectory,
+        )
         self._createFolder("Datasets")
 
         """Creating the log folder"""

@@ -65,12 +65,14 @@ The action flow within the dataset is as follows:
       action_type ="DEAL_CARDS" # Information saved in this row:  match_number, player_hands
       action_type ="DECLARE_SPECIAL_ACTION"# (only if someone declare it). match_number, source, current_roles, action_description (which special action was declared)
       action_type = "CARD_EXCHANGE"# (only after the first match). Information saved in this row: match_number, action_description (who gave cards to who), and updated players_hand
-      ...
+      
+      
       while players not finished:
         action_type = "DISCARD"# Information saved in this row: match_numner, game_number, source (author of the discard), action description (the discarded cards/pass), player hands, board before, board after, possible actions, and if this player has finished his cards or not
         if pizza:
           action_type= "PIZZA" # Information saved in this row: match_number, round_numner, source(author of the pizza)
-       
+
+
       action_type= "END_MATCH" #Information saved in this row: match_score, current_roles
   
   action_type = "END_EXPERIMENT"#Information saved in this row: current_roles, game_score, performance_score

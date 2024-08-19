@@ -17,17 +17,21 @@ Full documentation can be found here: [Documentation.](https://chefshatgym.readt
 
 We also provide a list of existing plugins and extensions for this library:
 
+### Chef`s Hat Run
+
+The [Chef’s Hat Run](https://github.com/pablovin/chefsHat_run) is a web interface that allows the setup, follow-up and management of server-based rooms of the Chef\\`s Hat. It is ideal to run local experiments with artificial agents, without the need to configure or code anything; To run server rooms and allow remote players to player; And to explore finished games, by using the interative plotting tools to visualize and extract important game statistics.
+
 ### Chef`s Hat Players Club
 
 The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersClub) is a collection of ready-to-use artificial agents. These agents were implemented, evaluated, and discussed in specific peer-reviewed publications and can be used anytime. If you want your agent to be included in the Player’s Club, message us.
 
-### Nova
-
-[Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment on a Chef`s Hat game.
-
 ### Chef`s Hat Play
 
 [Chef`s Hat Play](https://github.com/pablovin/ChefsHat_Play) is a Unity interface that allows humans to play the game against other humans or artificial agents.
+
+### Nova
+
+[Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment on a Chef`s Hat game.
 
 ## The Chef's Hat Card game
 

@@ -169,6 +169,7 @@ class DataSetManager:
         match_number,
         round_number,
         match_score,
+        game_score,
         current_roles,
     ):
         if self._save_dataset:
@@ -177,6 +178,7 @@ class DataSetManager:
                 round_number=round_number,
                 source="SYSTEM",
                 match_score=match_score,
+                game_score=game_score,
                 action_type=ACTION_TYPES["END_MATCH"],
                 current_roles=current_roles,
             )

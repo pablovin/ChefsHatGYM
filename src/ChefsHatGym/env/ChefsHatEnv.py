@@ -662,6 +662,7 @@ class ChefsHatEnv(gym.Env):
                     match_number=self.matches,
                     round_number=log_round,
                     match_score=points_position,
+                    game_score=self.score,
                     current_roles=[ROLES[a] for a in self.currentRoles],
                 )
 

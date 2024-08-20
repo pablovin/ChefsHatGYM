@@ -132,8 +132,8 @@ class ChefsHatRoomLocal:
         Args:
             message (str): error
         """
-        if self.verbose:
-            self.logger.critical(f"[Room]: {message}")
+
+        self.logger.critical(f"[Room]: {message}")
 
     def add_spectator(self, spectator: ChefsHatSpectator):
         """Add a spectator to the room

@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from copy import copy
-from typing import Literal
+import os
 
 # Action types
 actionDeal = "DEAL"
@@ -130,8 +130,10 @@ class DataSetManager:
         return pd.DataFrame(this_row, index=[date])
 
     def addDataFrame(self, row_df):
-
-        self.dataFrame = pd.concat([self.dataFrame, row_df])
+        if len(self.dataFrame) == 0:
+            self.dataFrame = row_df
+        else:
+            self.dataFrame = pd.concat([self.dataFrame, row_df])
 
     def startNewGame(self, agent_names):
         if self._save_dataset:
@@ -300,7 +302,22 @@ class DataSetManager:
             self.addDataFrame(this_row)
 
     def saveFile(self):
+
+        if os.path.exists(self.currentDataSetFile):
+            existing_dataframe = pd.read_pickle(self.currentDataSetFile)
+            if len(self.dataFrame) > 0:
+                self.dataFrame = pd.concat(
+                    [
+                        existing_dataframe,
+                        self.dataFrame,
+                    ]
+                )
+            else:
+                self.dataFrame = existing_dataframe
+
         self.dataFrame.to_pickle(self.currentDataSetFile)
         self.dataFrame.to_csv(
             self.currentDataSetFile + ".csv", index=False, header=True
         )
+
+        self.dataFrame = []

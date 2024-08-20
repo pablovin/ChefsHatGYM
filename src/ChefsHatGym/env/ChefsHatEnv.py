@@ -387,7 +387,7 @@ class ChefsHatEnv(gym.Env):
                 gameFinished = True
 
         if not self.experimentManager == None and gameFinished:
-            print(f"Adding to the log!")
+            # print(f"Adding to the log!")
             self.logger.newLogSession(
                 "Game Over! Final Score:"
                 + str(self.score)
@@ -684,6 +684,9 @@ class ChefsHatEnv(gym.Env):
             self.playersInvalidActions[thisPlayer] += 1
             isMatchOver = False
             boardAfter = self.getObservation()[0:11].tolist()
+
+        if self.matches % 100 == 0:
+            self.experimentManager.dataSetManager.saveFile()
 
         info = {}
         info["actionIsRandom"] = actionIsRandom

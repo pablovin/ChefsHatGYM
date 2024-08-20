@@ -274,6 +274,8 @@ class ChefsHatRoomLocal:
 
                 # Match is over
                 if isMatchOver:
+                    if self.env.matches % 100 == 0:
+                        print(f"{datetime.now()} - Match {self.env.matches} done!")
                     self.log(f"[Room]:  -- Match over! Total rounds: {self.env.rounds}")
 
                     # Players are updated that the match is over

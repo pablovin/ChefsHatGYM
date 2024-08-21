@@ -29,9 +29,14 @@ The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersCl
 
 [Chef`s Hat Play](https://github.com/pablovin/ChefsHat_Play) is a Unity interface that allows humans to play the game against other humans or artificial agents.
 
+### Metrics Chef`s Hat
+
+The [Metrics Chef`s Hat](https://github.com/lauratriglia/MetricsChefsHat) package includes the tools for creating different game behavior metrics that help to better understand and describe the agents. Developed and maintained by Laura Triglia.
+
+
 ### Nova
 
-[Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment on a Chef`s Hat game.
+[Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment on a Chef`s Hat game. Developed and mantained by Nathalia Cauas.
 
 
 ### Simulated Games

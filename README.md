@@ -33,6 +33,13 @@ The [Chef’s Hat Player’s Club](https://github.com/pablovin/ChefsHatPlayersCl
 
 [Nova](https://github.com/nathaliarcauas/Nova) is a dynamic game narrator, used to describe and comment on a Chef`s Hat game.
 
+
+### Simulated Games
+
+We also provide a series of simulated games, inside the [Simulated Games.](https://github.com/pablovin/ChefsHatGYM/tree/master/Simulated_Games) folder.
+Each of these games run for 1000 matches, and different combination of agents play them. They are provided as a ready-to-use resource for agent analysis, tools development or better understanding of the Chef`s Hat Simulator as a whole.
+
+
 ## The Chef's Hat Card game
 
 ![Chef's Hat Card Game](gitImages/cardGame.jpg) 
@@ -88,7 +95,7 @@ ChefsHatGym2 encapsulates the entire room structure, so it is easy to create a g
 
 ```
 
-For a more detailed example, check the [examples folder.](https://github.com/pablovin/ChefsHatGYM/tree/master/examples)
+For a more detailed example, check the [examples folder.](https://github.com/pablovin/ChefsHatGYM/tree/master/examples).
 
 ### Running a game remotely
 

@@ -11,14 +11,13 @@ timeout_player_response = 5  # In seconds
 
 verbose_console = True
 verbose_log = True
-game_verbose_console = False
+game_verbose_console = True
 game_verbose_log = True
 save_dataset = True
 
-
 # Game parameters
 game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
-stop_criteria = 3
+stop_criteria = 2
 maxRounds = -1
 
 

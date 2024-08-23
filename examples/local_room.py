@@ -5,16 +5,18 @@ from ChefsHatGym.agents.spectator_logger import SpectatorLogger
 
 # Room parameters
 room_name = "Testing_2_Local"
+timeout_player_response = 5
+
 
 # Game parameters
 game_type = ChefsHatEnv.GAMETYPE["MATCHES"]
-stop_criteria = 3
+stop_criteria = 1
 maxRounds = -1
 
 # Logging information
 verbose_console = True
 verbose_log = True
-game_verbose_console = False
+game_verbose_console = True
 game_verbose_log = True
 save_dataset = True
 
@@ -22,6 +24,7 @@ save_dataset = True
 # Start the room
 room = ChefsHatRoomLocal(
     room_name,
+    timeout_player_response=timeout_player_response,
     game_type=game_type,
     stop_criteria=stop_criteria,
     max_rounds=maxRounds,
@@ -48,9 +51,6 @@ for p in [p1, p2, p3, p4]:
     room.add_player(p)
 
 
-# Adding spectators to the game is easy, but not mandatory. Spectators are agents that observe the game, from a third-person perspective, and can use this information as they please.
-# Spectators are great for automatic narration, for example, or for creating live game statistics.
-
 # Create spectators
 s1 = SpectatorLogger(name="01", log_directory=logDirectory, verbose_log=agentVerbose)
 s2 = SpectatorLogger(name="02", log_directory=logDirectory, verbose_log=agentVerbose)
@@ -63,5 +63,5 @@ for s in [s1, s2]:
 # Start the game
 info = room.start_new_game()
 
-print(f"Performance score: {info['performanceScore']}")
-print(f"Scores: {info['score']}")
+print(f"Performance score: {info['Game_Performance_Score']}")
+print(f"Scores: {info['Game_Score']}")

@@ -36,8 +36,8 @@ class SpectatorLogger(ChefsHatSpectator):
         self.log(f"Yes, the brave player is declaring {action_type}!")
 
     def update_end_match(self, envInfo):
-        score = envInfo["score"]
-        players = envInfo["players"]
+        score = envInfo["Game_Score"]
+        players = envInfo["Player_Names"]
 
         self.log("---------------------------------")
         self.log("This match is over!")
@@ -47,23 +47,20 @@ class SpectatorLogger(ChefsHatSpectator):
             self.log(f"{player}: {score} points")
 
     def update_action_others(self, envInfo):
-        players = envInfo["players"]
-        boardBefore = envInfo["boardBefore"]
-        boardAfter = envInfo["boardAfter"]
-        thisPlayer = envInfo["thisPlayer"]
-        action = envInfo["thisPlayer"]
-        remaining_cards = envInfo["RemainingCardsPerPlayer"]
-        is_pizza_ready = envInfo["isPizzaReady"]
-        this_player_finished = envInfo["thisPlayerFinished"]
-        last_action_player = envInfo["lastActionPlayers"][thisPlayer]
+        players = envInfo["Player_Names"]
+        boardBefore = envInfo["Board_Before"]
+        boardAfter = envInfo["Board_After"]
+        thisPlayer = envInfo["Author_Index"]
+        action = envInfo["Action_Decoded"]
+        remaining_cards = envInfo["Cards_Per_Player"]
+        is_pizza_ready = envInfo["Is_Pizza"]
+        this_player_finished = thisPlayer in envInfo["Finished_Players"]
 
         player_name = players[thisPlayer]
 
         self.log("---------------------------------")
         self.log(f"This is the current state of the board: {boardBefore}.")
-        self.log(
-            f"Now, it appears that player {player_name} just did: {last_action_player}! "
-        )
+        self.log(f"Now, it appears that player {player_name} just did: {action}! ")
         self.log(f"That made the board looks like that: {boardAfter}.")
 
         if this_player_finished:

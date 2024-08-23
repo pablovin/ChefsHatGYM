@@ -12,6 +12,42 @@ The environment implement specific action and observation spaces, and calculates
 
 While the gaming is happening, the environment communicates with the Rooms and Agents using a specific dictionary, called info that contains the following information:
 
+
+# Game Settings Info
+info["Player_Names"] = self.playerNames
+
+# This Player Info
+info["Author_Index"] = int(thisPlayer)
+info["Author_Possible_Actions"] = possibleActions
+
+# Action Info
+info["Action_Valid"] = bool(validAction)
+info["Action_Random"] = bool(actionIsRandom)
+info["Action_Index"] = int(numpy.argmax(action))
+info["Action_Decoded"] = self.highLevelActions[numpy.argmax(action)]
+
+# Gameplay Status
+info["Is_Pizza"] = bool(isPizzaReady)
+info["Finished_Players"] = [
+    bool(p in self.finishingOrder) for p in range(self.numberPlayers)
+]
+info["Cards_Per_Player"] = [
+    len(list(filter(lambda a: a > 0, self.playersHand[i])))
+    for i in range(self.numberPlayers)
+]
+info["Next_Player"] = int(self.currentPlayer)
+
+# Board Info
+info["Board_Before"] = [int(a * 13) for a in observationBefore[0:11].tolist()]
+info["Board_After"] = [int(a * 13) for a in boardAfter]
+
+# Match Info
+info["Current_Roles"] = self.currentRoles
+info["Match_Score"] = points_position
+info["Game_Score"] = self.score
+info["Game_Performance_Score"] = self.performanceScore
+
+
 .. list-table:: **Dictionary info that is used for communication between the environment and the rooms/agents**
    :widths: auto
    :header-rows: 1
@@ -19,75 +55,80 @@ While the gaming is happening, the environment communicates with the Rooms and A
    * - Parameter
      - Type
      - Description
-   * - actionIsRandom
-     - bool
-     - If the action performed by the agent was randomly selected - usually True when the action performed by the agent was invalid.
-   * validAction
-     - bool
-     - If the action performed by the agent was a valid action based on the game rules.
-   * - matches
+   * - Matches
      - int
      - The current number of matches
-   * - rounds
+   * - Rounds
      - int
-     - The current number of rounds   
-   * - score
+     - The current number of rounds       
+   * - Player_Names 
      - list
-     - the current score for all players
-   * - performanceScore
+     - list with the names of all Players     
+
+   * - Author_Index
+     - int  
+     - the index of the player that did this action
+   * - Author_Possible_Actions
+     - list
+     - The possible actions that the author received when he did this action. A list in the format CQJ. Only present to the agent that did the action.
+
+
+   * Observation_Before
+     - list
+     - Full game observation state before this action was done. Only present to the agent that did the action.
+   * Observation_After
+     - list
+     - Full game observation state after this action was done. Only present to the agent that did the action.            
+   
+   * Action_Valid
+     - bool
+     - If the action performed by the agent was a valid action based on the game rules.   
+   * - Action_Random
+     - bool
+     - If the action performed by the agent was randomly selected - usually True when the action performed by the agent was invalid. Only present to the agent that did the action.
+   * - Action_Index
+     - int
+     - The index of the selected action over all the 200 possible actions.
+   * - Action_Decoded
+     - str
+     - The action that was done, in the format CQJ.
+
+   * - Is_Pizza
+     - bool
+     - Did this action caused a pizza.
+   * - Pizza_Author
+     - int
+     - Who was the player that made the pizza.
+   * - Finished_Players
+     - list
+     - List of bool indicating if each index player finished the match or not.
+   * - Cards_Per_Player 
+     - list
+     - the amount of cards each player has at hand after the action was done.    
+   * - Next_Player 
+     - int
+     - the next player to play.     
+
+   * - Board_Before
+     - list
+     - board before the action was done.
+   * - Board_After
+     - list
+     - board after the action was done.
+
+   * - Current_Roles 
+     - list
+     - list with the current roles of each player index. 
+   * - Match_Score 
+     - list
+     - The score each player index obtained at the end of this match.      
+   * - Game_Score 
+     - list
+     - The curernt acumulated game score each player index has.            
+   * - Game_Score 
      - list
      - the current performanceScore for all players. See bellow the performance score formula.
-   * - thisPlayer
-     - int  
-     - the index of the player that did the action
-   * - thisPlayerFinished
-     - bool
-     - if the player that did this action finished the match
-   * - isPizzaReady
-     - bool
-     - if the pizza is ready after this action
-   * - boardBefore
-     - list
-     - board before the action was done
-   * - boardAfter
-     - list
-     - board after the action was done
-   * - board
-     - list
-     - the current board
-   * - possibleActions
-     - list
-     - the indices of all possible actions that the player could have done during this action
-   * - possibleActionsDecoded
-     - list
-     - all the possible actions writen in the format: CQJ (ex. C1Q2J0 = two cards of value 1 and 9 jokers)
-   * - action
-     - list
-     - the action the player did
-   * - thisPlayerPosition
-     - int
-     - the position this player is in the score
-   * - lastPlayerAction 
-     - list
-     - the previous action all the players did
-   * - lastActionPlayers 
-     - list
-     - all the previous actions this player did
-   * - lastActionTypes 
-     - list
-     - all the types of the previous actions all players did
-   * - RemainingCardsPerPlayer 
-     - list
-     - the amount of cards each player has at hand after the action was done
-   * - players 
-     - list
-     - list of current players names
-   * - currentRoles 
-     - list
-     - list of current players roles
-   * - currentPlayer 
-     - int
-     - the next player to play               
+          
 
 When sending the info dictionary to the players that did not do the action (observe other players and match update actions), both the "actionIsRandom" and "possibleActions" informations are hidden, to avoid leaking of information.
 

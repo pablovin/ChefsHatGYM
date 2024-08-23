@@ -238,31 +238,32 @@ class ChefsHatRoomLocal:
                 )
                 observations = self.env.getObservation()
 
-                info = {"validAction": False}
-                while not info["validAction"]:
+                info = {"Action_Valid": False}
+                while not info["Action_Valid"]:
                     timeNow = datetime.now()
                     action = currentPlayer.get_action(observations)
 
-                    self.log(
-                        f"[Room]:  ---- Round {self.env.rounds} Action: {np.argmax(action)}"
-                    )
                     nextobs, reward, isMatchOver, truncated, info = self.env.step(
                         action
                     )
 
-                    if not info["validAction"]:
+                    self.log(
+                        f"[Room]:  ---- Round {self.env.rounds} Action: {info['Action_Decoded']}"
+                    )
+
+                    if not info["Action_Valid"]:
                         self.error(f"[Room][ERROR]: ---- Invalid action!")
 
                 # Send action update to the current agent
-                info["observation"] = observations.tolist()
-                info["nextObservation"] = nextobs.tolist()
+                info["Observation_Before"] = observations.tolist()
+                info["Observation_After"] = nextobs.tolist()
                 currentPlayer.update_my_action(info)
 
-                info["observation"] = ""
-                info["nextObservation"] = ""
+                info["Observation_Before"] = ""
+                info["Observation_After"] = ""
 
-                info["actionIsRandom"] = ""
-                info["possibleActions"] = ""
+                info["Action_Random"] = ""
+                info["Author_Possible_Actions"] = ""
                 # Observe others
                 for p in self.players:
                     if p != currentPlayer:

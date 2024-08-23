@@ -223,7 +223,6 @@ class ChefsHatRoomServer:
         while not self.room_status == ROOM_STATUS["game_finished"]:
             self.log(f"[Room]: Room Status: {self.room_status}")
             try:
-
                 connection, client_address = self.server_socket.accept()
                 self.log(
                     f"[Room]: - Received a connection request from {client_address}"
@@ -241,6 +240,8 @@ class ChefsHatRoomServer:
                 self.error(
                     f"[Room][ERROR]: Agent subscription timeout! Current playes: {self.players.keys()}. Current spectators: {self.spectators.keys()}"
                 )
+            except Exception as e:
+                self.error(f"[Room][ERROR]: Room is offline!")
 
         # self.log(f"[Room]: - All four players online, starting the game!")
         # self.ready_to_start = True
@@ -480,8 +481,8 @@ class ChefsHatRoomServer:
             self.log(f"[Room]:  -- Current player: {currentPlayer}")
             observations = self.env.getObservation()
 
-            info = {"validAction": False}
-            while not info["validAction"]:
+            info = {"Action_Valid": False}
+            while not info["Action_Valid"]:
 
                 sendInfo = {}
                 sendInfo["observations"] = observations.tolist()
@@ -491,19 +492,20 @@ class ChefsHatRoomServer:
                 sendInfo["type"] = REQUEST_TYPE["requestAction"]
                 action, time_action = self._request_message(currentPlayer, sendInfo)
 
-                self.log(
-                    f"[Room]:  ---- Action (duration: {time_action}s): {np.argmax(action)}"
-                )
                 nextobs, reward, isMatchOver, truncated, info = self.env.step(action)
 
-                if not info["validAction"]:
+                self.log(
+                    f"[Room]:  ---- Round {self.env.rounds} Action: {info['Action_Decoded']}"
+                )
+
+                if not info["Action_Valid"]:
                     self.error(f"[Room][ERROR]: ---- Invalid action!")
 
             # break
             # Send action update to the current agent
             # self._send_action_update(currentPlayer, info)
-            info["observation"] = observations.tolist()
-            info["nextObservation"] = nextobs.tolist()
+            info["Observation_Before"] = observations.tolist()
+            info["Observation_After"] = nextobs.tolist()
             info["type"] = REQUEST_TYPE[
                 "actionUpdate"
             ]  # Update the agents after the action was done
@@ -512,12 +514,12 @@ class ChefsHatRoomServer:
                 self.players, currentPlayer, info
             )  # update the current player, with the information about his hand
 
-            info["observation"] = ""
-            info["nextObservation"] = ""
+            info["Observation_Before"] = ""
+            info["Observation_After"] = ""
 
-            info["actionIsRandom"] = ""
-            info["possibleActions"] = ""
-            info["possibleActionsDecoded"] = ""
+            info["Action_Random"] = ""
+            info["Author_Possible_Actions"] = ""
+
             info["type"] = REQUEST_TYPE[
                 "updateOthers"
             ]  # Update the othe players after the action was done
@@ -680,7 +682,9 @@ class ChefsHatRoomServer:
         player_names = list(self.players.keys())
 
         scores = {}
-        for player_index, s in enumerate(zip(info["score"], info["performanceScore"])):
+        for player_index, s in enumerate(
+            zip(info["Game_Score"], info["Game_Performance_Score"])
+        ):
             scores[player_names[player_index]] = [s[0], s[1]]
 
         sorted_scores = sorted(scores.items(), key=lambda x: x[1])

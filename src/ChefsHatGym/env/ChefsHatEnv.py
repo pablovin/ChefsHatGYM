@@ -647,6 +647,7 @@ class ChefsHatEnv(gym.Env):
             else:
                 self.nextPlayer()
 
+            points_position = [0, 0, 0, 0]
             if self.isMatchover():
                 isMatchOver = True
                 if isPizzaReady:
@@ -688,37 +689,94 @@ class ChefsHatEnv(gym.Env):
         if self.matches % 100 == 0:
             self.experimentManager.dataSetManager.saveFile()
 
+        # Sanitizing the action
+        arg_max_action = numpy.argmax(action)
+        action[arg_max_action] = 1
+
+        # this_row["Match"] = match_number
+        # this_row["Round"] = round_number
+        # this_row["Agent_Names"] = [agent_names]
+        # this_row["Source"] = source
+        # this_row["Action_Type"] = action_type
+        # this_row["Action_Description"] = action_description
+        # this_row["Player_Finished"] = player_finished
+        # this_row["Player_Hands"] = [player_hands]
+        # this_row["Board_Before"] = [board_before]
+        # this_row["Board_After"] = [board_after]
+        # this_row["Possible_Actions"] = [possible_actions]
+        # this_row["Current_Roles"] = [current_roles]
+        # this_row["Match_Score"] = [match_score]
+        # this_row["Game_Score"] = [game_score]
+        # this_row["Game_Performance_Score"] = [game_performance_score]
+
         info = {}
-        info["actionIsRandom"] = actionIsRandom
-        info["validAction"] = validAction
-        info["matches"] = int(self.matches)
-        info["rounds"] = int(self.rounds)
-        info["score"] = self.score
-        info["performanceScore"] = self.performanceScore
-        info["thisPlayer"] = int(thisPlayer)
-        info["thisPlayerFinished"] = thisPlayer in self.finishingOrder
-        info["PlayersFinished"] = [
-            p in self.finishingOrder for p in range(self.numberPlayers)
+        # Game Settings Info
+        info["Matches"] = int(self.matches)
+        info["Rounds"] = int(self.rounds)
+        info["Player_Names"] = self.playerNames
+
+        # This Player Info
+        info["Author_Index"] = int(thisPlayer)
+        info["Author_Possible_Actions"] = currentlyAllowedActions
+
+        # Action Info
+        info["Action_Valid"] = bool(validAction)
+        info["Action_Random"] = bool(actionIsRandom)
+        info["Action_Index"] = int(numpy.argmax(action))
+        info["Action_Decoded"] = self.highLevelActions[numpy.argmax(action)]
+
+        # Gameplay Status
+        info["Is_Pizza"] = bool(isPizzaReady)
+        info["Pizza_Author"] = int(self.currentPlayer) if isPizzaReady else ""
+        info["Finished_Players"] = [
+            bool(p in self.finishingOrder) for p in range(self.numberPlayers)
         ]
-        info["isPizzaReady"] = isPizzaReady
-        info["boardBefore"] = observationBefore[0:11].tolist()
-        info["boardAfter"] = boardAfter
-        info["board"] = numpy.array(self.getObservation() * 13, dtype=int).tolist()[:11]
-        info["possibleActions"] = possibleActions
-        info["possibleActionsDecoded"] = currentlyAllowedActions
-        info["action"] = action
-        info["thisPlayerPosition"] = int(thisPlayerPosition)
-        info["lastActionPlayers"] = self.lastActionPlayers
-        info["lastActionTypes"] = [
-            "" if a == "" else a[0] for a in self.lastActionPlayers
-        ]
-        info["RemainingCardsPerPlayer"] = [
+        info["Cards_Per_Player"] = [
             len(list(filter(lambda a: a > 0, self.playersHand[i])))
             for i in range(self.numberPlayers)
         ]
-        info["players"] = self.playerNames
-        info["currentRoles"] = self.currentRoles
-        info["currentPlayer"] = int(self.currentPlayer)
+        info["Next_Player"] = int(self.currentPlayer)
+
+        # Board Info
+        info["Board_Before"] = [int(a * 13) for a in observationBefore[0:11].tolist()]
+        info["Board_After"] = [int(a * 13) for a in boardAfter]
+
+        # Match Info
+        info["Current_Roles"] = self.currentRoles
+        info["Match_Score"] = points_position
+        info["Game_Score"] = self.score
+        info["Game_Performance_Score"] = self.performanceScore
+
+        # info["actionIsRandom"] = actionIsRandom
+        # info["validAction"] = validAction
+        # info["matches"] = int(self.matches)
+        # info["rounds"] = int(self.rounds)
+        # info["score"] = self.score
+        # info["performanceScore"] = self.performanceScore
+        # info["thisPlayer"] = int(thisPlayer)
+        # info["thisPlayerFinished"] = thisPlayer in self.finishingOrder
+        # info["PlayersFinished"] = [
+        #     p in self.finishingOrder for p in range(self.numberPlayers)
+        # ]
+        # info["isPizzaReady"] = isPizzaReady
+        # info["boardBefore"] = observationBefore[0:11].tolist()
+        # info["boardAfter"] = boardAfter
+        # info["board"] = numpy.array(self.getObservation() * 13, dtype=int).tolist()[:11]
+        # info["possibleActions"] = possibleActions
+        # info["possibleActionsDecoded"] = currentlyAllowedActions
+        # info["action"] = action
+        # info["thisPlayerPosition"] = int(thisPlayerPosition)
+        # info["lastActionPlayers"] = self.lastActionPlayers
+        # info["lastActionTypes"] = [
+        #     "" if a == "" else a[0] for a in self.lastActionPlayers
+        # ]
+        # info["RemainingCardsPerPlayer"] = [
+        #     len(list(filter(lambda a: a > 0, self.playersHand[i])))
+        #     for i in range(self.numberPlayers)
+        # ]
+        # info["players"] = self.playerNames
+        # info["currentRoles"] = self.currentRoles
+        # info["currentPlayer"] = int(self.currentPlayer)
 
         reward = 0
         return (

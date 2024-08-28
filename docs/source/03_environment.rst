@@ -57,13 +57,13 @@ While the gaming is happening, the environment communicates with the Rooms and A
      - Did this action caused a pizza.
    * - Pizza_Author
      - int
-     - Who was the player that made the pizza.
+     - The index o the player that declared pizza.
    * - Finished_Players
      - list
-     - List of bool indicating if each index player finished the match or not.
+     - Dictionary containing {player:bool_finished} indicating if each player finished the match or not.
    * - Cards_Per_Player 
      - list
-     - the amount of cards each player has at hand after the action was done.    
+     - Dictionary containing {player:cards_number} the amount of cards each player has at hand after the action was done.    
    * - Next_Player 
      - int
      - the next player to play.     
@@ -75,16 +75,16 @@ While the gaming is happening, the environment communicates with the Rooms and A
      - board after the action was done.
    * - Current_Roles 
      - list
-     - list with the current roles of each player index. 
+     - Dictionary containing {player:role} with the current roles of each player. 
    * - Match_Score 
      - list
-     - The score each player index obtained at the end of this match.      
+     - Dictionary containing {player:match_score} the score each player obtained at the end of this match.      
    * - Game_Score 
      - list
-     - The curernt acumulated game score each player index has.            
-   * - Game_Score 
+     - Dictionary containing {player:game_score} the curernt acumulated game score each player has.            
+   * - Game_Performance_Score 
      - list
-     - the current performanceScore for all players. See bellow the performance score formula.
+     - Dictionary containing {player:performance_score} the current performanceScore for all players. See bellow the performance score formula.
           
 
 When sending the info dictionary to the players that did not do the action (observe other players and match update actions), both the "actionIsRandom" and "possibleActions" informations are hidden, to avoid leaking of information.

@@ -22,6 +22,7 @@ REQUEST_TYPE = {
     "doSpecialAction": "doSpecialAction",
     "specialActionUpdate": "specialActionUpdate",
     "exchangeCards": "exchangeCards",
+    "updateExchangedCards": "updateExchangedCards",
     "updateMatchStart": "updateMatchStart",
 }
 
@@ -450,7 +451,7 @@ class ChefsHatRoomServer:
         for p_index, p in enumerate(self.players.keys()):
             sendInfo = {}
             sendInfo["type"] = "updateMatchStart"
-            sendInfo["cards"] = self.env.playersHand[p_index]
+            sendInfo["cards"] = self.env.players[p_index].cards
             sendInfo["players"] = list(self.players.keys())
             sendInfo["starting_player"] = list(self.players.keys())[
                 self.env.currentPlayer
@@ -497,6 +498,11 @@ class ChefsHatRoomServer:
                 self.log(
                     f"[Room]:  ---- Round {self.env.rounds} Action: {info['Action_Decoded']}"
                 )
+
+                if info["Is_Pizza"]:
+                    self.log(
+                        f"[Room]:  ---- Round {info['Pizza_Author']} Made a Pizza!!"
+                    )
 
                 if not info["Action_Valid"]:
                     self.error(f"[Room][ERROR]: ---- Invalid action!")
@@ -622,9 +628,16 @@ class ChefsHatRoomServer:
                                 break
                     if not action_type == "Dinner served!":
                         # Once the cards are handled again, the chef and sous-chef have to choose which cards to give
-                        player_sourchef, sc_cards, player_chef, chef_cards = (
-                            self.env.get_chef_souschef_roles_cards()
-                        )
+                        (
+                            player_dishwasher,
+                            dishCards,
+                            player_waiter,
+                            waiterCards,
+                            player_sourchef,
+                            sc_cards,
+                            player_chef,
+                            chef_cards,
+                        ) = self.env.get_chef_souschef_roles_cards()
 
                         info_special = {}
                         info_special["cards"] = sc_cards
@@ -636,6 +649,10 @@ class ChefsHatRoomServer:
                             list(self.players.keys())[player_sourchef],
                             info_special,
                         )
+
+                        souschefCard = souschefCard[0]
+
+                        self.log("[Room]:  - Requesting card exchange from souschef!")
 
                         info_special = {}
                         info_special["cards"] = chef_cards
@@ -649,9 +666,63 @@ class ChefsHatRoomServer:
                             info_special,
                         )
 
+                        # Inform each player the cards they sent and the cards they received
+                        # Chef
+                        info_special = {}
+                        info_special["cards_sent"] = chefCards
+                        info_special["cards_received"] = dishCards
+                        info_special["type"] = REQUEST_TYPE["updateExchangedCards"]
+                        self.log("[Room]:  - Informing chef about cards exchanged!")
+                        self._broadcast_message(
+                            self.players,
+                            list(self.players.keys())[player_chef],
+                            info_special,
+                        )
+
+                        # Souschef
+                        info_special = {}
+                        info_special["cards_sent"] = souschefCard
+                        info_special["cards_received"] = waiterCards
+                        info_special["type"] = REQUEST_TYPE["updateExchangedCards"]
+                        self.log("[Room]:  - Informing souschef about cards exchanged!")
+                        self._broadcast_message(
+                            self.players,
+                            list(self.players.keys())[player_sourchef],
+                            info_special,
+                        )
+
+                        # Waiter
+                        info_special = {}
+                        info_special["cards_sent"] = waiterCards
+                        info_special["cards_received"] = souschefCard
+                        info_special["type"] = REQUEST_TYPE["updateExchangedCards"]
+                        self.log("[Room]:  - Informing waiter about cards exchanged!")
+                        self._broadcast_message(
+                            self.players,
+                            list(self.players.keys())[player_waiter],
+                            info_special,
+                        )
+
+                        # Dishwasher
+                        info_special = {}
+                        info_special["cards_sent"] = dishCards
+                        info_special["cards_received"] = chefCards
+                        info_special["type"] = REQUEST_TYPE["updateExchangedCards"]
+                        self.log(
+                            "[Room]:  - Informing dishwasher about cards exchanged!"
+                        )
+
+                        self._broadcast_message(
+                            self.players,
+                            list(self.players.keys())[player_dishwasher],
+                            info_special,
+                        )
+
                         self.env.exchange_cards(
-                            souschefCard,
                             chefCards,
+                            souschefCard,
+                            waiterCards,
+                            dishCards,
                             doSpecialAction,
                             playerSpecialAction,
                         )
@@ -681,18 +752,10 @@ class ChefsHatRoomServer:
 
         player_names = list(self.players.keys())
 
-        scores = {}
-        for player_index, s in enumerate(
-            zip(info["Game_Score"], info["Game_Performance_Score"])
-        ):
-            scores[player_names[player_index]] = [s[0], s[1]]
-
-        sorted_scores = sorted(scores.items(), key=lambda x: x[1])
-        self.log(f"[Room]:  -- Final Scores:")
-        for p in sorted_scores:
-            self.log(
-                f"[Room]:  ---- {p[0]}: Score: {p[1][0]} (Performance Score: {p[1][1]})"
-            )
+        self.log(f"[Room]:  -- Final Scores: {info['Game_Score']}")
+        self.log(
+            f"[Room]:  -- Final Performance Scores: {info['Game_Performance_Score']}"
+        )
 
         self.log(f"[Room]:  -- Closing the Room!")
         self.server_socket.close()

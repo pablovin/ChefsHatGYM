@@ -255,6 +255,15 @@ class ChefsHatPlayer:
 
             self._send_message_to_server(cards)
 
+        elif type == REQUEST_TYPE["updateExchangedCards"]:
+            cards_sent = room_message["cards_sent"]
+            cards_received = room_message["cards_received"]
+            cards = self.update_exchange_cards(cards_sent, cards_received)
+
+            self.log(
+                f"-- Card Exchange Update. I sent {cards_sent}. I received: {cards_received}"
+            )
+
         # If the received message is a update the begining of the match
         elif type == REQUEST_TYPE["updateMatchStart"]:
 
@@ -310,6 +319,19 @@ class ChefsHatPlayer:
         """This method returns the selected cards when exchanging them at the begining of the match.
 
         :param envInfo: [description]
+        :type envInfo: [type]
+
+        :return: The decision to do or not the special action
+        :rtype: ndarray
+        """
+        pass
+
+    @abstractmethod
+    def update_exchange_cards(self, cards_sent, cards_received):
+        """This method updates the player about the cards exchanged
+
+        :param cards_sent: [description]
+        :param cards_received: [description]
         :type envInfo: [type]
 
         :return: The decision to do or not the special action

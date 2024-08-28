@@ -219,7 +219,7 @@ class ChefsHatRoomLocal:
             # Update each player about the begining of the match
             for p_index, p in enumerate(self.players):
                 p.update_start_match(
-                    self.env.playersHand[p_index],
+                    self.env.players[p_index].cards,
                     self.players_names,
                     self.players_names[self.env.currentPlayer],
                 )
@@ -250,6 +250,10 @@ class ChefsHatRoomLocal:
                     self.log(
                         f"[Room]:  ---- Round {self.env.rounds} Action: {info['Action_Decoded']}"
                     )
+                    if info["Is_Pizza"]:
+                        self.log(
+                            f"[Room]:  ---- Round {info['Pizza_Author']} Made a Pizza!!"
+                        )
 
                     if not info["Action_Valid"]:
                         self.error(f"[Room][ERROR]: ---- Invalid action!")
@@ -317,20 +321,58 @@ class ChefsHatRoomLocal:
 
                         # Once the cards are handled again, the chef and sous-chef have to choose which cards to give
                         (
+                            player_dishwasher,
+                            dishCards,
+                            player_waiter,
+                            waiterCards,
                             player_sourchef,
                             sc_cards,
                             player_chef,
                             chef_cards,
                         ) = self.env.get_chef_souschef_roles_cards()
+
+                        self.log("[Room]:  - Requesting card exchange from souschef!")
                         souschefCard = self.players[player_sourchef].get_exhanged_cards(
                             sc_cards, 1
-                        )
+                        )[0]
+
+                        self.log("[Room]:  - Requesting card exchange from chef!")
                         chefCards = self.players[player_chef].get_exhanged_cards(
                             chef_cards, 2
                         )
+
+                        # Update each player about the card exchange results
+                        # Chef
+                        self.log("[Room]:  - Informing Chef about cards exchanged!")
+                        self.players[player_chef].update_exchange_cards(
+                            chefCards, dishCards
+                        )
+
+                        # Souschef
+                        self.log("[Room]:  - Informing Souschef about cards exchanged!")
+                        self.players[player_waiter].update_exchange_cards(
+                            souschefCard, waiterCards
+                        )
+
+                        # Waiter
+                        self.log("[Room]:  - Informing Waiter about cards exchanged!")
+                        self.players[player_sourchef].update_exchange_cards(
+                            waiterCards, souschefCard
+                        )
+
+                        # Dishwasher
+                        self.log(
+                            "[Room]:  - Informing Dishwasher about cards exchanged!"
+                        )
+                        self.players[player_dishwasher].update_exchange_cards(
+                            dishCards, chefCards
+                        )
+
                         self.env.exchange_cards(
-                            souschefCard,
                             chefCards,
+                            souschefCard,
+                            waiterCards,
+                            dishCards,
                             doSpecialAction,
                             playerSpecialAction,
                         )

@@ -94,9 +94,9 @@ class DataSetManager:
         board_before: list = np.nan,
         board_after: list = np.nan,
         possible_actions: list = np.nan,
-        current_roles: list = np.nan,
+        current_roles: dict = np.nan,
         match_score: list = np.nan,
-        game_score: list = np.nan,
+        game_score: dict = np.nan,
         game_performance_score: list = np.nan,
     ):
 

@@ -30,6 +30,7 @@ class AgentRandon(ChefsHatPlayer):
 
         possibleActions = observations[28:]
 
+        print(possibleActions)
         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[
             0
         ].tolist()
@@ -53,13 +54,21 @@ class AgentRandon(ChefsHatPlayer):
         selectedCards = sorted(cards[-amount:])
 
         self.log("---------------------------------")
-        self.log("        I did a card exchange!")
+        self.log("        I choose cards to exchange!")
         self.log("---------------------------------")
         self.log(f"Cards in my hand: {cards}")
         self.log(f"I need to select: {amount} cards")
         self.log(f"My choice: {selectedCards} ")
 
         return selectedCards
+
+    def update_exchange_cards(self, cards_sent, cards_received):
+
+        self.log("---------------------------------")
+        self.log("        I did a card exchange!")
+        self.log("---------------------------------")
+        self.log(f"I Received: {cards_received}")
+        self.log(f"I sent: {cards_sent} cards")
 
     def do_special_action(self, info, specialAction):
         return True

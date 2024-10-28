@@ -60,10 +60,13 @@ While the gaming is happening, the environment communicates with the Rooms and A
      - The index o the player that declared pizza.
    * - Finished_Players
      - list
-     - Dictionary containing {player:bool_finished} indicating if each player finished the match or not.
+     - List indicating if each player finished the match or not.
    * - Cards_Per_Player 
      - list
-     - Dictionary containing {player:cards_number} the amount of cards each player has at hand after the action was done.    
+     - list with the amount of cards each player has at hand after the action was done.    
+   * - Last_action_Per_Player
+     - list
+     - list with the last action each player did.      
    * - Next_Player 
      - int
      - the next player to play.     
@@ -75,16 +78,16 @@ While the gaming is happening, the environment communicates with the Rooms and A
      - board after the action was done.
    * - Current_Roles 
      - list
-     - Dictionary containing {player:role} with the current roles of each player. 
+     - list with the current roles of each player. 
    * - Match_Score 
      - list
-     - Dictionary containing {player:match_score} the score each player obtained at the end of this match.      
+     - list with the score each player obtained at the end of this match.      
    * - Game_Score 
      - list
-     - Dictionary containing {player:game_score} the curernt acumulated game score each player has.            
+     - list with the curernt acumulated game score each player has.            
    * - Game_Performance_Score 
      - list
-     - Dictionary containing {player:performance_score} the current performanceScore for all players. See bellow the performance score formula.
+     - list with the current performanceScore for all players. See bellow the performance score formula.
           
 
 When sending the info dictionary to the players that did not do the action (observe other players and match update actions), both the "actionIsRandom" and "possibleActions" informations are hidden, to avoid leaking of information.

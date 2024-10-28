@@ -782,7 +782,7 @@ class ChefsHatEnv(gym.Env):
                 source=self.players[thisPlayer].name,
                 action_description=self.highLevelActions[numpy.argmax(action)],
                 player_hands=self.players[thisPlayer].cards,
-                board_before=[int(b * 13) for b in boardBefore],
+                board_before=[int(b) for b in boardBefore],
                 board_after=[int(b * 13) for b in boardAfter],
                 possible_actions=possibleActions_decoded,
                 player_finished=self.players[thisPlayer].finished,
@@ -908,8 +908,8 @@ class ChefsHatEnv(gym.Env):
                     self.logNewRoles()
                     self.start_match_handle_cards()
 
-            # if self.gameFinished:
-            #     self.experimentManager.dataSetManager.saveFile()
+            if self.gameFinished:
+                self.experimentManager.dataSetManager.saveFile()
         else:
             self.players[thisPlayer].number_invalid_actions += 1
             isMatchOver = False
@@ -954,10 +954,9 @@ class ChefsHatEnv(gym.Env):
         # Gameplay Status
         info["Is_Pizza"] = bool(isPizzaReady)
         info["Pizza_Author"] = int(self.lastToDiscard) if isPizzaReady else -1
-        info["Finished_Players"] = {p.name: bool(p.finished) for p in self.players}
-        info["Cards_Per_Player"] = {
-            p.name: numpy.count_nonzero(p.cards) for p in self.players
-        }
+        info["Finished_Players"] = [bool(p.finished) for p in self.players]
+        info["Cards_Per_Player"] = [numpy.count_nonzero(p.cards) for p in self.players]
+        info["Last_action_Per_Player"] = [p.last_action for p in self.players]
 
         info["Next_Player"] = int(self.currentPlayer)
 
@@ -966,41 +965,12 @@ class ChefsHatEnv(gym.Env):
         info["Board_After"] = [int(a * 13) for a in boardAfter]
 
         # Match Info
-        info["Current_Roles"] = self.get_current_roles()
-        info["Match_Score"] = self.get_current_score()
-        info["Game_Score"] = self.get_acumulated_score()
-        info["Game_Performance_Score"] = self.get_acumulated_performance_score()
-
-        # info["actionIsRandom"] = actionIsRandom
-        # info["validAction"] = validAction
-        # info["matches"] = int(self.matches)
-        # info["rounds"] = int(self.rounds)
-        # info["score"] = self.score
-        # info["performanceScore"] = self.performanceScore
-        # info["thisPlayer"] = int(thisPlayer)
-        # info["thisPlayerFinished"] = thisPlayer in self.finishingOrder
-        # info["PlayersFinished"] = [
-        #     p in self.finishingOrder for p in range(self.numberPlayers)
-        # ]
-        # info["isPizzaReady"] = isPizzaReady
-        # info["boardBefore"] = observationBefore[0:11].tolist()
-        # info["boardAfter"] = boardAfter
-        # info["board"] = numpy.array(self.getObservation() * 13, dtype=int).tolist()[:11]
-        # info["possibleActions"] = possibleActions
-        # info["possibleActionsDecoded"] = currentlyAllowedActions
-        # info["action"] = action
-        # info["thisPlayerPosition"] = int(thisPlayerPosition)
-        # info["lastActionPlayers"] = self.lastActionPlayers
-        # info["lastActionTypes"] = [
-        #     "" if a == "" else a[0] for a in self.lastActionPlayers
-        # ]
-        # info["RemainingCardsPerPlayer"] = [
-        #     len(list(filter(lambda a: a > 0, self.playersHand[i])))
-        #     for i in range(self.numberPlayers)
-        # ]
-        # info["players"] = self.playerNames
-        # info["currentRoles"] = self.currentRoles
-        # info["currentPlayer"] = int(self.currentPlayer)
+        info["Current_Roles"] = [p.current_role for p in self.players]
+        info["Match_Score"] = [p.current_score for p in self.players]
+        info["Game_Score"] = [p.acumulated_score for p in self.players]
+        info["Game_Performance_Score"] = [
+            p.acumulated_performance_score for p in self.players
+        ]
 
         reward = 0
         return (
@@ -1028,8 +998,8 @@ class ChefsHatEnv(gym.Env):
             if not player.finished:
                 playersInGame.append(count)
 
-        print(f"------------")
-        print(f"Checking Pizza")
+        # print(f"------------")
+        # print(f"Checking Pizza")
 
         # for i in range(len(self.lastActionPlayers)):
         #     if not (i in self.finishingOrder):
@@ -1041,9 +1011,9 @@ class ChefsHatEnv(gym.Env):
         numberOfActions = 0
 
         for i in playersInGame:
-            print(
-                f"Player: {self.players[i].name } - last action: {self.players[i].last_action }"
-            )
+            # print(
+            #     f"Player: {self.players[i].name } - last action: {self.players[i].last_action }"
+            # )
             if self.players[i].last_action == self.highLevelActions[-1]:
                 number_passes += 1
 
@@ -1068,7 +1038,7 @@ class ChefsHatEnv(gym.Env):
 
             self.nextRound()
 
-        print(f"-------------")
+        # print(f"-------------")
 
         return pizzaReady
 
@@ -1167,11 +1137,12 @@ class ChefsHatEnv(gym.Env):
             :rtype: (ndarray)
         """
 
-        this_player_played = self.players[player].last_action == ""
+        first_action_this_player = self.players[player].last_action == ""
+
         firstAction = (
-            self.playerStartedGame == self.currentPlayer
+            self.playerStartedGame == player
             and self.rounds == 1
-            and this_player_played
+            and first_action_this_player
         )
 
         # print(
@@ -1298,12 +1269,12 @@ class ChefsHatEnv(gym.Env):
 
         possibleActions.append(canDiscardOnlyJoker)
 
-        if firstAction:
-            possibleActions.append(
-                0
-            )  # the pass action, which is anot a valid action on the first action
-        else:
-            possibleActions.append(1)  # the pass action, which is always a valid action
+        # if firstAction:
+        #     possibleActions.append(
+        #         0
+        #     )  # the pass action, which is anot a valid action on the first action
+        # else:
+        possibleActions.append(1)  # the pass action, which is always a valid action
 
         # print(
         #     f"First Action: {firstAction} - This PLayer played: {this_player_played} - POssible Actions: {possibleActions}"

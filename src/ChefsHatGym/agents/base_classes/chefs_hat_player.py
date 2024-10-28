@@ -7,6 +7,7 @@ from ChefsHatGym.gameRooms.chefs_hat_room_server import REQUEST_TYPE, MESSAGE_TY
 import ChefsHatGym.utils.utils as utils
 import socket
 import json
+import os
 
 
 class ChefsHatPlayer:
@@ -32,6 +33,7 @@ class ChefsHatPlayer:
         verbose_console: bool = False,
         verbose_log: bool = False,
         log_directory: str = "",
+        use_sufix: bool = True,
     ):
         """Constructor method. Initializes the agent name.
 
@@ -50,17 +52,30 @@ class ChefsHatPlayer:
         :param verbose_console: If the agent will print or not the logs in the log file
         :type verbose_log: bool
 
+        :param use_sufix: If the agent will use the sufix for the agent name
+        :type use_sufix: bool
+
         logDirectory (_type_): directory where the agent log will be saved
 
         """
-        self.name = f"{agent_suffix}_{name}"
+        self.name = name
+
+        if use_sufix:
+            self.name = f"{agent_suffix}_{name}"
+
+        self.this_log_folder = os.path.join(os.path.abspath(log_directory), self.name)
+        print(f"Agent { self.name} log folder:  { self.this_log_folder}")
+        if log_directory != "":
+            if not os.path.exists(self.this_log_folder):
+                os.makedirs(self.this_log_folder)
 
         self.saveModelIn = this_agent_folder
+
         self.stop_actions = False
 
         self.logger = utils.get_logger(
             f"PLAYER_{self.name}",
-            log_directory,
+            self.this_log_folder,
             f"PLAYER_{self.name}.log",
             verbose_console,
             verbose_log,

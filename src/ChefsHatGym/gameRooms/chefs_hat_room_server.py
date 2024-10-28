@@ -681,8 +681,8 @@ class ChefsHatRoomServer:
 
                         # Souschef
                         info_special = {}
-                        info_special["cards_sent"] = souschefCard
-                        info_special["cards_received"] = waiterCards
+                        info_special["cards_sent"] = [souschefCard]
+                        info_special["cards_received"] = [waiterCards]
                         info_special["type"] = REQUEST_TYPE["updateExchangedCards"]
                         self.log("[Room]:  - Informing souschef about cards exchanged!")
                         self._broadcast_message(
@@ -693,8 +693,8 @@ class ChefsHatRoomServer:
 
                         # Waiter
                         info_special = {}
-                        info_special["cards_sent"] = waiterCards
-                        info_special["cards_received"] = souschefCard
+                        info_special["cards_sent"] = [waiterCards]
+                        info_special["cards_received"] = [souschefCard]
                         info_special["type"] = REQUEST_TYPE["updateExchangedCards"]
                         self.log("[Room]:  - Informing waiter about cards exchanged!")
                         self._broadcast_message(

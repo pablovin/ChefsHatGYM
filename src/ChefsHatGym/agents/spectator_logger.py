@@ -48,6 +48,7 @@ class SpectatorLogger(ChefsHatSpectator):
 
     def update_action_others(self, envInfo):
         players = envInfo["Player_Names"]
+
         boardBefore = envInfo["Board_Before"]
         boardAfter = envInfo["Board_After"]
         thisPlayer = envInfo["Author_Index"]
@@ -67,7 +68,7 @@ class SpectatorLogger(ChefsHatSpectator):
             self.log(f"And the player discard all cards! Congratulations!")
         else:
             self.log(
-                f"And the player now the player has {remaining_cards[players[thisPlayer]]} cards at hand!"
+                f"And the player now the player has {remaining_cards[thisPlayer]} cards at hand!"
             )
 
         if is_pizza_ready:

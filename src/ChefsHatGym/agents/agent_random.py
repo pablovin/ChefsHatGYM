@@ -14,6 +14,7 @@ class AgentRandon(ChefsHatPlayer):
         verbose_console: bool = False,
         verbose_log: bool = False,
         log_directory: str = "",
+        use_sufix: bool = True,
     ):
         super().__init__(
             self.suffix,
@@ -22,6 +23,7 @@ class AgentRandon(ChefsHatPlayer):
             verbose_console,
             verbose_log,
             log_directory,
+            use_sufix,
         )
 
         self.reward = RewardOnlyWinning()

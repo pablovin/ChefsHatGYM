@@ -32,7 +32,7 @@ class AgentRandon(ChefsHatPlayer):
 
         possibleActions = observations[28:]
 
-        print(possibleActions)
+        # print(possibleActions)
         itemindex = numpy.array(numpy.where(numpy.array(possibleActions) == 1))[
             0
         ].tolist()

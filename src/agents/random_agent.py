@@ -3,7 +3,7 @@ from .base_agent import BaseAgent
 
 
 class RandomAgent(BaseAgent):
-    def __init__(self, name, log_directory):
+    def __init__(self, name, log_directory=""):
         super().__init__(name, log_directory)
         self.all_actions = []
         self.hand = []

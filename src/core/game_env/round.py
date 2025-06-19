@@ -7,21 +7,46 @@ from ..utils.rules import (
     complement_array,
 )
 import time
+from typing import Any, Dict, List, Optional
+
+from ..dataset.dataset_manager import DataSetManager
+from ..logging.engine_logger import EngineLogger
 
 
 class Round:
 
     def __init__(
         self,
-        players,
-        start_player_index,
-        is_first_round,
-        rounds_played,
-        max_rounds,
-        match_number,
-        logger=None,
-        dataset=None,
-    ):
+        players: List[Any],
+        start_player_index: int,
+        is_first_round: bool,
+        rounds_played: int,
+        max_rounds: Optional[int],
+        match_number: int,
+        logger: Optional[EngineLogger] = None,
+        dataset: Optional[DataSetManager] = None,
+    ) -> None:
+        """Create a round instance.
+
+        Parameters
+        ----------
+        players : list
+            List of :class:`Player` instances in the match.
+        start_player_index : int
+            Index of the player that starts this round.
+        is_first_round : bool
+            Whether this is the first round of the match.
+        rounds_played : int
+            Number of rounds already played in this match.
+        max_rounds : int | None
+            Maximum number of rounds allowed in the match.
+        match_number : int
+            Match identifier used for logging.
+        logger : EngineLogger | None
+            Logger instance for debug information.
+        dataset : DataSetManager | None
+            Dataset manager used to store gameplay information.
+        """
         self.players = players
         self.current_player_index = start_player_index
         self.board = [13]
@@ -62,7 +87,24 @@ class Round:
         playing_order = [p.name for p in ordered_players]
         self.logger.engine_log(f"Playing order: {playing_order}")
 
-    def step(self, action=None):
+    def step(self, action: Optional[str] = None) -> Dict[str, Any]:
+        """Execute ``action`` for the current player.
+
+        Parameters
+        ----------
+        action : str | None
+            Action string to be parsed and executed. When ``None`` a payload
+            requesting the player's action is returned.
+
+        Returns
+        -------
+        dict
+            Information about the current state. The payload always contains the
+            keys ``player`` and ``this_round_number``. When requesting an action
+            the ``observation`` describes the player's hand, board and possible
+            actions. If a round ends, ``round_over`` is ``True`` and
+            ``pizza_declarer`` indicates who ended the round.
+        """
         # print(f"self.current_player_index: {self.current_player_index}")
         current_player = self.players[self.current_player_index]
 

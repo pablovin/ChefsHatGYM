@@ -1,25 +1,51 @@
 # core/game.py
 
 import datetime
+import random
+from typing import Dict, List, Optional
+
 from ..utils.cards import deal_cards
 from ..utils.rules import find_starting_player
 from .match import Match
 from ..utils.player import Player
 from ..dataset.dataset_manager import DataSetManager
-import random
+from ..logging.engine_logger import EngineLogger
 
 
 class Game:
     def __init__(
         self,
-        player_names,
-        max_matches=3,
-        max_rounds=None,
-        max_score=None,
-        logger=None,
-        save_dataset=True,
-        dataset_directory="dataset",
-    ):
+        player_names: List[str],
+        max_matches: int = 3,
+        max_rounds: Optional[int] = None,
+        max_score: Optional[int] = None,
+        logger: Optional[EngineLogger] = None,
+        save_dataset: bool = True,
+        dataset_directory: str = "dataset",
+    ) -> None:
+        """Create a new :class:`Game` instance.
+
+        Parameters
+        ----------
+        player_names : list[str]
+            Names of all players taking part in the game. The position in the
+            list is used as player index.
+        max_matches : int, optional
+            Maximum number of matches that compose the game, by default ``3``.
+        max_rounds : int | None, optional
+            Maximum number of rounds allowed in a match. ``None`` means no
+            limit.
+        max_score : int | None, optional
+            If provided, the game ends once any player reaches this amount of
+            points.
+        logger : EngineLogger | None, optional
+            Logger used to output engine information.
+        save_dataset : bool, optional
+            If ``True`` the game events are recorded using
+            :class:`DataSetManager`.
+        dataset_directory : str, optional
+            Directory where the dataset will be stored.
+        """
         self.players = [Player(name, index=i) for i, name in enumerate(player_names)]
         self.max_matches = max_matches
         self.max_rounds = max_rounds
@@ -41,13 +67,15 @@ class Game:
             dataSetDirectory=dataset_directory if save_dataset else None
         )
 
-    def start(self):
+    def start(self) -> None:
+        """Initialize dataset information for the game."""
 
         self.dataset.startNewGame([p.name for p in self.players])
 
         # self._start_next_match()
 
-    def deal_cards(self):
+    def deal_cards(self) -> None:
+        """Deal cards to all players and record the action."""
         hands = deal_cards(len(self.players))
         role_exchange = " AND CARD EXCHANGE" if self.current_match_count > 0 else ""
         header = "\n" + "#" * 40 + f" DEALING CARDS " + role_exchange + "#" * 40
@@ -63,7 +91,8 @@ class Game:
 
         self.dataset.dealAction(self.current_match_count, cards)
 
-    def create_new_match(self):
+    def create_new_match(self) -> None:
+        """Instantiate a new :class:`Match` with fresh dealt cards."""
 
         self.starting_player_index = find_starting_player(self.players)
         self.current_match_count += 1
@@ -85,10 +114,29 @@ class Game:
 
         self.current_match = match
 
-    def start_match(self):
+    def start_match(self) -> None:
+        """Begin the current match by starting the first round."""
         self.current_match.start_match()
 
-    def step(self, action=None):
+    def step(self, action: Optional[str] = None) -> Dict:
+        """Advance the game by one action.
+
+        Parameters
+        ----------
+        action : str | None
+            Action string performed by the current player. If ``None`` a request
+            for an action is returned.
+
+        Returns
+        -------
+        dict
+            Payload returned by :meth:`Match.step`. It always contains the
+            keys ``player`` and ``this_round_number`` as well as information
+            about whether the round or match has finished. When an action is
+            requested the payload includes ``request_action`` and an
+            ``observation`` describing the current hand, board and possible
+            actions.
+        """
 
         if self.finished:
             return None
@@ -148,29 +196,47 @@ class Game:
 
         return result
 
-    def update_scores(self, finishing_order):
+    def update_scores(self, finishing_order: List[str]) -> Dict[str, int]:
+        """Update cumulative game scores based on finishing order.
+
+        Parameters
+        ----------
+        finishing_order : list[str]
+            Ordered list of player names according to their finishing position
+            in the match.
+
+        Returns
+        -------
+        dict[str, int]
+            Mapping of player names to the points earned in this match.
+        """
 
         score_map = {0: 3, 1: 2, 2: 1}
-        match_scores = {}
+        match_scores: Dict[str, int] = {}
         for position, player in enumerate(finishing_order):
             self.scores[player] += score_map.get(position, 0)
             match_scores[player] = score_map.get(position, 0)
         return match_scores
 
-    def assign_roles(self):
+    def assign_roles(self) -> None:
+        """Assign roles for the next match based on finishing order."""
+
         roles = ["chef", "souschef", "waiter", "dishwasher"]
         for idx, player_name in enumerate(self.finishing_order_last_game):
             self.roles[player_name] = roles[idx]
 
         self.logger.engine_log(f"Role assigned! New roles: {self.roles}")
 
-    def get_roles(self):
+    def get_roles(self) -> Dict[str, str | None]:
+        """Return a copy of the current role mapping."""
         return self.roles.copy()
 
-    def get_exchange_requests(self):
+    def get_exchange_requests(self) -> Dict[str, Dict[str, str | int]]:
+        """Return instructions for the mandatory card exchange phase."""
+
         # Who must pick which cards and how many
         # Only chef and souschef choose, rest are automatic
-        who = {}
+        who: Dict[str, Dict[str, str | int]] = {}
         for name, role in self.roles.items():
             if role == "chef":
                 who[name] = {"give_to": self.get_player_by_role("dishwasher"), "n": 2}
@@ -182,16 +248,30 @@ class Game:
 
         return who
 
-    def get_player_by_role(self, role):
+    def get_player_by_role(self, role: str) -> Optional[str]:
+        """Return the player name that currently has ``role``."""
         for name, r in self.roles.items():
             if r == role:
                 return name
         return None
 
-    def process_card_exchange(self, choices):
-        # choices: {agent_name: [cards]}
+    def process_card_exchange(self, choices: Dict[str, List[int]]) -> Dict[str, List[int]]:
+        """Apply the Chef's Hat role-based card exchange.
+
+        Parameters
+        ----------
+        choices : dict[str, list[int]]
+            Mapping from player names to the cards they wish to give away. Only
+            the chef and sous-chef selections are used; other players always give
+            the lowest cards.
+
+        Returns
+        -------
+        dict[str, list[int]]
+            Updated hands for each player after the exchange.
+        """
+
         # This function does all validation, fallback, and modifies player hands
-        # Return: dict {player_name: new_hand}
         hands = {p.name: p.cards for p in self.players}
         hands_before = {p.name: p.cards.copy() for p in self.players}
 
@@ -280,18 +360,24 @@ class Game:
 
         return {name: hands[name] for name in hands}
 
-    def valid_exchange_selection(self, selected, hand, n):
+    def valid_exchange_selection(self, selected: List[int], hand: List[int], n: int) -> bool:
+        """Validate the selected cards for the exchange."""
+
         return (
             isinstance(selected, list)
             and len(selected) == n
             and all(card in hand for card in selected)
         )
 
-    def get_joker_special_options(self):
-        """
-        Returns dict: {player_name: {"role": role, "option": str}}
-        for each player holding two jokers (card 12).
-        "option" is either "food_fight" (if dishwasher) or "dinner_served".
+    def get_joker_special_options(self) -> Dict[str, Dict[str, str]]:
+        """Check if any player can declare a joker special action.
+
+        Returns
+        -------
+        dict[str, dict[str, str]]
+            Mapping of player names to the special option available. The option
+            is ``"food_fight"`` when the player is the dishwasher and
+            ``"dinner_served"`` otherwise.
         """
         eligible = {}
         for p in self.players:
@@ -306,11 +392,20 @@ class Game:
             self.logger.engine_log(f"Players eligible for special actions: {eligible}")
         return eligible
 
-    def apply_joker_special(self, player_name, action):
-        """
-        Performs the chosen special action by player_name.
-        - If 'food_fight', invert roles.
-        - If 'dinner_served', skip card exchange for this match.
+    def apply_joker_special(self, player_name: str, action: str) -> Optional[str]:
+        """Execute the joker special action chosen by ``player_name``.
+
+        Parameters
+        ----------
+        player_name : str
+            Name of the player performing the special action.
+        action : str
+            Either ``"food_fight"`` or ``"dinner_served"``.
+
+        Returns
+        -------
+        str | None
+            The action performed or ``None`` if the action was invalid.
         """
         if action == "food_fight":
             # invert roles

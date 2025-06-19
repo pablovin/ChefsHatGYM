@@ -19,7 +19,10 @@ class RemoteComm(AgentCommInterface):
         payload = args[0] if args else {}
         name = self.room.websockets.get(agent, "unknown")
         self.logger.room_log(f"Notify ONE -> {name} | method={method} | args={args}")
-        await agent.send(json.dumps({"type": method, "payload": payload}))
+        try:
+            await agent.send(json.dumps({"type": method, "payload": payload}))
+        except websockets.exceptions.ConnectionClosed:
+            await self.room.handle_disconnect(name)
 
     async def request_one(self, agent, method, *args):
         payload = args[0] if args else {}

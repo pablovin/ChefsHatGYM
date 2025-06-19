@@ -203,9 +203,13 @@ class BaseAgent:
                     method = getattr(self, mtype, None)
                     if method:
                         method(payload)
+                if mtype == "update_game_over":
+                    break
         except asyncio.CancelledError:
             if self.ws:
                 await self.ws.close()
             raise
+        if self.ws:
+            await self.ws.close()
 
 

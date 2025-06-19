@@ -516,3 +516,15 @@ class Room:
         self.room_logger.room_log(f"Final scores: {self.game.scores}")
 
         self.final_scores = self.game.scores
+
+        if self.run_remote_room:
+            for ws in list(self.websockets.keys()):
+                try:
+                    await ws.close()
+                except Exception:
+                    pass
+                if hasattr(self.comm, "unregister_websocket"):
+                    self.comm.unregister_websocket(ws)
+                self.websockets.pop(ws, None)
+            self.name_to_websocket.clear()
+            await self.close()

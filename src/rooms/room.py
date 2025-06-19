@@ -147,8 +147,13 @@ class Room:
                     if len(self.connected_players) == self.max_players:
                         self._waiting_event.set()
 
-                    # Keep connection alive until game starts, then handle in game loop
+                    # Keep connection alive until the game finishes.  The
+                    # websocket library closes the connection once this handler
+                    # returns, so wait here until the room signals that the game
+                    # has started and later until the connection is closed by
+                    # the agent or the server.
                     await self._waiting_event.wait()
+                    await websocket.wait_closed()
                 except Exception as e:
                     print("WebSocket handler error:", e)
                     await websocket.close()

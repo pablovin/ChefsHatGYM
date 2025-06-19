@@ -42,9 +42,6 @@ def run_room(training: bool, model_path: str, matches: int, output_folder: str):
 def plot_score_distribution(dataset_path: str, output_path: str):
     df = pd.read_csv(dataset_path, index_col=0)
     df = df[df["Action_Type"] == "END_MATCH"]
-    print(df.head())
-    print(f"Agent names:{df['Agent_Names']}")
-    print(f"Agent names:{df['Match_Score']}")
     names = ast.literal_eval(df.iloc[0]["Match_Score"])
     scores = df["Game_Score"].apply(ast.literal_eval).tolist()
     scores_arr = pd.DataFrame(scores, columns=names)

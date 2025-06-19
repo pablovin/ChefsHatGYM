@@ -8,19 +8,35 @@ class RemoteComm(AgentCommInterface):
         self.room = room
         self.logger = logger
         self.timeout = timeout
+        self._send_locks = {}
+
+    def register_websocket(self, ws):
+        if ws not in self._send_locks:
+            self._send_locks[ws] = asyncio.Lock()
+
+    def unregister_websocket(self, ws):
+        self._send_locks.pop(ws, None)
+
+    async def _safe_send(self, ws, message):
+        lock = self._send_locks.setdefault(ws, asyncio.Lock())
+        async with lock:
+            await ws.send(message)
 
     async def notify_all(self, method, agents, *args):
         payload = args[0] if args else {}
         self.logger.room_log(f"Notify ALL -> method={method} | args={args}")
         message = json.dumps({"type": method, "payload": payload})
-        await asyncio.gather(*[a.send(message) for a in agents], return_exceptions=True)
+        await asyncio.gather(
+            *[self._safe_send(a, message) for a in agents],
+            return_exceptions=True,
+        )
 
     async def notify_one(self, agent, method, *args):
         payload = args[0] if args else {}
         name = self.room.websockets.get(agent, "unknown")
         self.logger.room_log(f"Notify ONE -> {name} | method={method} | args={args}")
         try:
-            await agent.send(json.dumps({"type": method, "payload": payload}))
+            await self._safe_send(agent, json.dumps({"type": method, "payload": payload}))
         except websockets.exceptions.ConnectionClosed:
             await self.room.handle_disconnect(name)
 
@@ -29,8 +45,9 @@ class RemoteComm(AgentCommInterface):
         name = self.room.websockets.get(agent, "unknown")
         self.logger.room_log(f"Request ONE -> {name} | method={method} | args={args}")
         try:
-            await agent.send(json.dumps({"type": method, "payload": payload}))
-            resp = await asyncio.wait_for(agent.recv(), timeout=self.timeout)
+            async with self._send_locks.setdefault(agent, asyncio.Lock()):
+                await agent.send(json.dumps({"type": method, "payload": payload}))
+                resp = await asyncio.wait_for(agent.recv(), timeout=self.timeout)
             data = json.loads(resp)
             self.logger.room_log(f" -- Response from {name}: {data}")
             return data.get("result")

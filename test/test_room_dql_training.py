@@ -38,9 +38,18 @@ def run_room(training: bool, model_path: str, matches: int, output_folder: str):
 
 def plot_score_distribution(dataset_path: str, output_path: str):
     df = pd.read_csv(dataset_path)
-    df = df[df["Action_Type"] == "END_MATCH"]
-    names = ast.literal_eval(df.iloc[0]["Agent_Names"])
-    scores = df["Game_Score"].apply(ast.literal_eval).tolist()
+    df_end = df[df["Action_Type"] == "END_MATCH"]
+
+    # Agent names might not be stored in END_MATCH rows. Retrieve them from the
+    # first row in the dataset that has this information available.
+    name_row = df.loc[df["Agent_Names"].notna(), "Agent_Names"].head(1)
+    if name_row.empty:
+        raise ValueError("No agent names found in dataset")
+    names = ast.literal_eval(name_row.iloc[0])
+
+    scores = (
+        df_end["Game_Score"].dropna().apply(ast.literal_eval).tolist()
+    )
     scores_arr = pd.DataFrame(scores, columns=names)
     plt.figure()
     for n in names:

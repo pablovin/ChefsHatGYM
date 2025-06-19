@@ -38,23 +38,25 @@ def get_logger(logger_name, log_directory, log_name, verbose_console, verbose_lo
 
 class BaseAgent:
 
-    def __init__(self, name, log_directory=""):
+    def __init__(self, name, log_directory="", verbose_console=True):
         self.name = name
         self.log_directory = log_directory
 
         self.this_log_folder = os.path.join(
             os.path.abspath(log_directory), "agents", self.name
         )
+        print(f"Log_directory: {log_directory}")
+        verbose_log = False
         if log_directory != "":
-            if not os.path.exists(self.this_log_folder):
-                os.makedirs(self.this_log_folder)
+            os.makedirs(self.this_log_folder, exist_ok=True)
+            verbose_log = True
 
         self.logger = get_logger(
             f"PLAYER_{self.name}",
             self.this_log_folder,
             f"PLAYER_{self.name}.log",
-            False,
-            True,
+            verbose_console,
+            verbose_log,
         )
 
         self.log("---------------------------")

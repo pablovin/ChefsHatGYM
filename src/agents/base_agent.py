@@ -39,6 +39,11 @@ def get_logger(logger_name, log_directory, log_name, verbose_console, verbose_lo
 
         logger.addHandler(console_handler)
 
+    if not verbose_console and not verbose_log:
+        logger.addHandler(logging.NullHandler())
+
+    logger.propagate = False
+
     return logger
 
 
@@ -81,6 +86,9 @@ class BaseAgent:
             verbose_console,
             verbose_log,
         )
+
+        if not verbose_console and not verbose_log:
+            self.log = lambda message: None
 
         self.log("---------------------------")
         self.log(f"Player {self.name} created!")

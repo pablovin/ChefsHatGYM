@@ -158,27 +158,40 @@ class BaseAgent:
     async def connect_remote(self):
         if websockets is None:
             raise ImportError("websockets package is required for remote mode")
+
         uri = f"ws://{self.remote_host}:{self.remote_port}"
-        self.ws = await websockets.connect(uri)
-        await self.ws.send(
-            json.dumps(
-                {
-                    "player_name": self.name,
-                    "password": self.remote_room_password,
-                    "room_name": self.remote_room_name,
-                }
-            )
-        )
-        resp = json.loads(await self.ws.recv())
-        if resp.get("status") != "connected":
-            raise RuntimeError(resp.get("error", "Connection refused"))
+        while True:
+            try:
+                self.ws = await websockets.connect(uri)
+                await self.ws.send(
+                    json.dumps(
+                        {
+                            "player_name": self.name,
+                            "password": self.remote_room_password,
+                            "room_name": self.remote_room_name,
+                        }
+                    )
+                )
+                resp = json.loads(await self.ws.recv())
+                if resp.get("status") != "connected":
+                    raise RuntimeError(resp.get("error", "Connection refused"))
+                break
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                self.log(f"Connection failed: {e}. Retrying...")
+                await asyncio.sleep(1)
 
     async def remote_loop(self):
-        if not self.ws:
-            await self.connect_remote()
         try:
             while True:
-                msg = await self.ws.recv()
+                if not self.ws:
+                    await self.connect_remote()
+                try:
+                    msg = await self.ws.recv()
+                except websockets.exceptions.ConnectionClosed:
+                    self.ws = None
+                    continue
                 data = json.loads(msg)
                 mtype = data.get("type")
                 payload = data.get("payload", {})
@@ -190,7 +203,9 @@ class BaseAgent:
                     method = getattr(self, mtype, None)
                     if method:
                         method(payload)
-        except websockets.exceptions.ConnectionClosed:
-            pass
+        except asyncio.CancelledError:
+            if self.ws:
+                await self.ws.close()
+            raise
 
 

@@ -88,11 +88,19 @@ class Match:
         # print(f"playing agents list: {[p.name for p in playing_agents]}")
         # print(f"Name of the player that should start the match: {name_initial_player}")
 
+        original_player_index = None
         for i, player in enumerate(self.players):
-            # print(f"{i} - {player.name}")
             if name_initial_player == player.name:
                 original_player_index = i
                 break
+
+        # If player name wasn't found (possible if next_player is None),
+        # fall back to the first available playing agent
+        if original_player_index is None:
+            for i, player in enumerate(self.players):
+                if player in playing_agents:
+                    original_player_index = i
+                    break
 
         # print(f"Position of this player in the original list: {original_player_index}")
         # If this item does exist in the playing_agents, get the next original item that exist in the players agent
@@ -111,10 +119,11 @@ class Match:
             # )
 
         # grab the correct new index for this player
+        starting_player_index = 0
         for i, player in enumerate(playing_agents):
             if self.players[original_player_index].name == player.name:
                 starting_player_index = i
-                #         break
+                break
 
                 # print(
                 #     f"Correct index of this player in the playing list: {starting_player_index}"

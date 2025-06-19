@@ -33,8 +33,6 @@ async def run_room_server(tmp_path):
 
     agent_tasks = [asyncio.create_task(a.remote_loop()) for a in agents]
     await room.run()
-    for t in agent_tasks:
-        t.cancel()
     await asyncio.gather(*agent_tasks, return_exceptions=True)
     assert hasattr(room, "final_scores")
 

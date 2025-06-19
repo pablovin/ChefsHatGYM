@@ -1,5 +1,11 @@
 import os
 import logging
+import asyncio
+import json
+try:
+    import websockets
+except Exception:  # pragma: no cover - optional for local tests
+    websockets = None
 
 
 def get_logger(logger_name, log_directory, log_name, verbose_console, verbose_log):
@@ -38,9 +44,26 @@ def get_logger(logger_name, log_directory, log_name, verbose_console, verbose_lo
 
 class BaseAgent:
 
-    def __init__(self, name, log_directory="", verbose_console=True):
+    def __init__(
+        self,
+        name,
+        log_directory="",
+        verbose_console=True,
+        run_remote=False,
+        host="localhost",
+        port=8765,
+        room_name="room",
+        room_password="password",
+    ):
         self.name = name
         self.log_directory = log_directory
+
+        self.run_remote = run_remote
+        self.remote_host = host
+        self.remote_port = port
+        self.remote_room_name = room_name
+        self.remote_room_password = room_password
+        self.ws = None
 
         self.this_log_folder = os.path.join(
             os.path.abspath(log_directory), "agents", self.name
@@ -62,6 +85,13 @@ class BaseAgent:
         self.log("---------------------------")
         self.log(f"Player {self.name} created!")
         self.log(f"  - Agent folder: {self.this_log_folder}")
+        self.log(
+            f"Running mode: {'REMOTE' if self.run_remote else 'LOCAL'}"
+        )
+        if self.run_remote:
+            self.log(
+                f"Remote target ws://{self.remote_host}:{self.remote_port} room={self.remote_room_name}"
+            )
         self.log("---------------------------")
 
     def log(self, message):
@@ -115,3 +145,41 @@ class BaseAgent:
 
     def request_action(self, info):
         pass
+
+    # === Remote support ===
+    async def connect_remote(self):
+        if websockets is None:
+            raise ImportError("websockets package is required for remote mode")
+        uri = f"ws://{self.remote_host}:{self.remote_port}"
+        self.ws = await websockets.connect(uri)
+        await self.ws.send(
+            json.dumps(
+                {
+                    "player_name": self.name,
+                    "password": self.remote_room_password,
+                    "room_name": self.remote_room_name,
+                }
+            )
+        )
+        resp = json.loads(await self.ws.recv())
+        if resp.get("status") != "connected":
+            raise RuntimeError(resp.get("error", "Connection refused"))
+
+    async def remote_loop(self):
+        if not self.ws:
+            await self.connect_remote()
+        while True:
+            msg = await self.ws.recv()
+            data = json.loads(msg)
+            mtype = data.get("type")
+            payload = data.get("payload", {})
+            if mtype.startswith("request_"):
+                method = getattr(self, mtype)
+                result = method(payload)
+                await self.ws.send(json.dumps({"result": result}))
+            else:
+                method = getattr(self, mtype, None)
+                if method:
+                    method(payload)
+
+

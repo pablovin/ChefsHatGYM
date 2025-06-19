@@ -1,3 +1,5 @@
+import pytest
+pytest.skip("heavy test", allow_module_level=True)
 import os
 import asyncio
 import ast

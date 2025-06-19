@@ -142,6 +142,8 @@ class Room:
                     self.websockets[websocket] = player_name
                     self.name_to_websocket[player_name] = websocket
                     self.invalid_counts[player_name] = 0
+                    if hasattr(self.comm, "register_websocket"):
+                        self.comm.register_websocket(websocket)
                     await websocket.send(json.dumps({"status": "connected"}))
 
                     if len(self.connected_players) == self.max_players:
@@ -187,6 +189,8 @@ class Room:
             except Exception:
                 pass
             self.websockets.pop(ws, None)
+            if hasattr(self.comm, "unregister_websocket"):
+                self.comm.unregister_websocket(ws)
             self.name_to_websocket.pop(player_name, None)
         from agents.random_agent import RandomAgent
 

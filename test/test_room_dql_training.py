@@ -42,12 +42,17 @@ def plot_score_distribution(dataset_path: str, output_path: str):
     df = pd.read_csv(dataset_path)
     df_end = df[df["Action_Type"] == "END_MATCH"]
 
-    # Agent names might not be stored in END_MATCH rows. Retrieve them from the
-    # first row in the dataset that has this information available.
-    name_row = df.loc[df["Agent_Names"].notna(), "Agent_Names"].head(1)
-    if name_row.empty:
+    # Retrieve agent names from the first non-null entry. Some rows might
+    # contain the string "nan" which should be ignored.
+    name_series = df["Agent_Names"].dropna()
+    if name_series.empty:
         raise ValueError("No agent names found in dataset")
-    names = ast.literal_eval(name_row.iloc[0])
+
+    first_names = name_series.iloc[0]
+    if isinstance(first_names, str) and first_names.lower() == "nan":
+        raise ValueError("No valid agent names found in dataset")
+
+    names = ast.literal_eval(first_names)
 
     scores = (
         df_end["Game_Score"].dropna().apply(ast.literal_eval).tolist()

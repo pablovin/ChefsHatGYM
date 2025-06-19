@@ -463,7 +463,12 @@ class Room:
                     }
 
                     for agent in self.connected_players.values():
-                        if agent.name == player_name:
+                        name = (
+                            agent.name
+                            if not self.run_remote_room
+                            else self.websockets.get(agent, "unknown")
+                        )
+                        if name == player_name:
                             action_info["observation_before"] = result_before_action[
                                 "observation"
                             ]

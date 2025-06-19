@@ -267,7 +267,7 @@ class Room:
             "update_game_start",
             self.connected_players.values(),
             {
-                "opponents": self.connected_players.keys(),
+                "opponents": list(self.connected_players.keys()),
                 "actions": self.action_lookup,
                 "max_rounds": self.game.max_rounds,
                 "max_matches": self.game.max_matches,

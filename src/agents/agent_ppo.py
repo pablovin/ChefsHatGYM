@@ -238,7 +238,7 @@ class AgentPPO(BaseAgent):
 
         hand = np.array(observations["hand"]) / 13
         board = np.array(observations["board"]) / 13
-        possible_actions = np.array(self.all_actions)
+        possible_actions = np.array(observations["possible_actions"])
 
         state = np.concatenate([hand, board])
         action_mask = np.isin(self.all_actions, list(possible_actions)).astype(int)
@@ -270,6 +270,9 @@ class AgentPPO(BaseAgent):
             self.possibleActions.append(action_mask)
             old_policy = self.actor.predict([state_input, mask_input], verbose=0)[0]
             self.old_policies.append(old_policy)
+
+        # print(f"Possible Actions: {mask_input}")
+        # print(f"Possible Actions: {mask_input}")
 
         print(f"Returning: {action_index} - {self.all_actions[action_index]}")
         return action_index

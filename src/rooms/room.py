@@ -31,7 +31,9 @@ class Room:
         save_logs_room=True,
         save_logs_game=True,
         save_game_dataset=True,
+        room_host="0.0.0.0",
         room_port=99,
+        agent_timeout=10,
     ):
         self.run_remote_room = run_remote_room
         self.room_name = room_name
@@ -41,7 +43,9 @@ class Room:
         self.save_logs_room = save_logs_room
         self.save_logs_game = save_logs_game
         self.save_game_dataset = save_game_dataset
+        self.ws_host = room_host
         self.ws_port = room_port
+        self.agent_timeout = agent_timeout
 
         self.max_matches = max_matches
         self.max_rounds = max_rounds
@@ -79,9 +83,9 @@ class Room:
         if not run_remote_room:
             self.comm = LocalComm(self, self.room_logger)
         else:
-            # REMOTE
-            self.comm = RemoteComm(self, self.room_logger)
-            self.websockets = {}  # names -> websocket
+            self.comm = RemoteComm(self, self.room_logger, timeout=self.agent_timeout)
+            self.websockets = {}  # websocket -> name
+            self.name_to_websocket = {}
 
     async def wait_for_players(self):
         self.room_logger.room_log("Checking if all players are connected...")
@@ -94,7 +98,7 @@ class Room:
         else:
 
             # Start the websocket server and wait until all players are connected
-            async def handler(websocket, path):
+            async def handler(websocket, path=None):
                 try:
                     join_msg = await websocket.recv()
                     try:
@@ -135,23 +139,32 @@ class Room:
 
                     self.room_logger.room_log(f"Remote player connected: {player_name}")
                     self.connected_players[player_name] = websocket
+                    self.websockets[websocket] = player_name
+                    self.name_to_websocket[player_name] = websocket
                     self.invalid_counts[player_name] = 0
+                    if hasattr(self.comm, "register_websocket"):
+                        self.comm.register_websocket(websocket)
                     await websocket.send(json.dumps({"status": "connected"}))
 
                     if len(self.connected_players) == self.max_players:
                         self._waiting_event.set()
 
-                    # Keep connection alive until game starts, then handle in game loop
+                    # Keep connection alive until the game finishes.  The
+                    # websocket library closes the connection once this handler
+                    # returns, so wait here until the room signals that the game
+                    # has started and later until the connection is closed by
+                    # the agent or the server.
                     await self._waiting_event.wait()
+                    await websocket.wait_closed()
                 except Exception as e:
                     print("WebSocket handler error:", e)
                     await websocket.close()
 
             # Start server
             self.room_logger.room_log(
-                f"Room server listening on ws://localhost:{self.ws_port}/ (room={self.room_name})"
+                f"Room server listening on ws://{self.ws_host}:{self.ws_port}/ (room={self.room_name})"
             )
-            self._ws_server = await websockets.serve(handler, "0.0.0.0", self.ws_port)
+            self._ws_server = await websockets.serve(handler, self.ws_host, self.ws_port)
             await self._waiting_event.wait()
             self.room_logger.room_log("All players connected. Ready to play.")
 
@@ -159,6 +172,30 @@ class Room:
         if self.run_remote_room and hasattr(self, "_ws_server"):
             self._ws_server.close()
             await self._ws_server.wait_closed()
+
+    async def handle_disconnect(self, player_name):
+        if player_name not in self.connected_players:
+            return
+        self.room_logger.room_log(
+            f"Player {player_name} disconnected. Replacing with RandomAgent"
+        )
+        self.engine_logger.engine_log(
+            f"Player {player_name} disconnected. Replaced with RandomAgent"
+        )
+        ws = self.name_to_websocket.get(player_name)
+        if ws:
+            try:
+                await ws.close()
+            except Exception:
+                pass
+            self.websockets.pop(ws, None)
+            if hasattr(self.comm, "unregister_websocket"):
+                self.comm.unregister_websocket(ws)
+            self.name_to_websocket.pop(player_name, None)
+        from agents.random_agent import RandomAgent
+
+        agent = RandomAgent(name=player_name, log_directory=self.room_dir)
+        self.connected_players[player_name] = agent
 
     # Local player connection
     def connect_player(self, agent):
@@ -235,11 +272,11 @@ class Room:
             f"Game setup: Players={len(self.connected_players)}, Max Matches={self.game.max_matches}, Max Rounds={self.game.max_rounds}, Max Score={self.game.max_score}"
         )
 
-        self.comm.notify_all(
+        await self.comm.notify_all(
             "update_game_start",
             self.connected_players.values(),
             {
-                "opponents": self.connected_players.keys(),
+                "opponents": list(self.connected_players.keys()),
                 "actions": self.action_lookup,
                 "max_rounds": self.game.max_rounds,
                 "max_matches": self.game.max_matches,
@@ -252,7 +289,7 @@ class Room:
             self.room_logger.room_log(f"\n--- CARDS HANDED TO PLAYERS ---")
             hands = [player.cards for player in self.game.players].copy()
             for agent, hand in zip(self.connected_players.values(), hands):
-                self.comm.notify_one(
+                await self.comm.notify_one(
                     agent,
                     "update_new_hand",
                     {"hand": hand},
@@ -261,7 +298,7 @@ class Room:
             # If this is the second or more match
             if self.game.current_match_count > 0:
                 self.game.assign_roles()
-                self.comm.notify_all(
+                await self.comm.notify_all(
                     "update_new_roles",
                     self.connected_players.values(),
                     self.game.get_roles(),
@@ -273,7 +310,7 @@ class Room:
 
                 for player_name, info in special_opts.items():
                     # Ask only this player if they want to use the special action.
-                    wants = self.comm.request_one(
+                    wants = await self.comm.request_one(
                         self.connected_players[player_name],
                         "request_special_action",
                         {
@@ -287,14 +324,14 @@ class Room:
                         self.game.apply_joker_special(player_name, info["option"])
                         # Inform all agents about what happened
                         if info["option"] == "food_fight":
-                            self.comm.notify_all(
+                            await self.comm.notify_all(
                                 "update_food_fight",
                                 self.connected_players.values(),
                                 {"by": player_name, "new_roles": self.game.get_roles()},
                             )
                             food_fight_action = True
                         else:
-                            self.comm.notify_all(
+                            await self.comm.notify_all(
                                 "update_dinner_served",
                                 self.connected_players.values(),
                                 {"by": player_name},
@@ -314,7 +351,7 @@ class Room:
                     for agent_name, req in exchange_requests.items():
                         attempts = 0
                         while True:
-                            cards = self.comm.request_one(
+                            cards = await self.comm.request_one(
                                 self.connected_players[agent_name],
                                 "request_cards_to_exchange",
                                 {
@@ -340,7 +377,7 @@ class Room:
 
                     # Notify each player of their updated hand privately
                     for player_name, new_hand in hands_after.items():
-                        self.comm.notify_one(
+                        await self.comm.notify_one(
                             self.connected_players[player_name],
                             "update_hand_after_exchange",
                             {"hand": new_hand},
@@ -353,7 +390,7 @@ class Room:
                 f"\n--- MATCH {self.game.current_match_count} STARTED ---"
             )
             for agent, hand in zip(self.connected_players.values(), hands):
-                self.comm.notify_one(
+                await self.comm.notify_one(
                     agent,
                     "update_start_match",
                     {
@@ -394,7 +431,7 @@ class Room:
                             # print(f"Random action: {action}")
                             # # action = self.action_lookup.
                         else:
-                            action_index = self.comm.request_one(
+                            action_index = await self.comm.request_one(
                                 self.connected_players[player_name],
                                 "request_action",
                                 observation,
@@ -434,14 +471,14 @@ class Room:
                                 "observation"
                             ]
 
-                        self.comm.notify_one(
+                        await self.comm.notify_one(
                             agent,
                             "update_player_action",
                             action_info,
                         )
 
                     if result_after_action.get("round_over"):
-                        self.comm.notify_all(
+                        await self.comm.notify_all(
                             "update_pizza_declared",
                             self.connected_players.values(),
                             {
@@ -453,7 +490,7 @@ class Room:
 
                 if result_after_action.get("match_over"):
                     self.room_logger.room_log("\n--- MATCH ENDED ---")
-                    self.comm.notify_all(
+                    await self.comm.notify_all(
                         "update_match_over",
                         self.connected_players.values(),
                         {
@@ -466,7 +503,7 @@ class Room:
             # --------------------------------------------------
 
         self.room_logger.room_log("\n=== GAME ENDED ===")
-        self.comm.notify_all(
+        await self.comm.notify_all(
             "update_game_over",
             self.connected_players.values(),
             {"final_scores": self.game.scores},

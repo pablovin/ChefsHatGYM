@@ -1,45 +1,57 @@
-from rooms.agent_communication import AgentCommInterface
 import asyncio
-
+import json
+import websockets
+from rooms.agent_communication import AgentCommInterface
 
 class RemoteComm(AgentCommInterface):
-    def __init__(
-        self, room, logger
-    ):  # Pass reference to UnifiedRoom for websockets, etc
+    def __init__(self, room, logger, timeout=10):
         self.room = room
         self.logger = logger
+        self.timeout = timeout
+        self._send_locks = {}
 
-    def notify_all(self, method, *args):
-        # await in game loop, or run as task
+    def register_websocket(self, ws):
+        if ws not in self._send_locks:
+            self._send_locks[ws] = asyncio.Lock()
 
+    def unregister_websocket(self, ws):
+        self._send_locks.pop(ws, None)
+
+    async def _safe_send(self, ws, message):
+        lock = self._send_locks.setdefault(ws, asyncio.Lock())
+        async with lock:
+            await ws.send(message)
+
+    async def notify_all(self, method, agents, *args):
+        payload = args[0] if args else {}
         self.logger.room_log(f"Notify ALL -> method={method} | args={args}")
-
-        return asyncio.create_task(
-            self.room.broadcast({"type": method, "info": args[0] if args else {}})
+        message = json.dumps({"type": method, "payload": payload})
+        await asyncio.gather(
+            *[self._safe_send(a, message) for a in agents],
+            return_exceptions=True,
         )
 
-    def notify_one(self, player_name, method, *args):
-        token = self.room.token_for_player_name[player_name]
+    async def notify_one(self, agent, method, *args):
+        payload = args[0] if args else {}
+        name = self.room.websockets.get(agent, "unknown")
+        self.logger.room_log(f"Notify ONE -> {name} | method={method} | args={args}")
+        try:
+            await self._safe_send(agent, json.dumps({"type": method, "payload": payload}))
+        except websockets.exceptions.ConnectionClosed:
+            await self.room.handle_disconnect(name)
 
-        self.logger.room_log(
-            f"Notify ONE -> {player_name} | method={method} | args={args}"
-        )
-
-        return asyncio.create_task(
-            self.room.send_to_agent(
-                token, {"type": method, "info": args[0] if args else {}}
-            )
-        )
-
-    def request_one(self, player_name, method, *args):
-        token = self.room.token_for_player_name[player_name]
-        self.logger.room_log(
-            f"Request ONE -> {player_name} | method={method} | args={args}"
-        )
-        response = asyncio.create_task(
-            self.room.request_from_agent(
-                token, method, args[0] if args else {}, timeout=60
-            )
-        )
-        self.logger.room_log(f" -- Response from {player_name}: {response}")
-        return response
+    async def request_one(self, agent, method, *args):
+        payload = args[0] if args else {}
+        name = self.room.websockets.get(agent, "unknown")
+        self.logger.room_log(f"Request ONE -> {name} | method={method} | args={args}")
+        try:
+            async with self._send_locks.setdefault(agent, asyncio.Lock()):
+                await agent.send(json.dumps({"type": method, "payload": payload}))
+                resp = await asyncio.wait_for(agent.recv(), timeout=self.timeout)
+            data = json.loads(resp)
+            self.logger.room_log(f" -- Response from {name}: {data}")
+            return data.get("result")
+        except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed):
+            await self.room.handle_disconnect(name)
+            agent_local = self.room.connected_players[name]
+            return getattr(agent_local, method)(*args)

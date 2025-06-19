@@ -1,6 +1,6 @@
 ![Chef's Hat Card Game](gitImages/chefsHatLogo.png)
 
-## ChefsHatGym V2
+## ChefsHatGym V3
 
 This repository holds the ChefsHatGym2 environment, which contains all the necessary tools to run, train and evaluate your agents while they play the Chef`s Hat game.
 

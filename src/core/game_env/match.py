@@ -1,22 +1,47 @@
+from typing import Any, Dict, List, Optional
+
 from .round import Round
 from ..utils.rules import assign_roles
 from ..utils.cards import deal_cards
 from ..utils.rules import find_starting_player
+from ..dataset.dataset_manager import DataSetManager
+from ..logging.engine_logger import EngineLogger
 
 
 class Match:
 
     def __init__(
         self,
-        players,
-        match_number,
-        max_matches,
-        current_scores,
-        starting_player_name,
-        max_rounds=None,
-        logger=None,
-        dataset=None,
-    ):
+        players: List[Any],
+        match_number: int,
+        max_matches: int,
+        current_scores: Dict[str, int],
+        starting_player_name: str,
+        max_rounds: Optional[int] = None,
+        logger: Optional[EngineLogger] = None,
+        dataset: Optional[DataSetManager] = None,
+    ) -> None:
+        """Initialize a match instance.
+
+        Parameters
+        ----------
+        players : list
+            List of :class:`Player` objects participating in the match.
+        match_number : int
+            Sequential identifier of this match.
+        max_matches : int
+            Total number of matches planned for the game.
+        current_scores : dict[str, int]
+            Current cumulative game score per player.
+        starting_player_name : str
+            Name of the player who starts the first round.
+        max_rounds : int | None, optional
+            Maximum number of rounds in this match.
+        logger : EngineLogger | None, optional
+            Logger instance for debug output.
+        dataset : DataSetManager | None, optional
+            Dataset manager used to store gameplay information.
+        """
         self.players = players
         self.match_number = match_number
         self.max_rounds = max_rounds
@@ -57,7 +82,8 @@ class Match:
 
         # self._start_round(self.players[starting_player_index].name)
 
-    def _deal_cards(self):
+    def _deal_cards(self) -> None:
+        """Deal cards to all players and record the action."""
         hands = deal_cards(len(self.players))
 
         self.logger.engine_log("- Cards dealt:")
@@ -70,12 +96,18 @@ class Match:
 
         self.dataset.dealAction(self.match_number, cards)
 
-    def start_match(
-        self,
-    ):
+    def start_match(self) -> None:
+        """Begin the first round of the match."""
         self._start_round(self.starting_player_name)
 
-    def _start_round(self, name_initial_player):
+    def _start_round(self, name_initial_player: str) -> None:
+        """Create a new :class:`Round` starting with ``name_initial_player``.
+
+        Parameters
+        ----------
+        name_initial_player : str
+            Name of the player that should act first in the new round.
+        """
 
         self.rounds_played += 1
         is_first_round = self.rounds_played == 1
@@ -142,7 +174,21 @@ class Match:
 
         # self.rounds_played += 1
 
-    def step(self, action):
+    def step(self, action: Optional[str]) -> Dict[str, Any]:
+        """Perform ``action`` in the current round and handle match flow.
+
+        Parameters
+        ----------
+        action : str | None
+            Action to perform in the current :class:`Round`. If ``None`` the
+            underlying round will simply request an action from the player.
+
+        Returns
+        -------
+        dict
+            Dictionary returned by :meth:`Round.step` enriched with match
+            information such as ``this_match_number`` and ``match_over``.
+        """
         result = self.round.step(action)
 
         result["this_match_number"] = self.match_number

@@ -1,4 +1,7 @@
 import os
+import random
+from collections import deque
+
 import numpy as np
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Input
@@ -27,7 +30,13 @@ class AgentDQN(BaseAgent):
         self.epsilon_decay = 0.995
         self.lr = 1e-3
         self.all_actions = []
-        self.memory = []
+        # Replay buffer across matches
+        self.memory = deque(maxlen=5000)
+        # Store transitions of the current match
+        self.match_memory: list[dict] = []
+        self.batch_size = 32
+        self.target_update = 100
+        self.update_steps = 0
         self.loss_history: list[float] = []
         self.epsilon_history: list[float] = []
         self.positions: list[int | None] = []
@@ -35,18 +44,22 @@ class AgentDQN(BaseAgent):
         self.loss_log_file = (
             os.path.join(log_directory, f"{self.name}_loss.log") if log_directory else None
         )
-        self._build_model()
+        self.model = self._build_model()
+        # Target network for more stable training
+        self.target_model = self._build_model()
+        self.target_model.set_weights(self.model.get_weights())
         if load_model and model_path and os.path.exists(model_path):
             from tensorflow.keras.models import load_model as _load
             self.model = _load(model_path)
-
+            
     def _build_model(self):
         inp = Input(shape=(28,))
         x = Dense(64, activation="relu")(inp)
         x = Dense(64, activation="relu")(x)
         out = Dense(200, activation="linear")(x)
-        self.model = Model(inp, out)
-        self.model.compile(optimizer=Adam(self.lr), loss="mean_squared_error")
+        model = Model(inp, out)
+        model.compile(optimizer=Adam(self.lr), loss="mean_squared_error")
+        return model
 
     # ------------------------------------------------------------------
     # Game update callbacks
@@ -86,11 +99,22 @@ class AgentDQN(BaseAgent):
             self.positions.append(None)
         if self.training:
             reward = self._calculate_reward(order)
-            if self.memory:
-                self.memory[-1]["reward"] = reward
-                self.memory[-1]["done"] = True
-                self._train_from_memory()
-                self.memory = []
+            discounted = reward
+            for i, tr in enumerate(reversed(self.match_memory)):
+                self.memory.append(
+                    {
+                        "state": tr["state"],
+                        "action": tr["action"],
+                        "mask": tr["mask"],
+                        "next_state": tr["next_state"],
+                        "next_mask": tr["next_mask"],
+                        "reward": discounted,
+                        "done": i == 0,
+                    }
+                )
+                discounted *= self.gamma
+            self.match_memory = []
+            self._train_from_memory()
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
             self.log(
@@ -112,15 +136,13 @@ class AgentDQN(BaseAgent):
         )
         mask_state = np.isin(self.all_actions, prev_ob["possible_actions"]).astype(int)
         mask_next = np.isin(self.all_actions, next_ob["possible_actions"]).astype(int)
-        self.memory.append(
+        self.match_memory.append(
             {
                 "state": state,
                 "action": payload["action_index"],
                 "mask": mask_state,
                 "next_state": next_state,
                 "next_mask": mask_next,
-                "reward": 0.0,
-                "done": False,
             }
         )
 
@@ -163,7 +185,10 @@ class AgentDQN(BaseAgent):
         return rewards.get(pos, -1.0)
 
     def _train_from_memory(self):
-        batch = self.memory
+        if len(self.memory) < self.batch_size:
+            return
+        batch = random.sample(self.memory, self.batch_size)
+
         states = np.array([m["state"] for m in batch])
         next_states = np.array([m["next_state"] for m in batch])
         actions = np.array([m["action"] for m in batch])
@@ -172,7 +197,7 @@ class AgentDQN(BaseAgent):
         dones = np.array([m["done"] for m in batch])
 
         q_values = self.model.predict(states, verbose=0)
-        q_next = self.model.predict(next_states, verbose=0)
+        q_next = self.target_model.predict(next_states, verbose=0)
         q_next[next_masks == 0] = -np.inf
         max_next = np.max(q_next, axis=1)
 
@@ -191,6 +216,9 @@ class AgentDQN(BaseAgent):
                 f.write(f"{loss}\n")
         if self.model_path:
             self.model.save(self.model_path)
+        self.update_steps += 1
+        if self.update_steps % self.target_update == 0:
+            self.target_model.set_weights(self.model.get_weights())
 
     # ------------------------------------------------------------------
     # Utility methods

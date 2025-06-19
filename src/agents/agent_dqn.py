@@ -16,6 +16,8 @@ class AgentDQN(BaseAgent):
         training: bool = False,
         log_directory: str = "",
         verbose_console: bool = False,
+        model_path: str | None = None,
+        load_model: bool = False,
     ):
         super().__init__(name, log_directory, verbose_console)
         self.training = training
@@ -26,7 +28,16 @@ class AgentDQN(BaseAgent):
         self.lr = 1e-3
         self.all_actions = []
         self.memory = []
+        self.loss_history: list[float] = []
+        self.positions: list[int | None] = []
+        self.model_path = model_path
+        self.loss_log_file = (
+            os.path.join(log_directory, f"{self.name}_loss.log") if log_directory else None
+        )
         self._build_model()
+        if load_model and model_path and os.path.exists(model_path):
+            from tensorflow.keras.models import load_model as _load
+            self.model = _load(model_path)
 
     def _build_model(self):
         inp = Input(shape=(28,))
@@ -67,19 +78,23 @@ class AgentDQN(BaseAgent):
         self.log(f"Update start match! Received payload: {payload}")
 
     def update_match_over(self, payload):
-        if not self.training:
-            return
-        reward = self._calculate_reward(payload.get("finishing_order", []))
-        if self.memory:
-            self.memory[-1]["reward"] = reward
-            self.memory[-1]["done"] = True
-            self._train_from_memory()
-            self.memory = []
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
-        self.log(
-            f"Match over. Finishing order: {payload.get('finishing_order')} - Reward: {reward}"
-        )
+        order = payload.get("finishing_order", [])
+        if self.name in order:
+            self.positions.append(order.index(self.name))
+        else:
+            self.positions.append(None)
+        if self.training:
+            reward = self._calculate_reward(order)
+            if self.memory:
+                self.memory[-1]["reward"] = reward
+                self.memory[-1]["done"] = True
+                self._train_from_memory()
+                self.memory = []
+            if self.epsilon > self.epsilon_min:
+                self.epsilon *= self.epsilon_decay
+            self.log(
+                f"Match over. Finishing order: {order} - Reward: {reward}"
+            )
 
     def update_player_action(self, payload):
         if payload.get("player") != self.name or not self.training:
@@ -166,5 +181,52 @@ class AgentDQN(BaseAgent):
                 target += self.gamma * max_next[i]
             q_values[i, actions[i]] = target
 
-        self.model.fit(states, q_values, epochs=1, verbose=0)
+        history = self.model.fit(states, q_values, epochs=1, verbose=0)
+        loss = float(history.history["loss"][0])
+        self.loss_history.append(loss)
+        if self.loss_log_file:
+            with open(self.loss_log_file, "a") as f:
+                f.write(f"{loss}\n")
+        if self.model_path:
+            self.model.save(self.model_path)
+
+    # ------------------------------------------------------------------
+    # Utility methods
+    # ------------------------------------------------------------------
+    def save_model(self, path: str | None = None):
+        """Save the model to disk."""
+        if path is None:
+            path = self.model_path
+        if path:
+            self.model.save(path)
+
+    def load_model(self, path: str | None = None):
+        """Load a model from disk."""
+        if path is None:
+            path = self.model_path
+        if path and os.path.exists(path):
+            from tensorflow.keras.models import load_model as _load
+            self.model = _load(path)
+
+    def plot_loss(self, path: str):
+        import matplotlib.pyplot as plt
+
+        plt.figure()
+        plt.plot(self.loss_history)
+        plt.xlabel("Training Step")
+        plt.ylabel("Loss")
+        plt.title("DQN Loss")
+        plt.savefig(path)
+        plt.close()
+
+    def plot_positions(self, path: str):
+        import matplotlib.pyplot as plt
+
+        plt.figure()
+        plt.plot(self.positions)
+        plt.xlabel("Match")
+        plt.ylabel("Position")
+        plt.title("Agent Position per Match")
+        plt.savefig(path)
+        plt.close()
 

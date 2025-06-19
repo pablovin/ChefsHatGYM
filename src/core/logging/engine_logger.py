@@ -36,8 +36,8 @@ class EngineLogger:
         self._log_game_start()
 
     def _noop_all(self):
-        self.log_room_intro = lambda: None
-        self.room_log = lambda message: None
+        """Disable all logging methods when logs are not saved."""
+        self.engine_log = lambda message: None
 
     def _init_logger(self, name, filepath):
         logger = logging.getLogger(name)

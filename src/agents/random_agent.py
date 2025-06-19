@@ -3,8 +3,28 @@ from .base_agent import BaseAgent
 
 
 class RandomAgent(BaseAgent):
-    def __init__(self, name, log_directory="", verbose_log=True):
-        super().__init__(name, log_directory, verbose_log)
+
+    def __init__(
+        self,
+        name,
+        log_directory="",
+        verbose_log=True,
+        run_remote=False,
+        host="localhost",
+        port=8765,
+        room_name="room",
+        room_password="password",
+    ):
+        super().__init__(
+            name,
+            log_directory,
+            verbose_log,
+            run_remote,
+            host,
+            port,
+            room_name,
+            room_password,
+        )
         self.all_actions = []
         self.hand = []
 

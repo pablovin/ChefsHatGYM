@@ -176,18 +176,21 @@ class BaseAgent:
     async def remote_loop(self):
         if not self.ws:
             await self.connect_remote()
-        while True:
-            msg = await self.ws.recv()
-            data = json.loads(msg)
-            mtype = data.get("type")
-            payload = data.get("payload", {})
-            if mtype.startswith("request_"):
-                method = getattr(self, mtype)
-                result = method(payload)
-                await self.ws.send(json.dumps({"result": result}))
-            else:
-                method = getattr(self, mtype, None)
-                if method:
-                    method(payload)
+        try:
+            while True:
+                msg = await self.ws.recv()
+                data = json.loads(msg)
+                mtype = data.get("type")
+                payload = data.get("payload", {})
+                if mtype.startswith("request_"):
+                    method = getattr(self, mtype)
+                    result = method(payload)
+                    await self.ws.send(json.dumps({"result": result}))
+                else:
+                    method = getattr(self, mtype, None)
+                    if method:
+                        method(payload)
+        except websockets.exceptions.ConnectionClosed:
+            pass
 
 

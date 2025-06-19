@@ -98,7 +98,7 @@ class Room:
         else:
 
             # Start the websocket server and wait until all players are connected
-            async def handler(websocket, path):
+            async def handler(websocket, path=None):
                 try:
                     join_msg = await websocket.recv()
                     try:

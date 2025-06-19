@@ -2,7 +2,7 @@
 
 ## ChefsHatGym V3
 
-This repository holds the ChefsHatGym2 environment, which contains all the necessary tools to run, train and evaluate your agents while they play the Chef`s Hat game.
+This repository holds the ChefsHatGym environment, which contains all the necessary tools to run, train and evaluate your agents while they play the Chef`s Hat game.
 
 With this library, you will be able to:
 
@@ -76,45 +76,76 @@ Refer to our full [documentation](https://chefshatgym.readthedocs.io/en/latest/)
 
 ### Running a game locally
 The basic structure of the simulator is a room, that will host four players, and initialize the game.
-ChefsHatGym2 encapsulates the entire room structure, so it is easy to create a game using just a few lines of code:
+ChefsHatGym encapsulates the entire room structure. A local game can be started with a few lines of code:
 
 ```python
-    # Start the room
-    room = ChefsHatRoomLocal(
-        room_name="local_room",
-        verbose=False,
-    )
+import asyncio
+from rooms.room import Room
+from agents.random_agent import RandomAgent
 
-    # Create the players
-    p1 = AgentRandonLocal(name="01")
-    p2 = AgentRandonLocal(name="02")
-    p3 = AgentRandonLocal(name="03")
-    p4 = AgentRandonLocal(name="04")
+async def main():
+    room = Room(run_remote_room=False, room_name="local_room", max_matches=1)
 
-    # Adding players to the room
-    for p in [p1, p2, p3, p4]:
-        room.add_player(p)
+    players = [RandomAgent(name=f"P{i}", log_directory=room.room_dir) for i in range(4)]
+    for p in players:
+        room.connect_player(p)
 
-    # Start the game
-    info = room.start_new_game(game_verbose=True)
+    await room.run()
+    print(room.final_scores)
 
+asyncio.run(main())
 ```
 
 For a more detailed example, check the [examples folder.](https://github.com/pablovin/ChefsHatGYM/tree/master/examples).
 
 ### Running a game remotely
 
-ChefsHatGym2 allows the creation of a gameroom server. Agents running in different machines can connect to the room server via simple TCP connection. A server room structure and remote agents is supported by the library, as shown in our [examples folder](https://github.com/pablovin/ChefsHatGYM/tree/master/examples/remoteRoom).
+ChefsHatGym can also host a room as a websocket server. Agents running on different machines can join the server and play together.
+
+```python
+# Server
+import asyncio
+from rooms.room import Room
+
+async def main():
+    room = Room(run_remote_room=True, room_name="server_room",
+                room_password="secret", room_port=8765)
+    await room.run()
+
+asyncio.run(main())
+```
+
+Remote agents connect using the `remote_loop` method:
+
+```python
+import asyncio
+from agents.random_agent import RandomAgent
+
+async def main():
+    agent = RandomAgent(
+        "P1",
+        run_remote=True,
+        host="localhost",
+        port=8765,
+        room_name="server_room",
+        room_password="secret",
+    )
+    await agent.remote_loop()
+
+asyncio.run(main())
+```
+
+For complete examples, check the [examples folder.](https://github.com/pablovin/ChefsHatGYM/tree/master/examples)
 
 ### Chefs Hat Agents
 
-ChefsHatGym2 provides an interface to encapsulate agents. It allows the extension of existing agents, but also the creation of new agents. Implementing from this interface, allow your agents to be inserted in any Chef`s Hat game run by the simulator.
+ChefsHatGym provides an interface to encapsulate agents. It allows the extension of existing agents, but also the creation of new agents. Implementing from this interface allows your agents to be inserted in any Chef`s Hat game run by the simulator.
 
-Runing an agent from another machine is supported directly by the ChefsHat agent interface. By implementing this interface, your agent gets all the local and remote agent functionality and can be used by the Chef`s Hat simulator. 
+Running an agent from another machine is supported directly by the agent interface. By enabling `run_remote=True` and calling `remote_loop`, your agent gets all the local and remote functionality and can be used by the Chef`s Hat simulator.
 
 
 Here is an example of an agent that only select random actions:
-* [Random Agent](https://github.com/pablovin/ChefsHatGYM/blob/master/src/ChefsHatGym/agents/agent_random.py)
+* [Random Agent](https://github.com/pablovin/ChefsHatGYM/blob/master/src/agents/random_agent.py)
 
 
 ## Legacy Plugins and Extensions

@@ -1,7 +1,23 @@
 import asyncio
 import json
+from typing import Any
+
+import numpy as np
 import websockets
 from rooms.agent_communication import AgentCommInterface
+
+
+def _to_serializable(obj: Any) -> Any:
+    """Recursively convert numpy types to JSON serializable types."""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, dict):
+        return {k: _to_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_to_serializable(v) for v in obj]
+    return obj
 
 class RemoteComm(AgentCommInterface):
     def __init__(self, room, logger, timeout=10):
@@ -23,7 +39,7 @@ class RemoteComm(AgentCommInterface):
             await ws.send(message)
 
     async def notify_all(self, method, agents, *args):
-        payload = args[0] if args else {}
+        payload = _to_serializable(args[0]) if args else {}
         self.logger.room_log(f"Notify ALL -> method={method} | args={args}")
         message = json.dumps({"type": method, "payload": payload})
         await asyncio.gather(
@@ -32,7 +48,7 @@ class RemoteComm(AgentCommInterface):
         )
 
     async def notify_one(self, agent, method, *args):
-        payload = args[0] if args else {}
+        payload = _to_serializable(args[0]) if args else {}
         name = self.room.websockets.get(agent, "unknown")
         self.logger.room_log(f"Notify ONE -> {name} | method={method} | args={args}")
         try:
@@ -41,7 +57,7 @@ class RemoteComm(AgentCommInterface):
             await self.room.handle_disconnect(name)
 
     async def request_one(self, agent, method, *args):
-        payload = args[0] if args else {}
+        payload = _to_serializable(args[0]) if args else {}
         name = self.room.websockets.get(agent, "unknown")
         self.logger.room_log(f"Request ONE -> {name} | method={method} | args={args}")
         try:

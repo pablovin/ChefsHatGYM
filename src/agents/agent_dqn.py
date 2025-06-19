@@ -29,6 +29,7 @@ class AgentDQN(BaseAgent):
         self.all_actions = []
         self.memory = []
         self.loss_history: list[float] = []
+        self.epsilon_history: list[float] = []
         self.positions: list[int | None] = []
         self.model_path = model_path
         self.loss_log_file = (
@@ -184,6 +185,7 @@ class AgentDQN(BaseAgent):
         history = self.model.fit(states, q_values, epochs=1, verbose=0)
         loss = float(history.history["loss"][0])
         self.loss_history.append(loss)
+        self.epsilon_history.append(self.epsilon)
         if self.loss_log_file:
             with open(self.loss_log_file, "a") as f:
                 f.write(f"{loss}\n")
@@ -211,13 +213,23 @@ class AgentDQN(BaseAgent):
     def plot_loss(self, path: str):
         import matplotlib.pyplot as plt
 
-        plt.figure()
-        plt.plot(self.loss_history)
-        plt.xlabel("Training Step")
-        plt.ylabel("Loss")
-        plt.title("DQN Loss")
+        fig, ax1 = plt.subplots()
+        color_loss = "tab:blue"
+        ax1.set_xlabel("Training Step")
+        ax1.set_ylabel("Loss", color=color_loss)
+        ax1.plot(self.loss_history, color=color_loss, label="Loss")
+        ax1.tick_params(axis="y", labelcolor=color_loss)
+
+        ax2 = ax1.twinx()
+        color_eps = "tab:red"
+        ax2.set_ylabel("Epsilon", color=color_eps)
+        ax2.plot(self.epsilon_history, color=color_eps, label="Epsilon")
+        ax2.tick_params(axis="y", labelcolor=color_eps)
+
+        fig.tight_layout()
+        plt.title("DQN Loss and Epsilon")
         plt.savefig(path)
-        plt.close()
+        plt.close(fig)
 
     def plot_positions(self, path: str):
         import matplotlib.pyplot as plt

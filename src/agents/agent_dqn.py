@@ -45,7 +45,7 @@ class AgentDQN(BaseAgent):
         x = Dense(64, activation="relu")(x)
         out = Dense(200, activation="linear")(x)
         self.model = Model(inp, out)
-        self.model.compile(optimizer=Adam(self.lr), loss="mse")
+        self.model.compile(optimizer=Adam(self.lr), loss="mean_squared_error")
 
     # ------------------------------------------------------------------
     # Game update callbacks

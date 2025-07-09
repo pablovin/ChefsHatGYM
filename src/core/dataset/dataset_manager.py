@@ -2,7 +2,6 @@
 import datetime
 import numpy as np
 import pandas as pd
-from copy import copy
 import os
 
 # Action types
@@ -51,9 +50,10 @@ class DataSetManager:
             self._dataSetDirectory = os.path.join(dataSetDirectory, "dataset")
             os.makedirs(self._dataSetDirectory, exist_ok=True)
 
-            self._currentDataSetFile = os.path.join(
-                self._dataSetDirectory, "game_dataset.pkl"
-            )
+            # Base path for dataset files.  Despite the ``.pkl`` extension the
+            # binary file is written using the HDF5 format which allows
+            # efficient appends.
+            self._currentDataSetFile = os.path.join(self._dataSetDirectory, "game_dataset.pkl")
             self._save_dataset = True
 
     def _create_row(
@@ -112,14 +112,15 @@ class DataSetManager:
             write_header = not os.path.exists(csv_file)
             combined_df.to_csv(csv_file, mode="a", header=write_header, index=False)
 
-            # Save to Pickle (read-append-write)
-            if os.path.exists(self.currentDataSetFile):
-                existing_df = pd.read_pickle(self.currentDataSetFile)
-                full_df = pd.concat([existing_df, combined_df], ignore_index=True)
-            else:
-                full_df = combined_df
-
-            full_df.to_pickle(self.currentDataSetFile)
+            # Efficiently append to HDF5 instead of rewriting a pickle file
+            combined_df.reset_index(drop=True, inplace=True)
+            combined_df.to_hdf(
+                self.currentDataSetFile,
+                key="data",
+                format="table",
+                append=True,
+                mode="a",
+            )
             self._buffer = []
 
     def startNewGame(self, agent_names):
@@ -148,9 +149,7 @@ class DataSetManager:
             )
         )
 
-    def end_match(
-        self, match_number, round_number, match_score, game_score, current_roles
-    ):
+    def end_match(self, match_number, round_number, match_score, game_score, current_roles):
         if self._save_dataset:
             self.addDataFrame(
                 self._create_row(
@@ -165,9 +164,7 @@ class DataSetManager:
             )
             self.flush_to_disk()
 
-    def end_experiment(
-        self, match_number, round_number, current_roles, game_score, game_performance
-    ):
+    def end_experiment(self, match_number, round_number, current_roles, game_score, game_performance):
         self.addDataFrame(
             self._create_row(
                 match_number=match_number,
@@ -243,9 +240,7 @@ class DataSetManager:
             )
         )
 
-    def do_special_action(
-        self, match_number, source, current_roles, action_description
-    ):
+    def do_special_action(self, match_number, source, current_roles, action_description):
         self.addDataFrame(
             self._create_row(
                 match_number=match_number,

@@ -114,6 +114,12 @@ class DataSetManager:
 
             # Efficiently append to HDF5 instead of rewriting a pickle file
             combined_df.reset_index(drop=True, inplace=True)
+
+            # Ensure numeric columns use a consistent dtype when saving to HDF5
+            if "Match" in combined_df.columns:
+                combined_df["Match"] = combined_df["Match"].astype("int64")
+            if "Round" in combined_df.columns:
+                combined_df["Round"] = combined_df["Round"].astype("int64")
             combined_df.to_hdf(
                 self.currentDataSetFile,
                 key="data",

@@ -116,10 +116,20 @@ class DataSetManager:
             combined_df.reset_index(drop=True, inplace=True)
 
             # Ensure numeric columns use a consistent dtype when saving to HDF5
+            # Values might come through as strings or ``None`` which would
+            # normally cause ``astype`` to fail. ``to_numeric`` coerces
+            # non-numeric values to ``NaN`` so they can be stored using the
+            # nullable ``Int64`` dtype.
             if "Match" in combined_df.columns:
-                combined_df["Match"] = combined_df["Match"].astype("Int64")
+                combined_df["Match"] = (
+                    pd.to_numeric(combined_df["Match"], errors="coerce")
+                    .astype("Int64")
+                )
             if "Round" in combined_df.columns:
-                combined_df["Round"] = combined_df["Round"].astype("Int64")
+                combined_df["Round"] = (
+                    pd.to_numeric(combined_df["Round"], errors="coerce")
+                    .astype("Int64")
+                )
             combined_df.to_hdf(
                 self.currentDataSetFile,
                 key="data",

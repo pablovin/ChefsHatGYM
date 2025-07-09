@@ -53,7 +53,9 @@ class DataSetManager:
             # Base path for dataset files.  Despite the ``.pkl`` extension the
             # binary file is written using the HDF5 format which allows
             # efficient appends.
-            self._currentDataSetFile = os.path.join(self._dataSetDirectory, "game_dataset.pkl")
+            self._currentDataSetFile = os.path.join(
+                self._dataSetDirectory, "game_dataset.pkl"
+            )
             self._save_dataset = True
 
     def _create_row(
@@ -113,31 +115,31 @@ class DataSetManager:
             combined_df.to_csv(csv_file, mode="a", header=write_header, index=False)
 
             # Efficiently append to HDF5 instead of rewriting a pickle file
-            combined_df.reset_index(drop=True, inplace=True)
+            # combined_df.reset_index(drop=True, inplace=True)
 
             # Ensure numeric columns use a consistent dtype when saving to HDF5
             # Values might come through as strings or ``None`` which would
             # normally cause ``astype`` to fail. ``to_numeric`` coerces
             # non-numeric values to ``NaN`` so they can be stored using the
             # nullable ``Int64`` dtype.
-            if "Match" in combined_df.columns:
-                combined_df["Match"] = (
-                    pd.to_numeric(combined_df["Match"], errors="coerce")
-                    .astype("Int64")
-                )
-            if "Round" in combined_df.columns:
-                combined_df["Round"] = (
-                    pd.to_numeric(combined_df["Round"], errors="coerce")
-                    .astype("Int64")
-                )
-            combined_df.to_hdf(
-                self.currentDataSetFile,
-                key="data",
-                format="table",
-                append=True,
-                mode="a",
-            )
-            self._buffer = []
+            # if "Match" in combined_df.columns:
+            #     combined_df["Match"] = (
+            #         pd.to_numeric(combined_df["Match"], errors="coerce")
+            #         .astype("Int64")
+            #     )
+            # if "Round" in combined_df.columns:
+            #     combined_df["Round"] = (
+            #         pd.to_numeric(combined_df["Round"], errors="coerce")
+            #         .astype("Int64")
+            #     )
+            # combined_df.to_hdf(
+            #     self.currentDataSetFile,
+            #     key="data",
+            #     format="table",
+            #     append=True,
+            #     mode="a",
+            # )
+            # self._buffer = []
 
     def startNewGame(self, agent_names):
         self._buffer = []  # Reset buffer on new game
@@ -165,7 +167,9 @@ class DataSetManager:
             )
         )
 
-    def end_match(self, match_number, round_number, match_score, game_score, current_roles):
+    def end_match(
+        self, match_number, round_number, match_score, game_score, current_roles
+    ):
         if self._save_dataset:
             self.addDataFrame(
                 self._create_row(
@@ -180,7 +184,9 @@ class DataSetManager:
             )
             self.flush_to_disk()
 
-    def end_experiment(self, match_number, round_number, current_roles, game_score, game_performance):
+    def end_experiment(
+        self, match_number, round_number, current_roles, game_score, game_performance
+    ):
         self.addDataFrame(
             self._create_row(
                 match_number=match_number,
@@ -256,7 +262,9 @@ class DataSetManager:
             )
         )
 
-    def do_special_action(self, match_number, source, current_roles, action_description):
+    def do_special_action(
+        self, match_number, source, current_roles, action_description
+    ):
         self.addDataFrame(
             self._create_row(
                 match_number=match_number,

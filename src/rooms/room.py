@@ -57,7 +57,9 @@ class Room:
 
         self._waiting_event = asyncio.Event()
 
-        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Use microseconds in the timestamp to avoid collisions when multiple
+        # rooms are created within the same second.
+        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.room_dir = os.path.join(output_folder, f"{room_name}_{self.timestamp }")
         os.makedirs(self.room_dir, exist_ok=True)
 

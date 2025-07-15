@@ -28,7 +28,8 @@ class Room:
         self.max_invalid_attempts = max_invalid_attemps_per_player
         self.invalid_counts = {agent.name: 0 for agent in player_agents}
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Include microseconds so directories are always unique
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.room_dir = os.path.join(output_folder, f"{room_name}_{timestamp}")
         os.makedirs(self.room_dir, exist_ok=True)
 

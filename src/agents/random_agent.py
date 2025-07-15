@@ -38,6 +38,7 @@ class RandomAgent(BaseAgent):
         pass
 
     def update_new_hand(self, payload):
+        # print(f"UPDATING NEW HAND: {payload}")
         self.hand = payload["hand"]
         self.log(f"My Hand: {self.hand}")
         pass

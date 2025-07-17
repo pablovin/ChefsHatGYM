@@ -22,6 +22,7 @@ class Game:
         logger: Optional[EngineLogger] = None,
         save_dataset: bool = True,
         dataset_directory: str = "dataset",
+        dataset_flush_interval: int = 1,
     ) -> None:
         """Create a new :class:`Game` instance.
 
@@ -45,6 +46,9 @@ class Game:
             :class:`DataSetManager`.
         dataset_directory : str, optional
             Directory where the dataset will be stored.
+        dataset_flush_interval : int, optional
+            Number of matches to keep in memory before flushing the dataset
+            to disk.
         """
         self.players = [Player(name, index=i) for i, name in enumerate(player_names)]
         self.max_matches = max_matches
@@ -64,7 +68,8 @@ class Game:
         self.now = datetime.datetime.now()
 
         self.dataset = DataSetManager(
-            dataSetDirectory=dataset_directory if save_dataset else None
+            dataSetDirectory=dataset_directory if save_dataset else None,
+            flush_interval=dataset_flush_interval,
         )
 
     def start(self) -> None:
@@ -255,7 +260,9 @@ class Game:
                 return name
         return None
 
-    def process_card_exchange(self, choices: Dict[str, List[int]]) -> Dict[str, List[int]]:
+    def process_card_exchange(
+        self, choices: Dict[str, List[int]]
+    ) -> Dict[str, List[int]]:
         """Apply the Chef's Hat role-based card exchange.
 
         Parameters
@@ -360,7 +367,9 @@ class Game:
 
         return {name: hands[name] for name in hands}
 
-    def valid_exchange_selection(self, selected: List[int], hand: List[int], n: int) -> bool:
+    def valid_exchange_selection(
+        self, selected: List[int], hand: List[int], n: int
+    ) -> bool:
         """Validate the selected cards for the exchange."""
 
         return (

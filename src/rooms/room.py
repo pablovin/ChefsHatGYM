@@ -31,7 +31,7 @@ class Room:
         save_logs_room=True,
         save_logs_game=True,
         save_game_dataset=True,
-        dataset_flush_interval=1,
+        dataset_flush_interval=1000,
         room_host="0.0.0.0",
         room_port=99,
         agent_timeout=10,

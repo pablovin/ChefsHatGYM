@@ -31,6 +31,7 @@ class Room:
         save_logs_room=True,
         save_logs_game=True,
         save_game_dataset=True,
+        dataset_flush_interval=1,
         room_host="0.0.0.0",
         room_port=99,
         agent_timeout=10,
@@ -43,6 +44,7 @@ class Room:
         self.save_logs_room = save_logs_room
         self.save_logs_game = save_logs_game
         self.save_game_dataset = save_game_dataset
+        self.dataset_flush_interval = dataset_flush_interval
         self.ws_host = room_host
         self.ws_port = room_port
         self.agent_timeout = agent_timeout
@@ -166,7 +168,9 @@ class Room:
             self.room_logger.room_log(
                 f"Room server listening on ws://{self.ws_host}:{self.ws_port}/ (room={self.room_name})"
             )
-            self._ws_server = await websockets.serve(handler, self.ws_host, self.ws_port)
+            self._ws_server = await websockets.serve(
+                handler, self.ws_host, self.ws_port
+            )
             await self._waiting_event.wait()
             self.room_logger.room_log("All players connected. Ready to play.")
 
@@ -251,6 +255,7 @@ class Room:
             logger=self.engine_logger,
             save_dataset=self.save_game_dataset,
             dataset_directory=self.room_dir,
+            dataset_flush_interval=self.dataset_flush_interval,
         )
         await self.game_loop()
 
@@ -416,9 +421,11 @@ class Room:
                     valid_action = False
                     while not valid_action:
                         if self.invalid_counts[player_name] > self.max_invalid_attempts:
-                            print (f"Possible actions: {observation['possible_actions']}")
+                            print(
+                                f"Possible actions: {observation['possible_actions']}"
+                            )
                             action = random.choice(observation["possible_actions"])
-                            print (f"RANDOM!")
+                            print(f"RANDOM!")
                             # print(f"Random action: {random_action}")
                             # # print(f"All actions: {self.action_lookup}")
 

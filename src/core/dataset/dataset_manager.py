@@ -42,9 +42,11 @@ class DataSetManager:
     def currentDataSetFile(self):
         return self._currentDataSetFile
 
-    def __init__(self, dataSetDirectory=None):
+    def __init__(self, dataSetDirectory=None, flush_interval: int = 1):
         self._save_dataset = False
         self._buffer = []
+        self._flush_interval = max(1, int(flush_interval))
+        self._matches_since_flush = 0
 
         if dataSetDirectory:
             self._dataSetDirectory = os.path.join(dataSetDirectory, "dataset")
@@ -139,10 +141,12 @@ class DataSetManager:
             #     append=True,
             #     mode="a",
             # )
-            # self._buffer = []
+            self._buffer = []
+            self._matches_since_flush = 0
 
     def startNewGame(self, agent_names):
         self._buffer = []  # Reset buffer on new game
+        self._matches_since_flush = 0
         self.addDataFrame(
             self._create_row(
                 match_number=0,
@@ -182,7 +186,9 @@ class DataSetManager:
                     current_roles=current_roles,
                 )
             )
-            self.flush_to_disk()
+            self._matches_since_flush += 1
+            if self._matches_since_flush >= self._flush_interval:
+                self.flush_to_disk()
 
     def end_experiment(
         self, match_number, round_number, current_roles, game_score, game_performance

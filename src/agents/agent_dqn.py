@@ -35,8 +35,23 @@ class DQNAgent(BaseAgent):
         train: bool = True,
         model_path: str = None,
         load_model: bool = False,
+        run_remote=False,
+        host="localhost",
+        port=8765,
+        room_name="room",
+        room_password="password",
     ):
-        super().__init__(name, log_directory, verbose_console)
+        super().__init__(
+            name,
+            log_directory,
+            verbose_console,
+            run_remote,
+            host,
+            port,
+            room_name,
+            room_password,
+        )
+
         self.state_size = state_size
         self.action_size = action_size
         self.memory = deque(maxlen=memory_size)
@@ -214,12 +229,16 @@ class DQNAgent(BaseAgent):
     # Integration functions and reward shaping as before (unchanged)
 
     def update_game_start(self, info):
+
+        self.score_history = []
+
         if "actions" in info:
             self.all_actions = list(info["actions"].values())
             if self.verbose_console:
                 self.log(f"Received ordered list of Actions: {self.all_actions}")
 
     def update_game_over(self, payload):
+
         if self.train and self.model_path:
             os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
             self.model.save(self.model_path)
@@ -403,7 +422,7 @@ class DQNAgent(BaseAgent):
         cumulative = {p: 0 for p in players}
         for match in self.score_history:
             for p in players:
-                cumulative[p] += match[p]
+                cumulative[p] = match[p]
                 scores_per_player[p].append(cumulative[p])
 
         plt.figure(figsize=(8, 5))

@@ -29,6 +29,7 @@ class RandomAgent(BaseAgent):
         self.hand = []
 
     def update_game_start(self, payload):
+        self.log(f"Game Start! Received payload {payload}")
         self.all_actions = list(payload["actions"].values())
         self.log(f"Received ordered list of Actions: {self.all_actions}")
         pass
@@ -38,7 +39,7 @@ class RandomAgent(BaseAgent):
         pass
 
     def update_new_hand(self, payload):
-        # print(f"UPDATING NEW HAND: {payload}")
+        self.log(f"Update new hand!: {payload}")
         self.hand = payload["hand"]
         self.log(f"My Hand: {self.hand}")
         pass
@@ -98,7 +99,7 @@ class RandomAgent(BaseAgent):
         )
         action = self.all_actions.index(chosen_action)
         self.log(
-            f"Request special action! Action chosen: {action} - Received payload: {payload}"
+            f"Request action! Action chosen: {action} - Received payload: {payload}"
         )
 
         return action

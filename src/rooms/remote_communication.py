@@ -19,6 +19,7 @@ def _to_serializable(obj: Any) -> Any:
         return [_to_serializable(v) for v in obj]
     return obj
 
+
 class RemoteComm(AgentCommInterface):
     def __init__(self, room, logger, timeout=10):
         self.room = room
@@ -41,7 +42,7 @@ class RemoteComm(AgentCommInterface):
     async def notify_all(self, method, agents, *args):
         payload = _to_serializable(args[0]) if args else {}
         self.logger.room_log(f"Notify ALL -> method={method} | args={args}")
-        message = json.dumps({"type": method, "payload": payload})
+        message = json.dumps({"type": method, "payload": json.dumps(payload)})
         await asyncio.gather(
             *[self._safe_send(a, message) for a in agents],
             return_exceptions=True,
@@ -52,7 +53,9 @@ class RemoteComm(AgentCommInterface):
         name = self.room.websockets.get(agent, "unknown")
         self.logger.room_log(f"Notify ONE -> {name} | method={method} | args={args}")
         try:
-            await self._safe_send(agent, json.dumps({"type": method, "payload": payload}))
+            await self._safe_send(
+                agent, json.dumps({"type": method, "payload": json.dumps(payload)})
+            )
         except websockets.exceptions.ConnectionClosed:
             await self.room.handle_disconnect(name)
 
@@ -62,7 +65,9 @@ class RemoteComm(AgentCommInterface):
         self.logger.room_log(f"Request ONE -> {name} | method={method} | args={args}")
         try:
             async with self._send_locks.setdefault(agent, asyncio.Lock()):
-                await agent.send(json.dumps({"type": method, "payload": payload}))
+                await agent.send(
+                    json.dumps({"type": method, "payload": json.dumps(payload)})
+                )
                 resp = await asyncio.wait_for(agent.recv(), timeout=self.timeout)
             data = json.loads(resp)
             self.logger.room_log(f" -- Response from {name}: {data}")

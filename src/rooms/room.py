@@ -34,7 +34,7 @@ class Room:
         dataset_flush_interval=1000,
         room_host="0.0.0.0",
         room_port=99,
-        agent_timeout=10,
+        agent_timeout=600,
     ):
         self.run_remote_room = run_remote_room
         self.room_name = room_name
@@ -469,6 +469,7 @@ class Room:
                         "cards_left": len(
                             self.game.players[self._index_by_name(player_name)].cards
                         ),
+                        "next_player": result_after_action["next_player"],
                     }
 
                     for agent in self.connected_players.values():

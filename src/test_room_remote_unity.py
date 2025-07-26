@@ -53,9 +53,9 @@ async def run_room_server(tmp_path):
     await asyncio.gather(*agent_tasks, return_exceptions=True)
     assert hasattr(room, "final_scores")
 
-    agent.plot_loss(os.path.join(room.room_dir, "loss.png"))
-    agent.plot_positions(os.path.join(room.room_dir, "position.png"))
-    agent.plot_score_progression(os.path.join(room.room_dir, "score_progression.png"))
+    # agent.plot_loss(os.path.join(room.room_dir, "loss.png"))
+    # agent.plot_positions(os.path.join(room.room_dir, "position.png"))
+    # agent.plot_score_progression(os.path.join(room.room_dir, "score_progression.png"))
 
 
 def test_remote_room(tmp_path):

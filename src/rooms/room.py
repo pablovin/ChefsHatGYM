@@ -509,7 +509,7 @@ class Room:
                         "update_match_over",
                         self.connected_players.values(),
                         {
-                            "scores": self.game.scores,
+                            "scores": self.game.scores.copy(),
                             "finishing_order": self.game.finishing_order_last_game,
                         },
                     )

@@ -24,11 +24,11 @@ class DQNAgent(BaseAgent):
         state_size=28,
         action_size=200,
         gamma=0.99,
-        lr=1e-2,
+        lr=1e-4,
         epsilon=1.0,
         epsilon_min=0.05,
         epsilon_decay=0.995,
-        batch_size=128,
+        batch_size=512,
         memory_size=10000,
         log_directory: str = "",
         verbose_console: bool = False,
@@ -73,7 +73,9 @@ class DQNAgent(BaseAgent):
         self.score_history = []
         self.all_actions = None
         self.verbose_console = verbose_console
+        self.rewards = []
 
+        model_path = os.path.join(log_directory, "model", "dql_model.h5")
         if model_path is not None and load_model and os.path.exists(model_path):
             print(f"Loading main model from {model_path}")
             self.model = keras_load_model(
@@ -305,7 +307,8 @@ class DQNAgent(BaseAgent):
         scores = payload.get("scores", {})
         player_name = self.name
 
-        self.score_history.append(payload["scores"])
+        # print(f"Scores: {payload['scores']} ")
+        self.score_history.append(payload["scores"].copy())
 
         try:
             place = finishing_order.index(player_name) + 1
@@ -313,6 +316,7 @@ class DQNAgent(BaseAgent):
             place = len(finishing_order)
 
         reward, place = self._get_final_reward_and_place(payload)
+        self.rewards.append(reward)
         self.positions.append(place)
 
         if (
@@ -347,7 +351,11 @@ class DQNAgent(BaseAgent):
         except ValueError:
             place = len(finishing_order) if finishing_order else 4
 
-        reward = scores.get(player_name, 0)
+        # reward = scores.get(player_name, 0)
+        # print(f"Fiishing order: {finishing_order}")
+        reward = 3 if place == 1 else -0.02
+        # print(f"Finishing order: {place}")
+        # print(f"Reward: {reward}")
         return reward, place
 
     # Plotting functions unchanged
@@ -407,6 +415,58 @@ class DQNAgent(BaseAgent):
         plt.legend()
         plt.tight_layout()
         plt.savefig(path)
+        plt.close()
+
+    def plot_rewards(self, path: str, path_averaged: str, window: int = 10):
+        import matplotlib.pyplot as plt
+
+        if not hasattr(self, "rewards"):
+            print("[plot_positions] Warning: No rewards data to plot.")
+            return
+
+        plt.figure()
+        x = range(len(self.rewards))
+        y = self.rewards
+        plt.plot(x, y, label="Position", linestyle="-", marker="o", alpha=0.8)
+        plt.xlabel("Match")
+        plt.ylabel("Rewards per match")
+        plt.title("Agent Reward per Match")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close()
+
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        if not hasattr(self, "rewards"):
+            print("[plot_rewards] Warning: No rewards data to plot.")
+            return
+
+        rewards = np.array(self.rewards)
+        x = np.arange(len(rewards))
+
+        # Compute rolling average
+        if len(rewards) >= window:
+            rewards_avg = np.convolve(rewards, np.ones(window) / window, mode="valid")
+            x_avg = np.arange(window - 1, len(rewards))
+        else:
+            rewards_avg = rewards
+            x_avg = x
+
+        plt.cla()
+        plt.figure()
+        plt.plot(x, rewards, label="Reward (raw)", linestyle="-", marker="o", alpha=0.4)
+        plt.plot(
+            x_avg, rewards_avg, label=f"Reward (avg {window})", linewidth=2, alpha=0.9
+        )
+
+        plt.xlabel("Match")
+        plt.ylabel("Rewards per match")
+        plt.title("Agent Reward per Match")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(path_averaged)
         plt.close()
 
     def plot_score_progression(self, path: str):

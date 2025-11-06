@@ -497,7 +497,7 @@ class Room:
                             "update_pizza_declared",
                             self.connected_players.values(),
                             {
-                                "player": player_name,
+                                "player": result_after_action["pizza_declarer"],
                                 "round": result_after_action["this_round_number"],
                                 "next_player": result_after_action["next_player"],
                             },

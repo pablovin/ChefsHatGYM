@@ -2,7 +2,6 @@
 import datetime
 import numpy as np
 import pandas as pd
-from copy import copy
 import os
 
 # Action types
@@ -43,14 +42,19 @@ class DataSetManager:
     def currentDataSetFile(self):
         return self._currentDataSetFile
 
-    def __init__(self, dataSetDirectory=None):
+    def __init__(self, dataSetDirectory=None, flush_interval: int = 1):
         self._save_dataset = False
         self._buffer = []
+        self._flush_interval = max(1, int(flush_interval))
+        self._matches_since_flush = 0
 
         if dataSetDirectory:
             self._dataSetDirectory = os.path.join(dataSetDirectory, "dataset")
             os.makedirs(self._dataSetDirectory, exist_ok=True)
 
+            # Base path for dataset files.  Despite the ``.pkl`` extension the
+            # binary file is written using the HDF5 format which allows
+            # efficient appends.
             self._currentDataSetFile = os.path.join(
                 self._dataSetDirectory, "game_dataset.pkl"
             )
@@ -112,18 +116,37 @@ class DataSetManager:
             write_header = not os.path.exists(csv_file)
             combined_df.to_csv(csv_file, mode="a", header=write_header, index=False)
 
-            # Save to Pickle (read-append-write)
-            if os.path.exists(self.currentDataSetFile):
-                existing_df = pd.read_pickle(self.currentDataSetFile)
-                full_df = pd.concat([existing_df, combined_df], ignore_index=True)
-            else:
-                full_df = combined_df
+            # Efficiently append to HDF5 instead of rewriting a pickle file
+            # combined_df.reset_index(drop=True, inplace=True)
 
-            full_df.to_pickle(self.currentDataSetFile)
+            # Ensure numeric columns use a consistent dtype when saving to HDF5
+            # Values might come through as strings or ``None`` which would
+            # normally cause ``astype`` to fail. ``to_numeric`` coerces
+            # non-numeric values to ``NaN`` so they can be stored using the
+            # nullable ``Int64`` dtype.
+            # if "Match" in combined_df.columns:
+            #     combined_df["Match"] = (
+            #         pd.to_numeric(combined_df["Match"], errors="coerce")
+            #         .astype("Int64")
+            #     )
+            # if "Round" in combined_df.columns:
+            #     combined_df["Round"] = (
+            #         pd.to_numeric(combined_df["Round"], errors="coerce")
+            #         .astype("Int64")
+            #     )
+            # combined_df.to_hdf(
+            #     self.currentDataSetFile,
+            #     key="data",
+            #     format="table",
+            #     append=True,
+            #     mode="a",
+            # )
             self._buffer = []
+            self._matches_since_flush = 0
 
     def startNewGame(self, agent_names):
         self._buffer = []  # Reset buffer on new game
+        self._matches_since_flush = 0
         self.addDataFrame(
             self._create_row(
                 match_number=0,
@@ -163,7 +186,9 @@ class DataSetManager:
                     current_roles=current_roles,
                 )
             )
-            self.flush_to_disk()
+            self._matches_since_flush += 1
+            if self._matches_since_flush >= self._flush_interval:
+                self.flush_to_disk()
 
     def end_experiment(
         self, match_number, round_number, current_roles, game_score, game_performance

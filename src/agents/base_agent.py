@@ -2,6 +2,7 @@ import os
 import logging
 import asyncio
 import json
+
 try:
     import websockets
 except Exception:  # pragma: no cover - optional for local tests
@@ -93,9 +94,7 @@ class BaseAgent:
         self.log("---------------------------")
         self.log(f"Player {self.name} created!")
         self.log(f"  - Agent folder: {self.this_log_folder}")
-        self.log(
-            f"Running mode: {'REMOTE' if self.run_remote else 'LOCAL'}"
-        )
+        self.log(f"Running mode: {'REMOTE' if self.run_remote else 'LOCAL'}")
         if self.run_remote:
             self.log(
                 f"Remote target ws://{self.remote_host}:{self.remote_port} room={self.remote_room_name}"
@@ -194,7 +193,11 @@ class BaseAgent:
                     continue
                 data = json.loads(msg)
                 mtype = data.get("type")
-                payload = data.get("payload", {})
+                raw_payload = data.get("payload", "{}")
+
+                # Deserialize the payload string into a Python dict
+                print(f"Raw Payload: {raw_payload}")
+                payload = json.loads(raw_payload)
                 if mtype.startswith("request_"):
                     method = getattr(self, mtype)
                     result = method(payload)
@@ -203,9 +206,11 @@ class BaseAgent:
                     method = getattr(self, mtype, None)
                     if method:
                         method(payload)
+                if mtype == "update_game_over":
+                    break
         except asyncio.CancelledError:
             if self.ws:
                 await self.ws.close()
             raise
-
-
+        if self.ws:
+            await self.ws.close()

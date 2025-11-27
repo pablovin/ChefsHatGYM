@@ -31,9 +31,10 @@ class Room:
         save_logs_room=True,
         save_logs_game=True,
         save_game_dataset=True,
+        dataset_flush_interval=1000,
         room_host="0.0.0.0",
         room_port=99,
-        agent_timeout=10,
+        agent_timeout=600,
     ):
         self.run_remote_room = run_remote_room
         self.room_name = room_name
@@ -43,6 +44,7 @@ class Room:
         self.save_logs_room = save_logs_room
         self.save_logs_game = save_logs_game
         self.save_game_dataset = save_game_dataset
+        self.dataset_flush_interval = dataset_flush_interval
         self.ws_host = room_host
         self.ws_port = room_port
         self.agent_timeout = agent_timeout
@@ -57,7 +59,9 @@ class Room:
 
         self._waiting_event = asyncio.Event()
 
-        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Use microseconds in the timestamp to avoid collisions when multiple
+        # rooms are created within the same second.
+        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.room_dir = os.path.join(output_folder, f"{room_name}_{self.timestamp }")
         os.makedirs(self.room_dir, exist_ok=True)
 
@@ -164,7 +168,9 @@ class Room:
             self.room_logger.room_log(
                 f"Room server listening on ws://{self.ws_host}:{self.ws_port}/ (room={self.room_name})"
             )
-            self._ws_server = await websockets.serve(handler, self.ws_host, self.ws_port)
+            self._ws_server = await websockets.serve(
+                handler, self.ws_host, self.ws_port
+            )
             await self._waiting_event.wait()
             self.room_logger.room_log("All players connected. Ready to play.")
 
@@ -249,6 +255,7 @@ class Room:
             logger=self.engine_logger,
             save_dataset=self.save_game_dataset,
             dataset_directory=self.room_dir,
+            dataset_flush_interval=self.dataset_flush_interval,
         )
         await self.game_loop()
 
@@ -414,9 +421,11 @@ class Room:
                     valid_action = False
                     while not valid_action:
                         if self.invalid_counts[player_name] > self.max_invalid_attempts:
-                            print (f"Possible actions: {observation['possible_actions']}")
+                            print(
+                                f"Possible actions: {observation['possible_actions']}"
+                            )
                             action = random.choice(observation["possible_actions"])
-                            print (f"RANDOM!")
+                            print(f"RANDOM!")
                             # print(f"Random action: {random_action}")
                             # # print(f"All actions: {self.action_lookup}")
 
@@ -460,10 +469,16 @@ class Room:
                         "cards_left": len(
                             self.game.players[self._index_by_name(player_name)].cards
                         ),
+                        "next_player": result_after_action["next_player"],
                     }
 
                     for agent in self.connected_players.values():
-                        if agent.name == player_name:
+                        name = (
+                            agent.name
+                            if not self.run_remote_room
+                            else self.websockets.get(agent, "unknown")
+                        )
+                        if name == player_name:
                             action_info["observation_before"] = result_before_action[
                                 "observation"
                             ]
@@ -482,7 +497,7 @@ class Room:
                             "update_pizza_declared",
                             self.connected_players.values(),
                             {
-                                "player": player_name,
+                                "player": result_after_action["pizza_declarer"],
                                 "round": result_after_action["this_round_number"],
                                 "next_player": result_after_action["next_player"],
                             },
@@ -494,7 +509,7 @@ class Room:
                         "update_match_over",
                         self.connected_players.values(),
                         {
-                            "scores": self.game.scores,
+                            "scores": self.game.scores.copy(),
                             "finishing_order": self.game.finishing_order_last_game,
                         },
                     )
@@ -511,3 +526,15 @@ class Room:
         self.room_logger.room_log(f"Final scores: {self.game.scores}")
 
         self.final_scores = self.game.scores
+
+        if self.run_remote_room:
+            for ws in list(self.websockets.keys()):
+                try:
+                    await ws.close()
+                except Exception:
+                    pass
+                if hasattr(self.comm, "unregister_websocket"):
+                    self.comm.unregister_websocket(ws)
+                self.websockets.pop(ws, None)
+            self.name_to_websocket.clear()
+            await self.close()

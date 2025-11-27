@@ -1,157 +1,257 @@
 import os
-import random
-from collections import deque
-
 import numpy as np
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense, Input
+from collections import deque
+import random
+from tensorflow.keras import Input, Model
+from tensorflow.keras.layers import Dense, Lambda, Add
 from tensorflow.keras.optimizers import Adam
-
+from tensorflow.keras.losses import MeanSquaredError
+from tensorflow.keras.models import load_model as keras_load_model
+import tensorflow as tf
 from .base_agent import BaseAgent
+from tensorflow.keras.losses import Huber
 
 
-class AgentDQN(BaseAgent):
-    """Deep Q-Learning agent for Chef's Hat."""
+def dueling_lambda(a):
+    return a - tf.reduce_mean(a, axis=1, keepdims=True)
+
+
+class DQNAgent(BaseAgent):
 
     def __init__(
         self,
-        name: str,
-        training: bool = False,
+        name="",
+        state_size=28,
+        action_size=200,
+        gamma=0.99,
+        lr=1e-4,
+        epsilon=1.0,
+        epsilon_min=0.05,
+        epsilon_decay=0.995,
+        batch_size=512,
+        memory_size=10000,
         log_directory: str = "",
         verbose_console: bool = False,
-        model_path: str | None = None,
+        train: bool = True,
+        model_path: str = None,
         load_model: bool = False,
+        run_remote=False,
+        host="localhost",
+        port=8765,
+        room_name="room",
+        room_password="password",
     ):
-        super().__init__(name, log_directory, verbose_console)
-        self.training = training
-        self.gamma = 0.95
-        self.epsilon = 1.0 if training else 0.0
-        self.epsilon_min = 0.1
-        self.epsilon_decay = 0.995
-        self.lr = 1e-3
-        self.all_actions = []
-        # Replay buffer across matches
-        self.memory = deque(maxlen=5000)
-        # Store transitions of the current match
-        self.match_memory: list[dict] = []
-        self.batch_size = 32
-        self.target_update = 100
-        self.update_steps = 0
-        self.loss_history: list[float] = []
-        self.epsilon_history: list[float] = []
-        self.positions: list[int | None] = []
-        self.model_path = model_path
-        self.loss_log_file = (
-            os.path.join(log_directory, f"{self.name}_loss.log") if log_directory else None
+        super().__init__(
+            name,
+            log_directory,
+            verbose_console,
+            run_remote,
+            host,
+            port,
+            room_name,
+            room_password,
         )
-        self.model = self._build_model()
-        # Target network for more stable training
-        self.target_model = self._build_model()
-        self.target_model.set_weights(self.model.get_weights())
-        if load_model and model_path and os.path.exists(model_path):
-            from tensorflow.keras.models import load_model as _load
-            self.model = _load(model_path)
-            
-    def _build_model(self):
-        inp = Input(shape=(28,))
-        x = Dense(64, activation="relu")(inp)
+
+        self.state_size = state_size
+        self.action_size = action_size
+        self.memory = deque(maxlen=memory_size)
+        self.gamma = gamma
+        self.epsilon = epsilon if train else 0.0
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
+        self.batch_size = batch_size
+        self.train = train
+        self.model_path = model_path
+        self.last_state = None
+        self.last_action = None
+        self.last_possible_actions = None
+        self.match_experiences = []
+        self.episode = []
+        self.loss_history = []
+        self.epsilon_history = []
+        self.positions = []
+        self.score_history = []
+        self.all_actions = None
+        self.verbose_console = verbose_console
+        self.rewards = []
+
+        model_path = os.path.join(log_directory, "model", "dql_model.h5")
+        if model_path is not None and load_model and os.path.exists(model_path):
+            print(f"Loading main model from {model_path}")
+            self.model = keras_load_model(
+                model_path, custom_objects={"dueling_lambda": dueling_lambda}
+            )
+            target_path = model_path.replace(".h5", ".target.h5")
+            if os.path.exists(target_path):
+                print(f"Loading target model from {target_path}")
+                self.target_model = keras_load_model(
+                    target_path, custom_objects={"dueling_lambda": dueling_lambda}
+                )
+            else:
+                print("Target model file not found, copying policy weights.")
+                self.target_model = self._build_model(lr)
+                self.target_model.set_weights(self.model.get_weights())
+        else:
+            self.model = self._build_model(lr)
+            self.target_model = self._build_model(lr)
+            self.target_model.set_weights(self.model.get_weights())
+        if not self.train:
+            self.epsilon = 0.0
+
+    def _build_model(self, lr):
+        state_input = Input(shape=(self.state_size,), name="state_input")
+        x = Dense(256, activation="relu")(state_input)
+        x = Dense(128, activation="relu")(x)
         x = Dense(64, activation="relu")(x)
-        out = Dense(200, activation="linear")(x)
-        model = Model(inp, out)
-        model.compile(optimizer=Adam(self.lr), loss="mean_squared_error")
+        value = Dense(1, activation="linear")(x)
+        advantage = Dense(self.action_size, activation="linear")(x)
+        advantage_mean = Lambda(dueling_lambda, output_shape=(self.action_size,))(
+            advantage
+        )
+        q_values = Add()([value, advantage_mean])
+        model = Model(inputs=state_input, outputs=q_values)
+        model.compile(loss=Huber(), optimizer=Adam(learning_rate=lr))
         return model
 
-    # ------------------------------------------------------------------
-    # Game update callbacks
-    # ------------------------------------------------------------------
-    def update_game_start(self, info):
-        self.all_actions = list(info["actions"].values())
-        self.log(f"Received ordered list of Actions: {self.all_actions}")
-
-    def update_game_over(self, payload):
-        self.log(f"Game over! Received payload {payload}")
-
-    def update_new_hand(self, payload):
-        self.hand = payload["hand"]
-        self.log(f"My Hand: {self.hand}")
-
-    def update_new_roles(self, payload):
-        pass
-
-    def update_food_fight(self, payload):
-        pass
-
-    def update_dinner_served(self, payload):
-        pass
-
-    def update_hand_after_exchange(self, payload):
-        pass
-
-    def update_start_match(self, payload):
-        self.hand = payload["hand"]
-        self.log(f"Update start match! Received payload: {payload}")
-
-    def update_match_over(self, payload):
-        order = payload.get("finishing_order", [])
-        if self.name in order:
-            self.positions.append(order.index(self.name))
-        else:
-            self.positions.append(None)
-        if self.training:
-            reward = self._calculate_reward(order)
-            discounted = reward
-            for i, tr in enumerate(reversed(self.match_memory)):
-                self.memory.append(
-                    {
-                        "state": tr["state"],
-                        "action": tr["action"],
-                        "mask": tr["mask"],
-                        "next_state": tr["next_state"],
-                        "next_mask": tr["next_mask"],
-                        "reward": discounted,
-                        "done": i == 0,
-                    }
+    def remember(
+        self,
+        state,
+        possible_actions,
+        action,
+        reward,
+        next_state,
+        next_possible_actions,
+        done,
+    ):
+        if self.train:
+            self.memory.append(
+                (
+                    state,
+                    possible_actions,
+                    action,
+                    reward,
+                    next_state,
+                    next_possible_actions,
+                    done,
                 )
-                discounted *= self.gamma
-            self.match_memory = []
-            self._train_from_memory()
-            if self.epsilon > self.epsilon_min:
-                self.epsilon *= self.epsilon_decay
-            self.log(
-                f"Match over. Finishing order: {order} - Reward: {reward}"
             )
 
-    def update_player_action(self, payload):
-        if payload.get("player") != self.name or not self.training:
-            return
-        prev_ob = payload.get("observation_before")
-        next_ob = payload.get("observation_after")
-        if not prev_ob or not next_ob:
-            return
-        state = np.concatenate(
-            [np.array(prev_ob["hand"]) / 13, np.array(prev_ob["board"]) / 13]
-        )
-        next_state = np.concatenate(
-            [np.array(next_ob["hand"]) / 13, np.array(next_ob["board"]) / 13]
-        )
-        mask_state = np.isin(self.all_actions, prev_ob["possible_actions"]).astype(int)
-        mask_next = np.isin(self.all_actions, next_ob["possible_actions"]).astype(int)
-        self.match_memory.append(
-            {
-                "state": state,
-                "action": payload["action_index"],
-                "mask": mask_state,
-                "next_state": next_state,
-                "next_mask": mask_next,
-            }
-        )
+    def act(self, state, possible_actions_mask, valid_actions):
+        # Identify the index of the "pass" action
+        pass_idx = None
+        for i, action in enumerate(self.all_actions):
+            if str(action).lower() == "pass":
+                pass_idx = i
+                break
 
-    def update_pizza_declared(self, payload):
-        pass
+        # Filter valid actions to avoid "pass" if possible
+        non_pass_actions = [a for a in valid_actions if a != pass_idx]
+        non_pass_mask = np.copy(possible_actions_mask)
+        if pass_idx is not None:
+            non_pass_mask[pass_idx] = 0
 
-    # ------------------------------------------------------------------
-    # Requests
-    # ------------------------------------------------------------------
+        # If only "pass" is available, fallback to it
+        if len(non_pass_actions) == 0:
+            action_indices = valid_actions  # Only pass remains
+            action_mask = possible_actions_mask
+        else:
+            action_indices = non_pass_actions
+            action_mask = non_pass_mask
+
+        # Exploration: random action
+        if self.train and np.random.rand() < self.epsilon:
+            return int(np.random.choice(action_indices))
+
+        # Exploitation: network prediction
+        q_values = self.model.predict(state[np.newaxis, :], verbose=0)[0]
+        masked_q_values = np.where(action_mask, q_values, -np.inf)
+        if np.all(masked_q_values == -np.inf):
+            return int(np.random.choice(action_indices))
+        return int(np.argmax(masked_q_values))
+
+    def soft_update_target_network(self, tau=0.01):
+        model_weights = self.model.get_weights()
+        target_weights = self.target_model.get_weights()
+        new_weights = [
+            tau * m + (1 - tau) * t for m, t in zip(model_weights, target_weights)
+        ]
+        self.target_model.set_weights(new_weights)
+
+    def replay(self):
+        if not self.train or len(self.memory) < self.batch_size:
+            return
+
+        minibatch = random.sample(self.memory, self.batch_size)
+        states = np.array([x[0] for x in minibatch])
+        possible_actions_batch = np.array([x[1] for x in minibatch])
+        actions = np.array([x[2] for x in minibatch])
+        rewards = np.array([x[3] for x in minibatch])
+        next_states = np.array([x[4] for x in minibatch])
+        next_possible_actions_batch = np.array([x[5] for x in minibatch])
+        dones = np.array([x[6] for x in minibatch])
+
+        # Get Q-values for next states using model and target_model
+        next_q_values = self.model.predict(next_states, verbose=0)
+        # Mask invalid actions in next state by setting to -inf
+        next_q_values_masked = np.where(
+            next_possible_actions_batch, next_q_values, -np.inf
+        )
+        next_best_actions = np.argmax(next_q_values_masked, axis=1)
+        target_next = self.target_model.predict(next_states, verbose=0)
+
+        # Prepare target
+        target = self.model.predict(states, verbose=0)
+        losses = []
+
+        for i in range(self.batch_size):
+            a = actions[i]
+            old_val = target[i][a]
+            if dones[i]:
+                target[i][a] = rewards[i]
+            else:
+                # Only allow valid actions in target_next (double Q-learning)
+                target[i][a] = (
+                    rewards[i] + self.gamma * target_next[i][next_best_actions[i]]
+                )
+            losses.append(abs(old_val - target[i][a]))
+
+        history = self.model.fit(states, target, epochs=1, verbose=0)
+        avg_loss = (
+            float(np.mean(losses))
+            if losses
+            else float(np.mean(history.history["loss"]))
+        )
+        self.loss_history.append(avg_loss)
+        self.epsilon_history.append(self.epsilon)
+        if self.epsilon > self.epsilon_min and self.train:
+            self.epsilon *= self.epsilon_decay
+
+        self.soft_update_target_network(tau=0.05)
+
+    # Integration functions and reward shaping as before (unchanged)
+
+    def update_game_start(self, info):
+
+        self.score_history = []
+
+        if "actions" in info:
+            self.all_actions = list(info["actions"].values())
+            if self.verbose_console:
+                self.log(f"Received ordered list of Actions: {self.all_actions}")
+
+    def update_game_over(self, payload):
+
+        if self.train and self.model_path:
+            os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
+            self.model.save(self.model_path)
+            self.target_model.save(self.model_path.replace(".h5", ".target.h5"))
+
+    def update_new_hand(self, payload):
+        self.episode = []
+        self.last_state = None
+        self.last_action = None
+        self.last_possible_actions = None
+
     def request_cards_to_exchange(self, payload):
         return sorted(payload["hand"])[-payload["n"] :]
 
@@ -159,114 +259,239 @@ class AgentDQN(BaseAgent):
         return True
 
     def request_action(self, observations):
-        hand = np.array(observations["hand"]) / 13
-        board = np.array(observations["board"]) / 13
-        possible_actions = np.array(observations["possible_actions"])
-        state = np.concatenate([hand, board])
-        mask = np.isin(self.all_actions, list(possible_actions)).astype(int)
+        hand = np.array(observations["hand"]).flatten() / 13
+        board = np.array(observations["board"]).flatten() / 13
+        possible_actions_values = list(observations["possible_actions"])
 
-        if np.random.rand() < self.epsilon:
-            valid_indices = np.where(mask == 1)[0]
-            action_index = int(np.random.choice(valid_indices))
-        else:
-            q_values = self.model.predict(state[None], verbose=0)[0]
-            q_values[mask == 0] = -np.inf
-            action_index = int(np.argmax(q_values))
+        obs = np.concatenate([hand, board])
+        possible_actions_mask = np.zeros(self.action_size, dtype=np.float32)
+        valid_action_indices = [
+            self.all_actions.index(val) for val in possible_actions_values
+        ]
+        possible_actions_mask[valid_action_indices] = 1.0
+
+        action_index = self.act(obs, possible_actions_mask, valid_action_indices)
+        action_str = self.all_actions[action_index]
+
+        # --- Reward Shaping (unchanged) ---
+        shaped_reward = 0.0
+        if action_str.lower() == "pass":
+            shaped_reward -= 1.0
+
+        shaped_reward -= 0.02
+
+        if (
+            self.last_state is not None
+            and self.last_action is not None
+            and self.train
+            and self.last_possible_actions is not None
+        ):
+            self.episode.append(
+                (
+                    self.last_state,
+                    self.last_possible_actions,
+                    self.last_action,
+                    shaped_reward,
+                    obs,
+                    possible_actions_mask,
+                    False,
+                )
+            )
+        self.last_state = obs
+        self.last_action = action_index
+        self.last_possible_actions = possible_actions_mask
         return action_index
 
-    # ------------------------------------------------------------------
-    # Helper methods
-    # ------------------------------------------------------------------
-    def _calculate_reward(self, order):
-        if not order or self.name not in order:
-            return 0.0
-        pos = order.index(self.name)
-        rewards = {0: 1.0, 1: 0.5, 2: 0.1, 3: -1.0}
-        return rewards.get(pos, -1.0)
+    def update_match_over(self, payload):
+        finishing_order = payload.get("finishing_order", [])
+        scores = payload.get("scores", {})
+        player_name = self.name
 
-    def _train_from_memory(self):
-        if len(self.memory) < self.batch_size:
-            return
-        batch = random.sample(self.memory, self.batch_size)
+        # print(f"Scores: {payload['scores']} ")
+        self.score_history.append(payload["scores"].copy())
 
-        states = np.array([m["state"] for m in batch])
-        next_states = np.array([m["next_state"] for m in batch])
-        actions = np.array([m["action"] for m in batch])
-        next_masks = np.array([m["next_mask"] for m in batch])
-        rewards = np.array([m["reward"] for m in batch])
-        dones = np.array([m["done"] for m in batch])
+        try:
+            place = finishing_order.index(player_name) + 1
+        except ValueError:
+            place = len(finishing_order)
 
-        q_values = self.model.predict(states, verbose=0)
-        q_next = self.target_model.predict(next_states, verbose=0)
-        q_next[next_masks == 0] = -np.inf
-        max_next = np.max(q_next, axis=1)
+        reward, place = self._get_final_reward_and_place(payload)
+        self.rewards.append(reward)
+        self.positions.append(place)
 
-        for i in range(len(batch)):
-            target = rewards[i]
-            if not dones[i]:
-                target += self.gamma * max_next[i]
-            q_values[i, actions[i]] = target
+        if (
+            self.last_state is not None
+            and self.last_action is not None
+            and self.train
+            and self.last_possible_actions is not None
+        ):
+            self.episode.append(
+                (
+                    self.last_state,
+                    self.last_possible_actions,
+                    self.last_action,
+                    reward,
+                    self.last_state,
+                    self.last_possible_actions,
+                    True,
+                )
+            )
+        for exp in self.episode:
+            self.remember(*exp)
+        self.episode = []
+        self.replay()
 
-        history = self.model.fit(states, q_values, epochs=1, verbose=0)
-        loss = float(history.history["loss"][0])
-        self.loss_history.append(loss)
-        self.epsilon_history.append(self.epsilon)
-        if self.loss_log_file:
-            with open(self.loss_log_file, "a") as f:
-                f.write(f"{loss}\n")
-        if self.model_path:
-            self.model.save(self.model_path)
-        self.update_steps += 1
-        if self.update_steps % self.target_update == 0:
-            self.target_model.set_weights(self.model.get_weights())
+    def _get_final_reward_and_place(self, payload):
+        player_name = self.name
+        finishing_order = payload.get("finishing_order", [])
+        scores = payload.get("scores", {})
 
-    # ------------------------------------------------------------------
-    # Utility methods
-    # ------------------------------------------------------------------
-    def save_model(self, path: str | None = None):
-        """Save the model to disk."""
-        if path is None:
-            path = self.model_path
-        if path:
-            self.model.save(path)
+        try:
+            place = finishing_order.index(player_name) + 1
+        except ValueError:
+            place = len(finishing_order) if finishing_order else 4
 
-    def load_model(self, path: str | None = None):
-        """Load a model from disk."""
-        if path is None:
-            path = self.model_path
-        if path and os.path.exists(path):
-            from tensorflow.keras.models import load_model as _load
-            self.model = _load(path)
+        # reward = scores.get(player_name, 0)
+        # print(f"Fiishing order: {finishing_order}")
+        reward = 3 if place == 1 else -0.02
+        # print(f"Finishing order: {place}")
+        # print(f"Reward: {reward}")
+        return reward, place
+
+    # Plotting functions unchanged
+
+    # ==== Plotting functions ====
 
     def plot_loss(self, path: str):
         import matplotlib.pyplot as plt
 
+        if (
+            not hasattr(self, "loss_history")
+            or not hasattr(self, "epsilon_history")
+            or len(self.loss_history) == 0
+        ):
+            print("[plot_loss] Warning: No loss or epsilon history to plot.")
+            return
+
+        steps = range(len(self.loss_history))
         fig, ax1 = plt.subplots()
+
         color_loss = "tab:blue"
         ax1.set_xlabel("Training Step")
         ax1.set_ylabel("Loss", color=color_loss)
-        ax1.plot(self.loss_history, color=color_loss, label="Loss")
+        ax1.plot(steps, self.loss_history, color=color_loss, label="Loss")
         ax1.tick_params(axis="y", labelcolor=color_loss)
 
         ax2 = ax1.twinx()
         color_eps = "tab:red"
         ax2.set_ylabel("Epsilon", color=color_eps)
-        ax2.plot(self.epsilon_history, color=color_eps, label="Epsilon")
+        ax2.plot(steps, self.epsilon_history, color=color_eps, label="Epsilon")
         ax2.tick_params(axis="y", labelcolor=color_eps)
 
-        fig.tight_layout()
+        lines, labels = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines + lines2, labels + labels2, loc="upper right")
+
         plt.title("DQN Loss and Epsilon")
+        fig.tight_layout()
         plt.savefig(path)
         plt.close(fig)
 
     def plot_positions(self, path: str):
         import matplotlib.pyplot as plt
 
+        if not hasattr(self, "positions") or not self.positions:
+            print("[plot_positions] Warning: No position data to plot.")
+            return
+
         plt.figure()
-        plt.plot(self.positions)
+        x = range(len(self.positions))
+        y = self.positions
+        plt.plot(x, y, label="Position", linestyle="-", marker="o", alpha=0.8)
         plt.xlabel("Match")
-        plt.ylabel("Position")
+        plt.ylabel("Position (1=1st, 4=4th)")
         plt.title("Agent Position per Match")
+        plt.gca().invert_yaxis()  # 1st place at the top
+        plt.legend()
+        plt.tight_layout()
         plt.savefig(path)
         plt.close()
 
+    def plot_rewards(self, path: str, path_averaged: str, window: int = 10):
+        import matplotlib.pyplot as plt
+
+        if not hasattr(self, "rewards"):
+            print("[plot_positions] Warning: No rewards data to plot.")
+            return
+
+        plt.figure()
+        x = range(len(self.rewards))
+        y = self.rewards
+        plt.plot(x, y, label="Position", linestyle="-", marker="o", alpha=0.8)
+        plt.xlabel("Match")
+        plt.ylabel("Rewards per match")
+        plt.title("Agent Reward per Match")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close()
+
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        if not hasattr(self, "rewards"):
+            print("[plot_rewards] Warning: No rewards data to plot.")
+            return
+
+        rewards = np.array(self.rewards)
+        x = np.arange(len(rewards))
+
+        # Compute rolling average
+        if len(rewards) >= window:
+            rewards_avg = np.convolve(rewards, np.ones(window) / window, mode="valid")
+            x_avg = np.arange(window - 1, len(rewards))
+        else:
+            rewards_avg = rewards
+            x_avg = x
+
+        plt.cla()
+        plt.figure()
+        plt.plot(x, rewards, label="Reward (raw)", linestyle="-", marker="o", alpha=0.4)
+        plt.plot(
+            x_avg, rewards_avg, label=f"Reward (avg {window})", linewidth=2, alpha=0.9
+        )
+
+        plt.xlabel("Match")
+        plt.ylabel("Rewards per match")
+        plt.title("Agent Reward per Match")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(path_averaged)
+        plt.close()
+
+    def plot_score_progression(self, path: str):
+        """
+        Plots the score progression for each player over matches.
+        - score_history: list of dicts, each dict is {player: score} for one match.
+        """
+        import matplotlib.pyplot as plt
+
+        # Build cumulative score for each player
+        players = sorted(list(self.score_history[0].keys()))
+        scores_per_player = {p: [] for p in players}
+        cumulative = {p: 0 for p in players}
+        for match in self.score_history:
+            for p in players:
+                cumulative[p] = match[p]
+                scores_per_player[p].append(cumulative[p])
+
+        plt.figure(figsize=(8, 5))
+        for p in players:
+            plt.plot(scores_per_player[p], label=p)
+        plt.xlabel("Match")
+        plt.ylabel("Cumulative Score")
+        plt.title("Score Progression per Player")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close()
